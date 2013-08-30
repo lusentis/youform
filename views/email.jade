@@ -1,0 +1,12 @@
+doctype 5
+html
+  body
+    p#intro=intro
+
+    h3 Form
+    div#form
+      table
+        for field, key in form
+          tr
+            td(style='font-weight: bold') #{key}
+            td #{field}
