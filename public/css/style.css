@@ -1,7 +1,121 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+@import url("http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700");
+.open-sans,
+html,
+body,
+#layout .content form input,
+#layout .content form textarea,
+#layout .pure-button {
+  font-family: 'Open Sans', sans-serif;
 }
-a {
-  color: #00b7ff;
+html,
+body {
+  width: 100%;
+  height: 100%;
+  font-size: 15px;
+  font-weight: 400;
+  background: #f2f2f2;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-left {
+  text-align: left;
+}
+#layout {
+  padding-left: 25%;
+  position: relative;
+}
+#layout .sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 25%;
+  margin-left: -25%;
+  background: #4eb360;
+  color: #fff;
+  overflow: hidden;
+}
+#layout .sidebar .sidebar-table {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+#layout .sidebar .sidebar-table .header {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 20px 20px 150px 20px;
+}
+#layout .sidebar .sidebar-table .header .logo {
+  width: 80px;
+  height: auto;
+}
+#layout .sidebar .pure-button.pure-button-success {
+  background: #3e904c;
+}
+#layout .content {
+  padding: 20px 40px;
+}
+#layout .content form label {
+  font-weight: 600;
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  margin-top: 15px;
+}
+#layout .content form input,
+#layout .content form textarea {
+  padding: 10px;
+  font-size: 14px;
+}
+#layout h1,
+#layout h2,
+#layout h3 {
+  font-weight: 300;
+}
+#layout h4,
+#layout h5,
+#layout h6 {
+  font-weight: 400;
+}
+#layout .spacer {
+  height: 20px;
+}
+#layout .pure-button {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 14px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+#layout .pure-button.pure-button-success {
+  background: #4eb360;
+  color: #fff;
+  -webkit-transition: opacity 0.5s ease;
+  -moz-transition: opacity 0.5s ease;
+  -o-transition: opacity 0.5s ease;
+  -ms-transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease;
+}
+#layout .pure-button.pure-button-success:hover {
+  opacity: 0.8;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+  filter: alpha(opacity=80);
+}
+#layout .pure-button.pure-button-primary {
+  background: #0378a6;
+  color: #fff;
+  -webkit-transition: opacity 0.5s ease;
+  -moz-transition: opacity 0.5s ease;
+  -o-transition: opacity 0.5s ease;
+  -ms-transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease;
+}
+#layout .pure-button.pure-button-primary:hover {
+  opacity: 0.8;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+  filter: alpha(opacity=80);
 }

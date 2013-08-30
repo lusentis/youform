@@ -1,10 +1,14 @@
 extends layout
 
 block content
-  
-  .container
-    .panel.panel-default
-      .panel-heading Youform
-      .panel-body
-        a(href='/signup')
-          .btn.btn-primary.btn-lg Signup
+  .content
+    h1 What is YouForm?
+
+block sidebar
+  header.header
+    hgroup.text-right
+        img.logo(src='/img/youform-logo-white.svg')
+        h2.brand-tagline Giving life to your static HTML Form
+        .spacer
+        a.pure-button.pure-button-success(href='/signup')
+          | Signup
