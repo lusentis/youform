@@ -4,6 +4,7 @@ html,
 body,
 #layout .content form input,
 #layout .content form textarea,
+#layout .content form select,
 #layout .pure-button {
   font-family: 'Open Sans', sans-serif;
 }
@@ -14,6 +15,7 @@ body {
   font-size: 15px;
   font-weight: 400;
   background: #f2f2f2;
+  overflow-x: hidden;
 }
 .text-center {
   text-align: center;
@@ -66,9 +68,61 @@ body {
   margin-top: 15px;
 }
 #layout .content form input,
-#layout .content form textarea {
+#layout .content form textarea,
+#layout .content form select {
   padding: 10px;
   font-size: 14px;
+  resize: none;
+}
+#layout .content form .radio-palette {
+  display: inline-block;
+  line-height: 0;
+  width: 14px;
+  height: 14px;
+  -webkit-border-radius: 9px;
+  border-radius: 9px;
+  margin-right: 10px;
+  -webkit-transition: background 0.2s ease;
+  -moz-transition: background 0.2s ease;
+  -o-transition: background 0.2s ease;
+  -ms-transition: background 0.2s ease;
+  transition: background 0.2s ease;
+  margin-top: 14px;
+}
+#layout .content form .radio-palette input[type='radio'] {
+  display: none;
+}
+#layout .content form .radio-palette.radio-palette-1 {
+  background: #fff;
+  -webkit-box-shadow: inset 0 0 0 2px #4eb360;
+  box-shadow: inset 0 0 0 2px #4eb360;
+}
+#layout .content form .radio-palette.radio-palette-1.active {
+  background: #4eb360;
+}
+#layout .content form .radio-palette.radio-palette-2 {
+  background: #fff;
+  -webkit-box-shadow: inset 0 0 0 2px #0378a6;
+  box-shadow: inset 0 0 0 2px #0378a6;
+}
+#layout .content form .radio-palette.radio-palette-2.active {
+  background: #0378a6;
+}
+#layout .content form .radio-palette.radio-palette-3 {
+  background: #fff;
+  -webkit-box-shadow: inset 0 0 0 2px #800080;
+  box-shadow: inset 0 0 0 2px #800080;
+}
+#layout .content form .radio-palette.radio-palette-3.active {
+  background: #800080;
+}
+#layout .content form .radio-palette.radio-palette-4 {
+  background: #fff;
+  -webkit-box-shadow: inset 0 0 0 2px #f00;
+  box-shadow: inset 0 0 0 2px #f00;
+}
+#layout .content form .radio-palette.radio-palette-4.active {
+  background: #f00;
 }
 #layout h1,
 #layout h2,

@@ -16,6 +16,7 @@ body
   font-size 15px
   font-weight 400
   background #F2F2F2
+  overflow-x hidden
 
 .text-center
   text-align center
@@ -66,10 +67,44 @@ body
         text-transform uppercase
         margin-top 15px
       input,
-      textarea
+      textarea,
+      select
         @extends .open-sans
         padding 10px
         font-size 14px
+        resize none
+      
+      .radio-palette
+        display inline-block
+        line-height 0
+        width 14px
+        height 14px
+        border-radius 9px
+        margin-right 10px
+        transition background 0.2s ease
+        margin-top 14px
+        input[type='radio']
+          display none
+        &.radio-palette-1
+          background _white
+          box-shadow inset 0 0 0 2px _green
+          &.active
+            background _green
+        &.radio-palette-2
+          background _white
+          box-shadow inset 0 0 0 2px _blue
+          &.active
+            background _blue
+        &.radio-palette-3
+          background _white
+          box-shadow inset 0 0 0 2px purple
+          &.active
+            background purple
+        &.radio-palette-4
+          background _white
+          box-shadow inset 0 0 0 2px red
+          &.active
+            background red
 
   h1,
   h2,

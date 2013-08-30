@@ -40,13 +40,17 @@ block content
               input.pure-input-1(type='text', name='f-subject', placeholder='Email subject', required)
             .pure-control-group
               label(for='f-intro') A short text to send
-              textarea.pure-input-1(type='text', name='f-intro', placeholder='Introduction', rows='9', required)
+              textarea.pure-input-1(type='text', name='f-intro', placeholder='Introduction', rows='5', required)
             .pure-control-group
-              select.form-control(name='colours', required)
-                option(value='.pal1') Colori 1
-                option(value='.pal2') Colori 2
-                option(value='.pal3') Colori 3
-                option(value='.pal4') Colori 4
+              label(for='colours') Pick a color
+              span.radio-palette.radio-palette-1.active
+                input(type='radio', name='colours', required, checked, value='palette-1')
+              span.radio-palette.radio-palette-2
+                input(type='radio', name='colours', required, value='palette-2')
+              span.radio-palette.radio-palette-3
+                input(type='radio', name='colours', required, value='palette-3')
+              span.radio-palette.radio-palette-4
+                input(type='radio', name='colours', required, value='palette-4')
 
         .pure-u-1
           .spacer
@@ -62,3 +66,17 @@ block sidebar
         .spacer
         a.pure-button.pure-button-success(href='/')
           | Discover more
+
+
+block scripts
+  script.
+    Array.prototype.forEach.call(document.querySelectorAll('.radio-palette'), function (el) {
+      el.addEventListener('click', function () {
+        document.querySelector('.radio-palette.active input').removeAttribute('checked');
+        document.querySelector('.radio-palette.active').classList.remove('active');
+
+        el.querySelector('input').setAttribute('checked', 'checked');
+        el.classList.add('active');
+      });
+    });
+    
