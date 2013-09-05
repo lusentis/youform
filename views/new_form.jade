@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  .container
+    h1= title
+    form.form(role='form', action='/new-form', method='post')
+      div
+        input.form-control(type='email', name='email-creator', placeholder='Creator email address', required)
+      div
+        input.form-control(type='email', name='email-destination', placeholder='Destination email address', required)
+      div
+        input.form-control(type='text', name='website-name', placeholder='Website name', required)
+      div
+        input.form-control(type='url', name='website-url', placeholder='Website url', required)
+      div
+        input.form-control(type='url', name='success-page', placeholder='Error page url', required)
+      div
+        input.form-control(type='url', name='error-page', placeholder='Success page url', required)
+
+      div
+        input.form-control(type='email', name='email-sender-email', placeholder='Email sender', required)
+      div
+        input.form-control(type='text', name='email-sender-name', placeholder='Email sender name', required)
+      div
+        input.form-control(type='text', name='email-subject', placeholder='Email subject', required)
+      div
+        textarea.form-control(type='text', name='email-intro', placeholder='Introduction', required)
+
+      button.btn.btn-default(type='submit') Send

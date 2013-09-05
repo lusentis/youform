@@ -1,0 +1,16 @@
+{
+  "name": "youform",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "3.3.4",
+    "jade": "*",
+    "stylus": "*",
+    "async": "*",
+    "postmark": "~0.1.8",
+    "coolog": "~2.1.2"
+  }
+}
