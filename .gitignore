@@ -1,4 +1,5 @@
 out/
+dump.rdb
 
 lib-cov
 *.seed
