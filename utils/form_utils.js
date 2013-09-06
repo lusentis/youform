@@ -3,15 +3,9 @@
 
 module.exports = function (db) {
   
-  var uuid = require('node-uuid')
-    , generate_api_key
-    , save_form
+  var save_form
     , get_form
     ;
-
-  generate_api_key = function () {
-    return uuid.v4();
-  };
 
   save_form = function (form, callback) {
     db.atomic('youform', 'forms', undefined, form, function (err, body) {
@@ -30,7 +24,6 @@ module.exports = function (db) {
   };
  
   return {
-    'generate_api_key': generate_api_key,
     'save_form': save_form,
     'get_form': get_form
   };

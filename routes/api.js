@@ -5,6 +5,7 @@ module.exports = function (app, db, redis, prefix) {
 
   var async = require('async')
     , form_utils = require('../utils/form_utils.js')(db)
+    , log_utils = require('../utils/log_utils.js')(db)
     , utils = require('../utils/utils.js')(redis)
     , coolog = require('coolog')
     , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
@@ -13,9 +14,8 @@ module.exports = function (app, db, redis, prefix) {
   var logger = coolog.logger('api.js');
 
   var new_form = function (req, res) {
-    var form;
-    var data = {
-      website_name: req.body['w-name']
+    var form = {
+      form_name: req.body['f-name']
     , website_url: req.body['w-url']
     , website_success_page: req.body['w-success-page']
     , website_error_page: req.body['w-error-page']
@@ -29,16 +29,28 @@ module.exports = function (app, db, redis, prefix) {
 
     async.waterfall([
         function (next) {
-          form_utils.save_form(data, function (err, form) {
+          form_utils.save_form(form, function (err, data) {
             if (err) {
               next(err);
             } else {
               logger.ok('saved form', form);
+              form = data;
               next(null);
             }
           });
         },
         function (next) {
+          res.render('email/signup', { api_key: form._id }, function (err, body) {
+            next(null, body);
+          });
+        },
+        function (html_body) {
+          postmark.send({
+            'From': 'hello@plasticpanda.com'
+          , 'To': form.form_creator
+          , 'Subject': 'Signup youform: ' + form.form_name
+          , 'HtmlBody': html_body
+          });
           res.redirect('/success');
         }
       ], function (err) {
@@ -49,16 +61,31 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   var form = function (req, res) {
-    var form_id = req.param('id', null);
-    logger.info(form_id);
-    var data;
+    var api_key = req.param('id', null);
     async.waterfall([
       function (next) {
-        form_utils.get_form(form_id, function (err, result) {
+        // save connection
+        var data = {
+          user_ip: req.connection.remoteAddress
+        , api_key: api_key
+        };
+        logger.debug(data);
+        log_utils.save_log(data, function (err, log) {
+          if (err) {
+            next(err);
+          } else {
+            logger.info('log saved', log);
+            next(null);
+          }
+        });
+      },
+      function (next) {
+        // get form
+        form_utils.get_form(api_key, function (err, result) {
           if (!result) {
             logger.error({
               error: true
-            , form_id: form_id
+            , form_id: api_key
             , description: 'Form not found'
             });
             res.json({
@@ -66,25 +93,26 @@ module.exports = function (app, db, redis, prefix) {
             , description: 'Form not found. Check your API key'
             });
           } else {
-            data = result;
-            logger.debug('results', data);
-            next(null);
+            logger.debug('results', result);
+            next(null, result);
           }
         });
       },
-      function (next) {
-        res.render('email/email', { intro: data.form_intro, form: req.body }, function (err, body) {
-          next(null, body);
+      function (form, next) {
+        // render email template
+        res.render('email/email', { intro: form.form_intro, form: req.body }, function (err, body) {
+          next(null, form, body);
         });
       },
-      function (html_body, next) {
+      function (form, html_body) {
+        // send email
         postmark.send({
           'From': 'hello@plasticpanda.com'
-        , 'To': data.form_destination
-        , 'Subject': data.form_subject
+        , 'To': form.form_destination
+        , 'Subject': form.form_subject
         , 'HtmlBody': html_body
         });
-        res.redirect(data.website_success_page);
+        res.redirect(form.website_success_page);
       }
     ], function (err) {
       if (err) {
@@ -94,6 +122,7 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   // routes
+  app.post(prefix + '/new-form', new_form);
   app.post(prefix + '/new-form', new_form);
   app.get(prefix + '/form/:id', utils.rateLimit(), form);
 };

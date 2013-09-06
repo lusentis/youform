@@ -11,7 +11,7 @@ function(doc, req) {
       _id: req.uuid
     , type: 'form'
     , created_at: new Date()
-    , website_name: data.website_name
+    , form_name: data.form_name
     , website_url: data.website_url
     , website_success_page: data.website_success_page
     , website_error_page: data.website_error_page
