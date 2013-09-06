@@ -47,10 +47,14 @@ module.exports = function (app, db, redis, prefix) {
         },
         function (html_body) {
           postmark.send({
-            'From': 'hello@plasticpanda.com'
+            'From': process.env.POSTMARK_FROM
           , 'To': form.creator_email
           , 'Subject': 'Signup youform: ' + form.form_name
           , 'HtmlBody': html_body
+          }, function (err) {
+            if (err) {
+              logger.error('email error', err);
+            }
           });
           res.redirect('/success');
         }
@@ -107,13 +111,18 @@ module.exports = function (app, db, redis, prefix) {
       function (form, html_body) {
         // send email
         postmark.send({
-          'From': 'hello@plasticpanda.com'
+          'From': process.env.POSTMARK_FROM
         , 'To': form.form_destination
         , 'ReplyTo': form.sender_email
         , 'Subject': form.form_subject
         , 'HtmlBody': html_body
+        }, function (err) {
+          if (err) {
+            res.redirect(form.website_success_page);
+          } else {
+            res.redirect(form.website_error_page);
+          }
         });
-        res.redirect(form.website_success_page);
       }
     ], function (err) {
       if (err) {
