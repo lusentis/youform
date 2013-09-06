@@ -22,8 +22,10 @@ module.exports = function (app, prefix) {
     res.render('signup_success', {
       title: 'Sign success'
     });
-  }
+  };
 
+  // routes
   app.get(prefix + '/', index);
+  app.get(prefix + '/success', signup_success);
   app.get(prefix + '/signup', new_form);
 };

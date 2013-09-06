@@ -3,6 +3,6 @@
 function map(doc) {
   'use strict';
   if (doc.type && doc.type === 'form') {
-    emit([doc._id, doc.website_url], null);
+    emit(doc._id, null);
   }
 }

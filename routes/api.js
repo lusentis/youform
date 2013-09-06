@@ -1,9 +1,10 @@
 /* jshint node:true, indent:2, white:true, laxcomma:true, undef:true, strict:true, unused:true, eqnull:true, camelcase: false, trailing: true */
 'use strict';
 
-module.exports = function (app, db, prefix) {
+module.exports = function (app, db, redis, prefix) {
 
   var form_utils = require('../utils/form_utils.js')(db)
+    , utils = require('../utils/utils.js')(redis)
     , coolog = require('coolog')
     , logger = coolog.logger('api.js')
     ;
@@ -27,7 +28,7 @@ module.exports = function (app, db, prefix) {
       if (err) {
         throw err;
       } else {
-        logger.info('saved form', form);
+        logger.ok('saved form', form);
         // @TODO: send confirm email 
         res.redirect('/success');
       }
@@ -37,17 +38,29 @@ module.exports = function (app, db, prefix) {
   var form = function (req, res) {
     var form_id = req.param('id', null);
     logger.info(form_id);
-    form_utils.get_form(form_id, function (err, form) {
+    form_utils.get_form(form_id, function (err, data) {
       if (err) {
         throw err;
       } else {
-        logger.debug('results', form);
-        // @TODO: redirect to website success page
+        if (!data) {
+          logger.error({
+            error: true
+          , form_id: form_id
+          , description: 'Form not found'
+          });
+          res.json({
+            error: true
+          , description: 'Form not found. Check your API key'
+          });
+        } else {
+          logger.debug('results', data);
+          res.redirect(data.website_success_page);
+        }
       }
     });
   };
 
-
-  app.get(prefix + '/new-form', new_form);
-  app.get(prefix + '/form/:id', form);
+  // routes
+  app.post(prefix + '/new-form', new_form);
+  app.get(prefix + '/form/:id', utils.rateLimit(), form);
 };
