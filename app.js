@@ -3,7 +3,9 @@
 
 var express = require('express')
   , http = require('http')
-  , path = require('path');
+  , path = require('path')
+  , nano = require('nano')(process.env.DATABASE_URL || 'http://localhost:5984/youform')
+  ;
 
 var app = express();
 
@@ -27,6 +29,7 @@ if ('development' == app.get('env')) {
 }
 
 require('./routes/site')(app, '');
+require('./routes/api')(app, nano, '/api');
 
 http.createServer(app).listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));

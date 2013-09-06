@@ -13,34 +13,17 @@ module.exports = function (app, prefix) {
   };
 
   var new_form = function (req, res) {
-    res.render('new_form', {
+    res.render('signup', {
       title: 'New form'
     });
   };
 
-  var save_form = function (req, res) {
-    var form = {
-      url: req.body['website-url']
-    , name: req.body['website-name']
-    , success: req.body['success-page']
-    , error: req.body['error-page']
-    , email: {
-        destination: req.body['email-destination']
-      , creator: req.body['email-creator']
-      , subject: req.body['email-subject']
-      , intro: req.body['email-intro']
-      }
-    , sender: {
-        email: req.body['email-sender-email']
-      , name: req.body['email-sender-name']
-      }
-    };
-    
-    logger.info(form);
-    res.redirect(prefix + '/');
-  };
+  var signup_success = function (req, res) {
+    res.render('signup_success', {
+      title: 'Sign success'
+    });
+  }
 
   app.get(prefix + '/', index);
-  app.get(prefix + '/new-form', new_form);
-  app.post(prefix + '/new-form', save_form);
+  app.get(prefix + '/signup', new_form);
 };
