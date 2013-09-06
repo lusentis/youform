@@ -25,6 +25,7 @@ module.exports = function (app, db, redis, prefix) {
     , creator_email: req.body['email-crt']
     , sender_name: req.body['snd-name']
     , sender_email: req.body['snd-email']
+    , colours: req.body.colours
     };
 
     async.waterfall([
@@ -33,7 +34,7 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
-              logger.ok('saved form', form);
+              logger.ok('saved form', data);
               form = data;
               next(null);
             }
@@ -47,7 +48,7 @@ module.exports = function (app, db, redis, prefix) {
         function (html_body) {
           postmark.send({
             'From': 'hello@plasticpanda.com'
-          , 'To': form.form_creator
+          , 'To': form.creator_email
           , 'Subject': 'Signup youform: ' + form.form_name
           , 'HtmlBody': html_body
           });
@@ -69,7 +70,6 @@ module.exports = function (app, db, redis, prefix) {
           user_ip: req.connection.remoteAddress
         , api_key: api_key
         };
-        logger.debug(data);
         log_utils.save_log(data, function (err, log) {
           if (err) {
             next(err);
@@ -109,6 +109,7 @@ module.exports = function (app, db, redis, prefix) {
         postmark.send({
           'From': 'hello@plasticpanda.com'
         , 'To': form.form_destination
+        , 'ReplyTo': form.sender_email
         , 'Subject': form.form_subject
         , 'HtmlBody': html_body
         });
@@ -121,8 +122,14 @@ module.exports = function (app, db, redis, prefix) {
     });
   };
 
+  //var contacts = function (req, res) {
+  //  log_utils.get_logs(req.param('id', null), function (err, result) {
+  //    res.json(result.rows);
+  //  });
+  ///};
+
   // routes
   app.post(prefix + '/new-form', new_form);
-  app.post(prefix + '/new-form', new_form);
+  //app.get(prefix + '/contacts/:id', contacts);
   app.get(prefix + '/form/:id', utils.rateLimit(), form);
 };

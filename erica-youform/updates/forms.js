@@ -21,6 +21,7 @@ function(doc, req) {
     , creator_email: data.creator_email
     , sender_name: data.sender_name
     , sender_email: data.sender_email
+    , colours: data.colours
     };
   }
 
