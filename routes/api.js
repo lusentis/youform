@@ -66,7 +66,7 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   var form = function (req, res) {
-    var api_key = req.param('id', null);
+    var api_key = req.param('api_key', null);
     async.waterfall([
       function (next) {
         // save connection
@@ -140,5 +140,6 @@ module.exports = function (app, db, redis, prefix) {
   // routes
   app.post(prefix + '/new-form', new_form);
   //app.get(prefix + '/contacts/:id', contacts);
-  app.get(prefix + '/form/:id', utils.rateLimit(), form);
+  //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
+  app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
 };
