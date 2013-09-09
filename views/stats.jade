@@ -14,8 +14,7 @@ block content
 
       p Total requests: #{stats.total_rows}
 
-      for row, year in stats.rows
-        h5 Year #{year}
+      for row, year in stats.counter
+        h5 Year: #{year}
           for value, month in row
             p #{month}: #{value}
-

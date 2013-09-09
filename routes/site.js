@@ -34,7 +34,7 @@ module.exports = function (app, db, prefix) {
 
   var stats = function (req, res) {
     var api_key = req.param('api_key', null)
-      , token = req.params.token;
+      , token = req.query.token;
     async.waterfall([
         function (next) {
           form_utils.get_form(api_key, function (err, form) {
@@ -53,22 +53,24 @@ module.exports = function (app, db, prefix) {
           if (!form) {
             next(null, null, null);
           } else {
-            var args = {
-              api_key: api_key
-            , token: token
-            };
-            logger.info('stats args', args);
-            log_utils.get_stats(args.api_key, function (err, stats) {
+            log_utils.get_stats(api_key, function (err, stats) {
               if (err) {
                 next(err);
               } else {
-                next(null, stats);
+                logger.info('stats', stats);
+                next(null, form, stats);
               }
             });
           }
         },
         function (form, stats) {
           var not_found = !form;
+          logger.debug(token);
+          if (form) {
+            not_found = form.token !== token;
+          } else {
+            not_found = true;
+          }
           res.render('stats', {not_found: not_found, form: form, stats: stats});
         }
       ],
