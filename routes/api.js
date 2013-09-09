@@ -97,8 +97,21 @@ module.exports = function (app, db, redis, prefix) {
             , description: 'Form not found. Check your API key'
             });
           } else {
-            logger.debug('results', result);
-            next(null, result);
+            // check origin url
+            if (check_origin(req, result)) {
+              logger.debug('results', result);
+              next(null, result);
+            } else {
+              logger.error({
+                error: true
+              , form_id: api_key
+              , description: 'Origin error'
+              });
+              res.json({
+                error: true
+              , description: 'Origin error.'
+              });
+            }
           }
         });
       },
@@ -131,15 +144,36 @@ module.exports = function (app, db, redis, prefix) {
     });
   };
 
-  //var contacts = function (req, res) {
-  //  log_utils.get_logs(req.param('id', null), function (err, result) {
-  //    res.json(result.rows);
-  //  });
-  ///};
+  // @FIXME
+  var stats = function (api_key, callback) {
+    log_utils.get_logs(api_key, function (err, result) {
+      if (err) {
+        callback(err, null);
+      } else {
+        var counter;
+        result.rows.forEach(function (row) {
+          if (!Object.has(counter[row.date.year], row.date.mounth)) {
+            counter[row.date.year][row.date.mounth] = 0;
+          }
+          counter[row.date.year][row.date.mounth] += 1;
+        });
+        callback(null, {
+          rows: result.rows
+        , total_rows: result.rows
+        , counter: counter
+        });
+      }
+    });
+  };
+
+  var check_origin = function (req, form) {
+    var origin = req.headers.origin;
+    logger.debug('origin', origin);
+    return (origin.has(form.website_url));
+  };
 
   // routes
   app.post(prefix + '/new-form', new_form);
-  //app.get(prefix + '/contacts/:id', contacts);
   //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
 };
