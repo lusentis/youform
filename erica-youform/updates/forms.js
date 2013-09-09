@@ -8,8 +8,9 @@ function(doc, req) {
   
   if (doc == null) {
     doc = {
-      _id: req.uuid
+      _id: data._id
     , type: 'form'
+    , token: data.token
     , created_at: new Date()
     , form_name: data.form_name
     , website_url: data.website_url

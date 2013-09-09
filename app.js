@@ -42,7 +42,7 @@ if (process.env.REDIS_URL) {
 
 redis_client = jsonify(redis_client);
 redis_client.on('error', function (err) {
-  logger.error('Redis Error ', err);
+  logger.error('redis error', err);
 });
 
 // all environments
@@ -71,7 +71,7 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-require('./routes/site')(app, '');
+require('./routes/site')(app, nano, '');
 require('./routes/api')(app, nano, redis, '/api');
 
 http.createServer(app).listen(app.get('port'), function () {

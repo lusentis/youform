@@ -5,17 +5,19 @@
 
 module.exports = function (app, db, redis, prefix) {
 
-  var async = require('async')
+  var akismet = require('akismet-api')
+    , async = require('async')
+    , coolog = require('coolog')
     , dns = require('dns')
+    , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
+    , uuid = require('node-uuid')
     , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
-    , utils = require('../utils/utils.js')(redis)
     , spam_list = require('../spam_list.json')
-    , coolog = require('coolog')
-    , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
-    , moment = require('moment')
-    , akismet = require('akismet-api')
+    , utils = require('../utils/utils.js')(redis)
     ;
+  
+  var logger = coolog.logger('api.js');
 
   var akismet_client = akismet.client({
     key  : process.env.AKISMET_API_KEY,
@@ -31,11 +33,11 @@ module.exports = function (app, db, redis, prefix) {
   //  }
   //});
 
-  var logger = coolog.logger('api.js');
-
   var new_form = function (req, res) {
     var form = {
-      form_name: req.body['f-name']
+      _id: uuid.v4()
+    , token: uuid.v4()
+    , form_name: req.body['f-name']
     , website_url: req.body['w-url']
     , website_success_page: req.body['w-success-page']
     , website_error_page: req.body['w-error-page']
@@ -47,7 +49,6 @@ module.exports = function (app, db, redis, prefix) {
     , sender_email: req.body['snd-email']
     , colours: req.body.colours
     };
-
     async.waterfall([
         function (next) {
           form_utils.save_form(form, function (err, data) {
@@ -61,8 +62,12 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (next) {
-          res.render('email/signup', { api_key: form._id }, function (err, body) {
-            next(null, body);
+          res.render('email/signup', { form: form }, function (err, body) {
+            if (err) {
+              next(err);
+            } else {
+              next(null, body);
+            }
           });
         },
         function (html_body) {
@@ -176,11 +181,6 @@ module.exports = function (app, db, redis, prefix) {
             });
           } else {
             // check origin url
-
-            // @DEBUG
-            //next(null, result);
-            //return;
-
             if (check_origin(req, result)) {
               logger.debug('results', result);
               next(null, result);
@@ -215,7 +215,11 @@ module.exports = function (app, db, redis, prefix) {
       function (form, next) {
         // render email template
         res.render('email/email', { intro: form.form_intro, form: req.body }, function (err, body) {
-          next(null, form, body);
+          if (err) {
+            next(err);
+          } else {
+            next(null, form, body);
+          }
         });
       },
       function (form, html_body) {
@@ -244,35 +248,6 @@ module.exports = function (app, db, redis, prefix) {
     });
   };
 
-  var stats = function (api_key, callback) {
-    log_utils.get_logs(api_key, function (err, result) {
-      if (err) {
-        callback(err, null);
-      } else {
-        var counter = {};
-        var logs = [];
-        result.rows.forEach(function (row) {
-          var date = moment(row.doc.date);
-          if (!Object.has(counter[date.year()], date.month() + 1)) {
-            counter[date.year()] = {};
-            counter[date.year()][date.month() + 1] = 0;
-          }
-          counter[date.year()][date.month() + 1] += 1;
-          logs.push({
-            date: row.doc.date
-          , user_ip: row.doc.user_ip
-          });
-        });
-        callback(null, {
-          api_key: api_key
-        , rows: logs
-        , total_rows: logs.length
-        , counter: counter
-        });
-      }
-    });
-  };
-
   //var test_stats = function (req, res) {
   //  var api_key = req.param('api_key', null);
   //  stats(api_key, function (err, obj) {
@@ -286,13 +261,15 @@ module.exports = function (app, db, redis, prefix) {
 
   var check_origin = function (req, form) {
     var origin = req.headers.origin;
-    logger.debug('origin', origin);
-    return (origin && origin.has(form.website_url));
+    logger.debug({
+      'origin': origin
+    , 'website_url': form.website_url
+    });
+    return (origin && (origin.has(form.website_url) || form.website_url.has(origin)));
   };
 
   // routes
   app.post(prefix + '/new-form', new_form);
   //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
-  //app.get(prefix + '/test/stats/:api_key', test_stats);
 };

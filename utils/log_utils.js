@@ -3,8 +3,10 @@
 
 module.exports = function (db) {
   
-  var save_log
+  var moment = require('moment')
+    , save_log
     , get_logs
+    , get_stats
     ;
 
   save_log = function (log, callback) {
@@ -21,9 +23,38 @@ module.exports = function (db) {
       callback(err, body);
     });
   };
+
+  get_stats = function (api_key, callback) {
+    get_logs(api_key, function (err, result) {
+      if (err) {
+        callback(err, null);
+      } else {
+        var counter = {};
+        var logs = [];
+        result.rows.forEach(function (row) {
+          var date = moment(row.doc.date);
+          if (!Object.has(counter[date.year()], date.month() + 1)) {
+            counter[date.year()] = {};
+            counter[date.year()][date.month() + 1] = 0;
+          }
+          counter[date.year()][date.month() + 1] += 1;
+          logs.push({
+            date: row.doc.date
+          , user_ip: row.doc.user_ip
+          });
+        });
+        callback(null, {
+          rows: logs
+        , total_rows: logs.length
+        , counter: counter
+        });
+      }
+    });
+  };
  
   return {
-    'save_log': save_log,
-    'get_logs': get_logs
+    'save_log': save_log
+  , 'get_logs': get_logs
+  , 'get_stats': get_stats
   };
 };
