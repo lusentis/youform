@@ -1,16 +1,35 @@
 /* jshint node:true, indent:2, white:true, laxcomma:true, undef:true, strict:true, unused:true, eqnull:true, camelcase: false, trailing: true */
 'use strict';
 
+
+
 module.exports = function (app, db, redis, prefix) {
 
   var async = require('async')
+    , dns = require('dns')
     , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
     , utils = require('../utils/utils.js')(redis)
+    , spam_list = require('../spam_list.json')
     , coolog = require('coolog')
     , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
     , moment = require('moment')
+    , akismet = require('akismet-api')
     ;
+
+  var akismet_client = akismet.client({
+    key  : process.env.AKISMET_API_KEY,
+    blog : 'http://youform.me'
+  });
+
+  //akismet_client.verifyKey(function (err, valid) {
+  //  if (valid) {
+  //    logger.info('Valid key!');
+  //  } else {
+  //    logger.err('Key validation failed...');
+  //    logger.err(err.message);
+  //  }
+  //});
 
   var logger = coolog.logger('api.js');
 
@@ -66,6 +85,61 @@ module.exports = function (app, db, redis, prefix) {
       });
   };
 
+  var spam_filter = function (req, res, callback) {
+    async.parallel([
+        function (ret) {
+          // Akismet filter
+          akismet_client.checkSpam({
+            user_ip : req.ip,
+            user_agent : req.headers['user-agent'],
+            referer : req.headers.referer
+          }, function (err, spam) {
+            if (err) {
+              ret(err);
+            }
+            if (spam) {
+              logger.error({
+                spam: true
+              , user_ip: req.ip
+              , referrer: req.headers.referer
+              });
+            }
+            ret(null, spam);
+          });
+        },
+        function (ret) {
+          var host = function (item, next) {
+            var ip = req.ip.split('.').reverse().join('.');
+            dns.resolve4(ip + '.' + item.dns, function (err, domain) {
+              if (err) {
+                next(null, false);
+              } else {
+                logger.error(domain + ' has your IP on it\'s blacklist!');
+                next(null, true);
+              }
+            });
+          };
+          async.detect(spam_list, host, function (err, result) {
+            if (err) {
+              ret(err);
+            } else {
+              result = (result === undefined) ?  false: true;
+              ret(null, result);
+            }
+          });
+        }
+      ],
+      function (err, results) {
+        if (err) {
+          callback(err);
+        } else {
+          var spam = (results[0] && results[1]);
+          logger.info('Spam', spam);
+          callback(null, spam);
+        }
+      });
+  };
+
   var form = function (req, res) {
     var api_key = req.param('api_key', null);
     async.waterfall([
@@ -112,6 +186,19 @@ module.exports = function (app, db, redis, prefix) {
                 error: true
               , description: 'Origin error.'
               });
+            }
+          }
+        });
+      },
+      function (form, next) {
+        spam_filter(req, res, function (err, spam) {
+          if (err) {
+            next(err);
+          } else {
+            if (spam) {
+              res.redirect(form.website_error_page);
+            } else {
+              next(null, form);
             }
           }
         });
