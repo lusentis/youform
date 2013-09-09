@@ -86,6 +86,8 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   var spam_filter = function (req, res, callback) {
+    var ip = req.ip.split('.').reverse().join('.');
+    // logger.debug(ip);
     async.parallel([
         function (ret) {
           // Akismet filter
@@ -109,23 +111,24 @@ module.exports = function (app, db, redis, prefix) {
         },
         function (ret) {
           var host = function (item, next) {
-            var ip = req.ip.split('.').reverse().join('.');
             dns.resolve4(ip + '.' + item.dns, function (err, domain) {
               if (err) {
-                next(null, false);
+                if (err.code === 'ENOTFOUND') {
+                  next(false);
+                } else {
+                  ret(err);
+                }
               } else {
                 logger.error(domain + ' has your IP on it\'s blacklist!');
-                next(null, true);
+                next(true);
               }
             });
           };
-          async.detect(spam_list, host, function (err, result) {
-            if (err) {
-              ret(err);
-            } else {
-              result = (result === undefined) ?  false: true;
-              ret(null, result);
-            }
+          async.detect(spam_list, host, function (result) {
+            logger.debug(result);
+            result = result !== undefined;
+            logger.debug('Check Spam', result);
+            ret(null, result);
           });
         }
       ],
@@ -133,7 +136,7 @@ module.exports = function (app, db, redis, prefix) {
         if (err) {
           callback(err);
         } else {
-          var spam = (results[0] && results[1]);
+          var spam = (results[0] || results[1]);
           logger.info('Spam', spam);
           callback(null, spam);
         }
@@ -173,6 +176,11 @@ module.exports = function (app, db, redis, prefix) {
             });
           } else {
             // check origin url
+
+            // @DEBUG
+            //next(null, result);
+            //return;
+
             if (check_origin(req, result)) {
               logger.debug('results', result);
               next(null, result);
@@ -196,6 +204,7 @@ module.exports = function (app, db, redis, prefix) {
             next(err);
           } else {
             if (spam) {
+              logger.info('Redirect to', form.website_error_page);
               res.redirect(form.website_error_page);
             } else {
               next(null, form);
@@ -219,9 +228,12 @@ module.exports = function (app, db, redis, prefix) {
         , 'HtmlBody': html_body
         }, function (err) {
           if (err) {
-            res.redirect(form.website_success_page);
-          } else {
+            logger.error('Postmark error', err);
+            logger.info('Redirect to', form.website_error_page);
             res.redirect(form.website_error_page);
+          } else {
+            logger.info('Redirect to', form.website_success_page);
+            res.redirect(form.website_success_page);
           }
         });
       }
@@ -280,8 +292,7 @@ module.exports = function (app, db, redis, prefix) {
 
   // routes
   app.post(prefix + '/new-form', new_form);
-  app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
-  app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
   //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
+  app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
   //app.get(prefix + '/test/stats/:api_key', test_stats);
 };
