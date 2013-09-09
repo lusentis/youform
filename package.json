@@ -19,6 +19,7 @@
     "redis-jsonify": "0.0.4",
     "connect-redis": "~1.4.5",
     "connect-flash": "~0.1.1",
-    "express-rate": "0.0.1"
+    "express-rate": "0.0.1",
+    "moment": "~2.1.0"
   }
 }

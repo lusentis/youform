@@ -52,7 +52,8 @@ app.set('view engine', 'jade');
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(cookieParser);
-app.use(express.bodyParser());
+app.use(express.json());
+app.use(express.urlencoded());
 app.use(express.session({
     key: 'express.sid'
   , store: sessionStore

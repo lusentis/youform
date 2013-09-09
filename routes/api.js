@@ -9,6 +9,7 @@ module.exports = function (app, db, redis, prefix) {
     , utils = require('../utils/utils.js')(redis)
     , coolog = require('coolog')
     , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
+    , moment = require('moment')
     ;
 
   var logger = coolog.logger('api.js');
@@ -144,36 +145,56 @@ module.exports = function (app, db, redis, prefix) {
     });
   };
 
-  // @FIXME
   var stats = function (api_key, callback) {
     log_utils.get_logs(api_key, function (err, result) {
       if (err) {
         callback(err, null);
       } else {
-        var counter;
+        var counter = {};
+        var logs = [];
         result.rows.forEach(function (row) {
-          if (!Object.has(counter[row.date.year], row.date.mounth)) {
-            counter[row.date.year][row.date.mounth] = 0;
+          var date = moment(row.doc.date);
+          if (!Object.has(counter[date.year()], date.month() + 1)) {
+            counter[date.year()] = {};
+            counter[date.year()][date.month() + 1] = 0;
           }
-          counter[row.date.year][row.date.mounth] += 1;
+          counter[date.year()][date.month() + 1] += 1;
+          logs.push({
+            date: row.doc.date
+          , user_ip: row.doc.user_ip
+          });
         });
         callback(null, {
-          rows: result.rows
-        , total_rows: result.rows
+          api_key: api_key
+        , rows: logs
+        , total_rows: logs.length
         , counter: counter
         });
       }
     });
   };
 
+  //var test_stats = function (req, res) {
+  //  var api_key = req.param('api_key', null);
+  //  stats(api_key, function (err, obj) {
+  //    if (err) {
+  //      throw err;
+  //    } else {
+  //      res.json(obj);
+  //    }
+  //  });
+  //};
+
   var check_origin = function (req, form) {
     var origin = req.headers.origin;
     logger.debug('origin', origin);
-    return (origin.has(form.website_url));
+    return (origin && origin.has(form.website_url));
   };
 
   // routes
   app.post(prefix + '/new-form', new_form);
-  //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
+  app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
+  //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
+  //app.get(prefix + '/test/stats/:api_key', test_stats);
 };
