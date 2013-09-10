@@ -271,12 +271,12 @@ module.exports = function (app, db, redis, prefix) {
         if (err) {
           throw err;
         } else {
-          req.session.deleted = deleted;
+          req.flash('form_deleted', deleted);
           res.redirect('/deleted');
         }
       });
     } else {
-      req.session.deleted = false;
+      req.flash('form_deleted', false);
       res.redirect('/deleted');
     }
   };
@@ -315,7 +315,7 @@ module.exports = function (app, db, redis, prefix) {
                 next(err);
               } else {
                 logger.info('Form updated', result);
-                req.session.saved = true;
+                req.flash('form_saved', true);
                 res.redirect('/stats/' + form._id + '?token=' + form.token);
               }
             });

@@ -79,14 +79,19 @@ module.exports = function (app, db, prefix) {
         },
         function (form, stats) {
           var not_found = !form;
-          logger.debug(token);
           if (form) {
             not_found = form.token !== token;
           } else {
             not_found = true;
           }
-
-          res.render('stats', {not_found: not_found, form: form, stats: stats});
+          var form_saved = req.flash('form_saved').length > 0;
+          var form_save_error = req.flash('form_save_error').length > 0;
+          res.render('stats', {
+            not_found: not_found
+          , form: form, stats: stats
+          , form_saved: form_saved
+          , form_save_error: form_save_error
+          });
         }
       ],
       function (err) {
@@ -97,10 +102,9 @@ module.exports = function (app, db, prefix) {
   };
 
   var form_deleted = function (req, res) {
-    if (req.session.deleted) {
-      var deleted = req.session.deleted;
-      delete req.session.deleted;
-      res.render('deleted', {deleted: deleted});
+    var access = req.flash('form_deleted').length > 0;
+    if (access) {
+      res.render('deleted', {deleted: access[0]});
     } else {
       res.redirect('/');
     }
