@@ -184,7 +184,20 @@ module.exports = function (app, db, redis, prefix) {
             // check origin url
             if (utils.check_origin(req, result)) {
               logger.debug('results', result);
-              next(null, result);
+              if (result.deleted === false) {
+                next(null, result);
+              } else {
+                // deleted
+                logger.error({
+                  error: true
+                , form_id: api_key
+                , description: 'Form deleted'
+                });
+                res.json({
+                  error: true
+                , description: 'Form deleted.'
+                });
+              }
             } else {
               logger.error({
                 error: true
