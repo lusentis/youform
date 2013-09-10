@@ -6,15 +6,18 @@ block content
     if not_found
       p Form not found. Check your params
     else
-      p Form: #{form.form_name}
       p API KEY: #{form._id}
-      p Website: 
-        a(href=form.website_url) #{form.website_url}
-      p Date: #{form.created_at}
+      p Form: #{form.form_name}
+      if form.deleted === true
+        p FORM ELIMINATO
+      else
+        p Website: 
+          a(href=form.website_url) #{form.website_url}
+        p Date: #{form.created_at}
 
-      p Total requests: #{stats.total_rows}
+        p Total requests: #{stats.total_rows}
 
-      for row, year in stats.counter
-        h5 Year: #{year}
-          for value, month in row
-            p #{month}: #{value}
+        for row, year in stats.counter
+          h5 Year: #{year}
+            for value, month in row
+              p #{month}: #{value}
