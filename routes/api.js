@@ -52,7 +52,7 @@ module.exports = function (app, db, redis, prefix) {
 
     async.waterfall([
         function (next) {
-          form_utils.save_form(form, function (err, data) {
+          form_utils.save_form(form, null, function (err, data) {
             if (err) {
               next(err);
             } else {
@@ -184,9 +184,7 @@ module.exports = function (app, db, redis, prefix) {
             // check origin url
             if (utils.check_origin(req, result)) {
               logger.debug('results', result);
-              if (result.deleted === false) {
-                next(null, result);
-              } else {
+              if (result.deleted === true) {
                 // deleted
                 logger.error({
                   error: true
@@ -197,6 +195,9 @@ module.exports = function (app, db, redis, prefix) {
                   error: true
                 , description: 'Form deleted.'
                 });
+              } else {
+                next(null, result);
+                
               }
             } else {
               logger.error({
@@ -280,8 +281,58 @@ module.exports = function (app, db, redis, prefix) {
     }
   };
 
+  var edit_form = function (req, res) {
+    var api_key = req.body.api_key
+      , token = req.body.token;
+    async.waterfall([
+        function (next) {
+          form_utils.get_form(api_key, function (err, result) {
+            if (err) {
+              next(err);
+            } else {
+              next(null, result);
+            }
+          });
+        },
+        function (form, next) {
+          if (token === form.token) {
+            // save
+            var data = {
+              form_name: req.body['f-name']
+            , website_url: req.body['w-url']
+            , website_success_page: req.body['w-success-page']
+            , website_error_page: req.body['w-error-page']
+            , form_subject: req.body['f-subject']
+            , form_intro: req.body['f-intro']
+            , form_destination: req.body['email-dest']
+            , creator_email: req.body['email-crt']
+            , sender_name: req.body['snd-name']
+            , sender_email: req.body['snd-email']
+            , colours: req.body.colours
+            };
+            form_utils.save_form(data, api_key, function (err, result) {
+              if (err) {
+                next(err);
+              } else {
+                logger.info('Form updated', result);
+                req.session.saved = true;
+                res.redirect('/stats/' + form._id + '?token=' + form.token);
+              }
+            });
+          } else {
+            res.redirect('/');
+          }
+        }
+      ], function (err) {
+        if (err) {
+          throw err;
+        }
+      });
+  };
+
   // routes
   app.post(prefix + '/new-form', new_form);
+  app.post(prefix + '/edit-form', edit_form);
   app.post(prefix + '/delete-form', delete_form);
   //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form);

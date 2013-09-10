@@ -24,6 +24,18 @@ function(doc, req) {
     , sender_email: data.sender_email
     , colours: data.colours
     };
+  } else {
+    doc.form_name = data.form_name;
+    doc.website_url = data.website_url;
+    doc.website_success_page = data.website_success_page;
+    doc.website_error_page = data.website_error_page;
+    doc.form_subject = data.form_subject;
+    doc.form_intro = data.form_intro;
+    doc.form_destination = data.form_destination;
+    doc.creator_email = data.creator_email;
+    doc.sender_name = data.sender_name;
+    doc.sender_email = data.sender_email;
+    doc.colours = data.colours;
   }
 
   // remove form

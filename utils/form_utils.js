@@ -11,8 +11,11 @@ module.exports = function (db) {
     , delete_form
     ;
 
-  save_form = function (form, callback) {
-    db.atomic('youform', 'forms', undefined, form, function (err, body) {
+  save_form = function (form, api_key, callback) {
+    if (api_key === null) {
+      api_key = undefined;
+    }
+    db.atomic('youform', 'forms', api_key, form, function (err, body) {
       callback(err, body);
     });
   };

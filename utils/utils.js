@@ -34,7 +34,7 @@ module.exports = function (redis) {
   };
 
   check_origin = function (req, form) {
-    var origin = req.headers.origin;
+    var origin =  req.headers.origin;
     logger.debug({
       'origin': origin
     , 'website_url': form.website_url

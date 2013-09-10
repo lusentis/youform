@@ -85,6 +85,7 @@ module.exports = function (app, db, prefix) {
           } else {
             not_found = true;
           }
+
           res.render('stats', {not_found: not_found, form: form, stats: stats});
         }
       ],
@@ -105,11 +106,30 @@ module.exports = function (app, db, prefix) {
     }
   };
 
+  var edit_form = function (req, res) {
+    var api_key = req.param('api_key', null)
+      , token = req.query.token;
+    if (api_key && token) {
+      form_utils.get_form(api_key, function (err, form) {
+        if (err) {
+          throw err;
+        } else {
+          var not_found = (!form || form.token !== token);
+          logger.info('form not found', not_found);
+          res.render('edit', {not_found: not_found, form: form});
+        }
+      });
+    } else {
+      res.render('edit', {not_found: true});
+    }
+  };
+
   // routes
   app.get(prefix + '/', index);
   app.get(prefix + '/success', signup_success);
   app.get(prefix + '/deleted', form_deleted);
   app.get(prefix + '/signup', new_form);
   app.get(prefix + '/delete-form/:api_key', delete_form);
+  app.get(prefix + '/edit-form/:api_key', edit_form);
   app.get(prefix + '/stats/:api_key', stats);
 };

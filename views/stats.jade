@@ -3,6 +3,14 @@ extends layout
 block content
   .content
     h2 Statistics
+
+    if saved === true
+      p Form salvato
+
+    if saved === false
+      p Errore. Form non salvato
+
+
     if not_found
       p Form not found. Check your params
     else
