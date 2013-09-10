@@ -24,7 +24,7 @@ module.exports = function (redis) {
     handler: new rate.Redis.RedisRateHandler({ client: rl_client })
   , interval: 5
   , limit: 2
-  , onLimitReached: function (req, res, rate, limit, resetTime, next) {
+  , onLimitReached: function (req, res) {
       res.json({
         error: true
       , description: 'rate limit exceeded'
@@ -48,16 +48,19 @@ module.exports = function (redis) {
   };
 
   send_sms = function (form, callback) {
-    var message = '';
-    var response = '';
-    var data = querystring.stringify({
+    var message = 'Youform.me confirmation code: ' + form.code
+      , response = ''
+      , data
+      , post_options
+      ;
+    data = querystring.stringify({
       'username': process.env.HQ_USERNAME
     , 'password': crypto.createHash('md5').update(process.env.HQ_PASSWORD).digest('hex')
-    , 'to': ''
+    , 'to': form.phone
     , 'from': process.env.HQ_SENDER
     , 'message': message
     });
-    var post_options = {
+    post_options = {
       host: 'ssl.hqsms.com',
       port: '443',
       path: '/sms.do',
@@ -67,7 +70,7 @@ module.exports = function (redis) {
         'Content-Length': data.length
       }
     };
-    var post_req = https.request(post_options, function (res) {
+    var hq_request = https.request(post_options, function (res) {
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
         response += chunk;
@@ -77,8 +80,8 @@ module.exports = function (redis) {
         callback(response.has('ERROR'));
       });
     });
-    post_req.write(data);
-    post_req.end();
+    hq_request.write(data);
+    hq_request.end();
   };
 
   return {

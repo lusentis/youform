@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  .content
+    h2 One more thing
+    h4 Confirm your phone number
+    form.pure-form.pure-form-stacked(role='form', action='/confirm/sms', method='post')
+      input(type='hidden', name='token', value='#{form.token}')
+      input(type='hidden', name='api_key', value='#{form._id}')
+      fieldset.pure-g
+        .pure-u-1-2
+          div(style='padding-right: 20px;')
+            .pure-control-group
+              label(for='code') Code
+              input.pure-input-1(type='text', name='code', placeholder='Code', required)
+
+        .pure-u-1
+          .spacer
+          .pure-controls
+            button.pure-button.pure-button-success(type='submit') Send

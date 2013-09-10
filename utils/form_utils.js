@@ -21,7 +21,7 @@ module.exports = function (db) {
   };
 
   get_form = function (form_id, callback) {
-    db.get(form_id, { include_docs: true }, function (err, body) {
+    db.get(form_id, {include_docs: true}, function (err, body) {
       if (err && err.status_code === 404) {
         body = null;
         err = null;

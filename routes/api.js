@@ -37,6 +37,7 @@ module.exports = function (app, db, redis, prefix) {
     var form = {
       _id: uuid.v4()
     , token: uuid.v4()
+    , code: uuid.v4().replace(/-/).substring(0, 6).toUpperCase()
     , form_name: req.body['f-name']
     , website_url: req.body['w-url']
     , website_success_page: req.body['w-success-page']
@@ -48,6 +49,7 @@ module.exports = function (app, db, redis, prefix) {
     , sender_name: req.body['snd-name']
     , sender_email: req.body['snd-email']
     , colours: req.body.colours
+    , phone: req.body.phone
     };
 
     async.waterfall([
@@ -267,23 +269,27 @@ module.exports = function (app, db, redis, prefix) {
     var api_key = req.body.api_key
       , token = req.body.token;
     if (api_key && token) {
-      form_utils.delete_form(api_key, token, function (err, deleted) {
-        if (err) {
-          throw err;
-        } else {
-          req.flash('form_deleted', deleted);
-          res.redirect('/deleted');
-        }
-      });
-    } else {
       req.flash('form_deleted', false);
       res.redirect('/deleted');
+      return;
     }
+    form_utils.delete_form(api_key, token, function (err, deleted) {
+      if (err) {
+        throw err;
+      } else {
+        req.flash('form_deleted', deleted);
+        res.redirect('/deleted');
+      }
+    });
   };
 
   var edit_form = function (req, res) {
     var api_key = req.body.api_key
       , token = req.body.token;
+    if (!api_key || !token) {
+      res.redirect('/');
+      return;
+    }
     async.waterfall([
         function (next) {
           form_utils.get_form(api_key, function (err, result) {
@@ -309,6 +315,7 @@ module.exports = function (app, db, redis, prefix) {
             , sender_name: req.body['snd-name']
             , sender_email: req.body['snd-email']
             , colours: req.body.colours
+            , phone: req.body.phone
             };
             form_utils.save_form(data, api_key, function (err, result) {
               if (err) {
@@ -330,18 +337,127 @@ module.exports = function (app, db, redis, prefix) {
       });
   };
 
-  var test_sms = function (req, res) {
-    utils.send_sms('', function (){
+  var confirm = function (req, res) {
+    var api_key = req.query.api_key
+      , email = req.query.email
+      , token = req.query.token
+      ;
+    if (!api_key || !email || !token) {
+      res.redirect('/signup');
+      return;
+    }
+    async.waterfall([
+        function (next) {
+          // get form
+          form_utils.get_form(api_key, function (err, form) {
+            if (err) {
+              next(err);
+            } else {
+              if (form.token === token && email === form.creator_email) {
+                if (form.confirmed === true) {
+                  logger.info('Already confirmed');
+                  res.redirect('/');
+                } else {
+                  next(null, form);
+                }
+              } else {
+                logger.info('Token/email error');
+                req.flash('confirm_error', true);
+                res.redirect('/');
+              }
+            }
+          });
+        },
+        function (form, next) {
+          if (!form.sms_sent) {
+            utils.send_sms(form, function (sent) {
+              next(null, form, sent);
+            });
+          }
+        },
+        function (form, sent, next) {
+          db.atomic('youform', 'forms', api_key, {'action': 'sms_sent'}, function (err) {
+            if (err) {
+              next(err);
+            } else {
+              next(null, form);
+            }
+          });
+        },
+        function (form) {
+          res.render('confirm', {form: form});
+        }
+      ], function (err) {
+        if (err) {
+          throw err;
+        }
+      });
+  };
 
-    });
+  var confirm_sms = function (req, res) {
+    var api_key = req.body.api_key
+      , email = req.body.email
+      , token = req.body.token
+      , code = req.body.code
+      ;
+    
+    async.waterfall([
+        function (next) {
+          // get form
+          form_utils.get_form(api_key, function (err, data) {
+            if (err) {
+              next(err);
+            } else {
+              if (data.token === token && email === data.creator_email) {
+                if (data.confirmed === true) {
+                  res.redirect('/');
+                } else {
+                  next(null, data);
+                }
+              } else {
+                req.flash('confirm_error', true);
+                res.redirect('/');
+              }
+            }
+          });
+        },
+        function (form, next) {
+          logger.info({
+            user_code: code
+          , code: form
+          });
+          if (form.code === code) {
+            db.atomic('youform', 'forms', api_key, {'action': 'confirmed'}, function (err) {
+              if (err) {
+                next(err);
+              } else {
+                next(null, form);
+              }
+            });
+          } else {
+            req.flash('code_error', true);
+            res.redirect('/confirm');
+          }
+        },
+        function (form) {
+          logger.info('code confirmed');
+          res.render('confirm', {form: form});
+        }
+      ], function (err) {
+        if (err) {
+          throw err;
+        }
+      });
   };
 
   // routes
+  app.get('/confirm', confirm);
+  app.post('/confirm/sms', confirm_sms);
+
   app.post(prefix + '/new-form', new_form);
   app.post(prefix + '/edit-form', edit_form);
   app.post(prefix + '/delete-form', delete_form);
   //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
-  // test
-  app.get(prefix + '/test_sms', test_sms);
+  
 };

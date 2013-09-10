@@ -128,8 +128,6 @@ module.exports = function (app, db, prefix) {
     }
   };
 
-  
-
   // routes
   app.get(prefix + '/', index);
   app.get(prefix + '/success', signup_success);
