@@ -88,7 +88,8 @@ module.exports = function (app, db, prefix) {
           var form_save_error = req.flash('form_save_error').length > 0;
           res.render('stats', {
             not_found: not_found
-          , form: form, stats: stats
+          , form: form
+          , stats: stats
           , form_saved: form_saved
           , form_save_error: form_save_error
           });
@@ -102,9 +103,8 @@ module.exports = function (app, db, prefix) {
   };
 
   var form_deleted = function (req, res) {
-    var access = req.flash('form_deleted').length > 0;
-    if (access) {
-      res.render('deleted', {deleted: access[0]});
+    if (req.flash('form_deleted').length > 0) {
+      res.render('deleted', {deleted: req.flash('form_deleted')[0]});
     } else {
       res.redirect('/');
     }
