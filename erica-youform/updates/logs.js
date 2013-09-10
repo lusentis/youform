@@ -16,10 +16,5 @@ function(doc, req) {
     };
   }
 
-  // remove form
-  if (data.action == 'delete') {
-    doc.deleted = true;
-  }
-
   return [doc, toJSON(doc)];
 }

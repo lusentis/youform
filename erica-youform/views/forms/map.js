@@ -2,7 +2,7 @@
 
 function map(doc) {
   'use strict';
-  if (doc.type && doc.type === 'form') {
+  if (doc.type && doc.type === 'form' && doc.deleted !== true) {
     emit(doc._id, null);
   }
 }

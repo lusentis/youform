@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  .content
+    if !not_found
+      form(action='/api/delete-form', method='post')
+        input(type='hidden', name='api_key', value='#{form._id}')
+        input(type='hidden', name='token', value='#{form.token}')
+        input(type='submit', value='Delete')
+    else
+      p Form not found

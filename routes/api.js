@@ -2,7 +2,6 @@
 'use strict';
 
 
-
 module.exports = function (app, db, redis, prefix) {
 
   var akismet = require('akismet-api')
@@ -34,6 +33,7 @@ module.exports = function (app, db, redis, prefix) {
   //});
 
   var new_form = function (req, res) {
+    
     var form = {
       _id: uuid.v4()
     , token: uuid.v4()
@@ -49,6 +49,7 @@ module.exports = function (app, db, redis, prefix) {
     , sender_email: req.body['snd-email']
     , colours: req.body.colours
     };
+
     async.waterfall([
         function (next) {
           form_utils.save_form(form, function (err, data) {
@@ -181,7 +182,7 @@ module.exports = function (app, db, redis, prefix) {
             });
           } else {
             // check origin url
-            if (check_origin(req, result)) {
+            if (utils.check_origin(req, result)) {
               logger.debug('results', result);
               next(null, result);
             } else {
@@ -247,29 +248,28 @@ module.exports = function (app, db, redis, prefix) {
       }
     });
   };
-
-  //var test_stats = function (req, res) {
-  //  var api_key = req.param('api_key', null);
-  //  stats(api_key, function (err, obj) {
-  //    if (err) {
-  //      throw err;
-  //    } else {
-  //      res.json(obj);
-  //    }
-  //  });
-  //};
-
-  var check_origin = function (req, form) {
-    var origin = req.headers.origin;
-    logger.debug({
-      'origin': origin
-    , 'website_url': form.website_url
-    });
-    return (origin && (origin.has(form.website_url) || form.website_url.has(origin)));
+  
+  var delete_form = function (req, res) {
+    var api_key = req.body.api_key
+      , token = req.body.token;
+    if (api_key && token) {
+      form_utils.delete_form(api_key, token, function (err, deleted) {
+        if (err) {
+          throw err;
+        } else {
+          req.session.deleted = deleted;
+          res.redirect('/deleted');
+        }
+      });
+    } else {
+      req.session.deleted = false;
+      res.redirect('/deleted');
+    }
   };
 
   // routes
   app.post(prefix + '/new-form', new_form);
+  app.post(prefix + '/delete-form', delete_form);
   //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
 };

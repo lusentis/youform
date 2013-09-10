@@ -11,6 +11,7 @@ module.exports = function (redis) {
 
   var rateLimitMiddleware
     , rateLimit
+    , check_origin
     , rl_client = redis.createClient()
     ;
 
@@ -32,7 +33,17 @@ module.exports = function (redis) {
     };
   };
 
+  check_origin = function (req, form) {
+    var origin = req.headers.origin;
+    logger.debug({
+      'origin': origin
+    , 'website_url': form.website_url
+    });
+    return (origin && (origin.has(form.website_url) || form.website_url.has(origin)));
+  };
+
   return {
     'rateLimit': rateLimit
+  , 'check_origin': check_origin
   };
 };
