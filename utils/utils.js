@@ -6,12 +6,17 @@ module.exports = function (redis) {
   // npm modules
   var rate = require('express-rate')
     , coolog = require('coolog')
+    , crypto = require('crypto')
+    , querystring = require('querystring')
+    , https = require('https')
     , logger = coolog.logger('utils.js')
+
     ;
 
   var rateLimitMiddleware
     , rateLimit
     , check_origin
+    , send_sms
     , rl_client = redis.createClient()
     ;
 
@@ -42,8 +47,43 @@ module.exports = function (redis) {
     return (origin && (origin.has(form.website_url) || form.website_url.has(origin)));
   };
 
+  send_sms = function (form, callback) {
+    var message = '';
+    var response = '';
+    var data = querystring.stringify({
+      'username': process.env.HQ_USERNAME
+    , 'password': crypto.createHash('md5').update(process.env.HQ_PASSWORD).digest('hex')
+    , 'to': ''
+    , 'from': process.env.HQ_SENDER
+    , 'message': message
+    });
+    var post_options = {
+      host: 'ssl.hqsms.com',
+      port: '443',
+      path: '/sms.do',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': data.length
+      }
+    };
+    var post_req = https.request(post_options, function (res) {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        response += chunk;
+      });
+      res.on('end', function () {
+        logger.info('HQSMS response', response);
+        callback(response.has('ERROR'));
+      });
+    });
+    post_req.write(data);
+    post_req.end();
+  };
+
   return {
     'rateLimit': rateLimit
   , 'check_origin': check_origin
+  , 'send_sms': send_sms
   };
 };

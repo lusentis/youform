@@ -330,10 +330,18 @@ module.exports = function (app, db, redis, prefix) {
       });
   };
 
+  var test_sms = function (req, res) {
+    utils.send_sms('', function (){
+
+    });
+  };
+
   // routes
   app.post(prefix + '/new-form', new_form);
   app.post(prefix + '/edit-form', edit_form);
   app.post(prefix + '/delete-form', delete_form);
   //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
+  // test
+  app.get(prefix + '/test_sms', test_sms);
 };
