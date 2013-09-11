@@ -12,17 +12,18 @@ module.exports = function () {
 
   var send_confirm_email = function (form, res, callback) {
     async.waterfall([
-        function (form, next) {
+        function (next) {
           // render email template
-          res.render('email/confirm', { intro: form.form_intro }, function (err, body) {
+          logger.info(form);
+          res.render('email/confirm', {form: form}, function (err, body) {
             if (err) {
               next(err);
             } else {
-              next(null, form, body);
+              next(null, body);
             }
           });
         },
-        function (form, html_body) {
+        function (html_body) {
           // send email
           postmark.send({
             'From': process.env.POSTMARK_FROM

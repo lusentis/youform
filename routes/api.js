@@ -93,6 +93,15 @@ module.exports = function (app, db, redis, prefix) {
             }
           });
         },
+        function (next) {
+          email_utils.send_confirm_email(form, res, function (err) {
+            if (err) {
+              next(err);
+            } else {
+              next(null);
+            }
+          });
+        },
         function () {
           // send sms
           utils.send_sms(form, function () {

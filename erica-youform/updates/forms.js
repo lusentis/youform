@@ -24,7 +24,7 @@ function(doc, req) {
       , website_error_page: data.website_error_page.trim()
       , form_subject: data.form_subject
       , form_intro: data.form_intro
-      , form_destination: ''
+      , form_destination: data.form_destination.trim()
       , form_destination_not_confirmed: data.form_destination.trim()
       , creator_email: data.creator_email.trim()
       , sender_name: data.sender_name
