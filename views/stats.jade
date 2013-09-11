@@ -29,3 +29,6 @@ block content
           h5 Year: #{year}
             for value, month in row
               p #{month}: #{value}
+
+      a.pure-button(href='/edit-form/#{form._id}?token=#{form.token}') Edit form
+      a.pure-button(href='/delete-form/#{form._id}?token=#{form.token}') Delete form

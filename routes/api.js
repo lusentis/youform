@@ -14,6 +14,9 @@ module.exports = function (app, db, redis, prefix) {
     , log_utils = require('../utils/log_utils.js')(db)
     , spam_list = require('../spam_list.json')
     , utils = require('../utils/utils.js')(redis)
+    , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
+    , phone_regex = /^[0-9\-().\s]{10,15}$/
+    , country_code_regex = /^\+{0,1}[0-9]{1,4}$/
     ;
   
   var logger = coolog.logger('api.js');
@@ -32,8 +35,12 @@ module.exports = function (app, db, redis, prefix) {
   //  }
   //});
 
+  var test_email = function (email) {
+    return email_regex.test(email) && email.length < 100;
+  };
+
   var new_form = function (req, res) {
-    
+
     var form = {
       _id: uuid.v4()
     , token: uuid.v4()
@@ -49,11 +56,22 @@ module.exports = function (app, db, redis, prefix) {
     , sender_name: req.body['snd-name']
     , sender_email: req.body['snd-email']
     , colours: req.body.colours
-    , phone: req.body.phone
     };
+
+    if (!test_email(form.creator_email) || !test_email(form.sender_email) || !test_email(form.form_destination)) {
+      req.flash('email_error', true);
+      res.redirect('/signup');
+      return;
+    }
+    if (!phone_regex.test(form.phone.trim()) || !country_code_regex.test(form.country_code.trim())) {
+      req.flash('phone_error', true);
+      res.redirect('/signup');
+    }
 
     async.waterfall([
         function (next) {
+          form.country_code = req.body['country-code'].trim().replace(/\+/g, '');
+          form.phone = req.body.phone.trim().replace(/[\-]/g, '');
           form_utils.save_form(form, null, function (err, data) {
             if (err) {
               next(err);
@@ -95,7 +113,6 @@ module.exports = function (app, db, redis, prefix) {
 
   var spam_filter = function (req, res, callback) {
     var ip = req.ip.split('.').reverse().join('.');
-    // logger.debug(ip);
     async.parallel([
         function (ret) {
           // Akismet filter
@@ -268,11 +285,13 @@ module.exports = function (app, db, redis, prefix) {
   var delete_form = function (req, res) {
     var api_key = req.body.api_key
       , token = req.body.token;
+    
     if (api_key && token) {
       req.flash('form_deleted', false);
       res.redirect('/deleted');
       return;
     }
+
     form_utils.delete_form(api_key, token, function (err, deleted) {
       if (err) {
         throw err;
@@ -286,10 +305,44 @@ module.exports = function (app, db, redis, prefix) {
   var edit_form = function (req, res) {
     var api_key = req.body.api_key
       , token = req.body.token;
+
+    var data = {
+      form_name: req.body['f-name']
+    , website_url: req.body['w-url']
+    , website_success_page: req.body['w-success-page']
+    , website_error_page: req.body['w-error-page']
+    , form_subject: req.body['f-subject']
+    , form_intro: req.body['f-intro']
+    , form_destination: req.body['email-dest']
+    , creator_email: req.body['email-crt']
+    , sender_name: req.body['snd-name']
+    , sender_email: req.body['snd-email']
+    , colours: req.body.colours
+    };
+
+    data.country_code = req.body['country-code'].trim().replace(/\+/g, '');
+    data.phone = req.body.phone.trim().replace(/[\-]/g, '');
+
     if (!api_key || !token) {
       res.redirect('/');
       return;
     }
+    if (!test_email(data.creator_email) || !test_email(data.sender_email) || !test_email(data.form_destination)) {
+      logger.error('emails format error');
+      req.flash('email_error', true);
+      res.redirect('/edit-form/' + api_key + '?token=' + token);
+      return;
+    }
+    if (!phone_regex.test(data.phone.trim()) || !country_code_regex.test(data.country_code.trim())) {
+      logger.error('phone format error', {
+        country_code: data.country_code
+      , phone: data.phone
+      });
+      req.flash('phone_error', true);
+      res.redirect('/edit-form/' + api_key + '?token=' + token);
+      return;
+    }
+
     async.waterfall([
         function (next) {
           form_utils.get_form(api_key, function (err, result) {
@@ -303,20 +356,6 @@ module.exports = function (app, db, redis, prefix) {
         function (form, next) {
           if (token === form.token) {
             // save
-            var data = {
-              form_name: req.body['f-name']
-            , website_url: req.body['w-url']
-            , website_success_page: req.body['w-success-page']
-            , website_error_page: req.body['w-error-page']
-            , form_subject: req.body['f-subject']
-            , form_intro: req.body['f-intro']
-            , form_destination: req.body['email-dest']
-            , creator_email: req.body['email-crt']
-            , sender_name: req.body['snd-name']
-            , sender_email: req.body['snd-email']
-            , colours: req.body.colours
-            , phone: req.body.phone
-            };
             form_utils.save_form(data, api_key, function (err, result) {
               if (err) {
                 next(err);
@@ -342,10 +381,12 @@ module.exports = function (app, db, redis, prefix) {
       , email = req.query.email
       , token = req.query.token
       ;
-    if (!api_key || !email || !token) {
+
+    if (!api_key || !email_regex.test(email) || !token) {
       res.redirect('/signup');
       return;
     }
+
     async.waterfall([
         function (next) {
           // get form
@@ -401,6 +442,11 @@ module.exports = function (app, db, redis, prefix) {
       , code = req.body.code
       ;
     
+    if (!api_key || !email_regex.test(email) || !token || !code) {
+      req.flash('confirm_error', true);
+      req.redirect('/');
+    }
+
     async.waterfall([
         function (next) {
           // get form

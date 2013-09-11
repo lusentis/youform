@@ -113,19 +113,22 @@ module.exports = function (app, db, prefix) {
   var edit_form = function (req, res) {
     var api_key = req.param('api_key', null)
       , token = req.query.token;
-    if (api_key && token) {
-      form_utils.get_form(api_key, function (err, form) {
-        if (err) {
-          throw err;
-        } else {
-          var not_found = (!form || form.token !== token);
-          logger.info('form not found', not_found);
-          res.render('edit', {not_found: not_found, form: form});
-        }
-      });
-    } else {
-      res.render('edit', {not_found: true});
+
+    if (!api_key || !token) {
+      req.flash('param_error', true);
+      res.redirect('/');
+      return;
     }
+
+    form_utils.get_form(api_key, function (err, form) {
+      if (err) {
+        throw err;
+      } else {
+        var not_found = (!form || form.token !== token);
+        logger.info('form not found', not_found);
+        res.render('edit', {not_found: not_found, form: form});
+      }
+    });
   };
 
   // routes
