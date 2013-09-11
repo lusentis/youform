@@ -5,7 +5,7 @@ block content
     if !not_found
       h2 Delete form
       h4 Are you sure that you want to permanently delete the form?
-      form(action='/api/delete-form', method='post')
+      form(action='/api/delete-form/#{form._id}', method='post')
         input(type='hidden', name='api_key', value='#{form._id}')
         input(type='hidden', name='token', value='#{form.token}')
 

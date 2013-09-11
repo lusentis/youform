@@ -96,7 +96,7 @@ module.exports = function (app, db, redis, prefix) {
         function () {
           // send sms
           utils.send_sms(form, function () {
-            res.redirect('/confirm/sms?api_key=' + form._id + '&token=' + form.token);
+            res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
           });
         }
       ], function (err) {
@@ -261,7 +261,7 @@ module.exports = function (app, db, redis, prefix) {
   };
   
   var delete_form = function (req, res) {
-    var api_key = req.body.api_key
+    var api_key = req.param('api_key', null)
       , token = req.body.token;
     
     if (api_key && token) {
@@ -281,7 +281,7 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   var edit_form = function (req, res) {
-    var api_key = req.body.api_key
+    var api_key = req.param('api_key', null)
       , token = req.body.token
       , form;
 
@@ -366,7 +366,7 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   var confirm_email = function (req, res) {
-    var api_key = req.query.api_key
+    var api_key = req.param('api_key', null)
       , email = req.query.email
       , token = req.query.token
       ;
@@ -405,7 +405,7 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
-              res.redirect('/confirm/sms/confirmed?api_key=' + api_key + '&token=' + token);
+              res.redirect('/confirm/email/confirmed/' + api_key + '?token=' + token);
             }
           });
         }
@@ -417,7 +417,7 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   var confirm_sms = function (req, res) {
-    var api_key = req.body.api_key
+    var api_key = req.param('api_key', null)
       , token = req.body.token
       , code = req.body.code
       ;
@@ -463,12 +463,12 @@ module.exports = function (app, db, redis, prefix) {
             });
           } else {
             req.flash('code_error', true);
-            res.redirect('/confirm/sms');
+            res.redirect('/confirm/sms/' + api_key + '?token=' + token);
           }
         },
         function () {
           logger.info('code confirmed');
-          res.redirect('/confirm/sms/confirmed?api_key=' + api_key + '&token=' + token);
+          res.redirect('/confirm/sms/confirmed/' + api_key + '?token=' + token);
         }
       ], function (err) {
         if (err) {
@@ -478,7 +478,7 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   var send_confirm_email = function (req, res) {
-    var api_key = req.query.api_key
+    var api_key = req.param('api_key', null)
       , token = req.query.token
       ;
 
@@ -522,13 +522,13 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   // routes
-  app.get('/confirm/email', confirm_email);
-  app.post(prefix + '/confirm/sms', confirm_sms);
-  app.get(prefix + '/confirm/send-email', send_confirm_email);
+  app.get('/confirm/email/:api_key', confirm_email);
+  app.post(prefix + '/confirm/sms/:api_key', confirm_sms);
+  app.get(prefix + '/confirm/send-email/:api_key', send_confirm_email);
 
   app.post(prefix + '/new-form', new_form);
-  app.post(prefix + '/edit-form', edit_form);
-  app.post(prefix + '/delete-form', delete_form);
+  app.post(prefix + '/edit-form/:api_key', edit_form);
+  app.post(prefix + '/delete-form/:api_key', delete_form);
   //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
   

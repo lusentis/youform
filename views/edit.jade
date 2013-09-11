@@ -4,7 +4,7 @@ block content
   .content
     if !not_found
       h2 Edit form
-      form.pure-form.pure-form-stacked(role='form', action='/api/edit-form', method='post')
+      form.pure-form.pure-form-stacked(role='form', action='/api/edit-form/#{form._id}', method='post')
         input(type='hidden', name='api_key', value='#{form._id}')
         input(type='hidden', name='token', value='#{form.token}')
         fieldset.pure-g

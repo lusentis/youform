@@ -6,7 +6,7 @@ block content
 
     if !form.confirmed
       p Your email is not confirmed. 
-        a(href='/confirm/email?api_key=#{form._id}&token=#{form.token}') Resend the confirmation email
+        a(href='/confirm/send-email/#{form._id}?token=#{form.token}') Resend the confirmation email
 
     if saved === true
       p Form salvato

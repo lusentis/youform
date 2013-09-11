@@ -132,7 +132,7 @@ module.exports = function (app, db, prefix) {
   };
 
   var confirm_sms = function (req, res) {
-    var api_key = req.query.api_key
+    var api_key = req.param('api_key', null)
       , token = req.query.token
       ;
 
@@ -161,7 +161,7 @@ module.exports = function (app, db, prefix) {
   };
 
   var confirmed_sms = function (req, res) {
-    var api_key = req.query.api_key
+    var api_key = req.param('api_key', null)
       , token = req.query.token
       ;
 
@@ -191,7 +191,7 @@ module.exports = function (app, db, prefix) {
   };
 
   var confirmed_email = function (req, res) {
-    var api_key = req.query.api_key
+    var api_key = req.param('api_key', null)
       , token = req.query.token
       ;
 
@@ -227,7 +227,7 @@ module.exports = function (app, db, prefix) {
   app.get(prefix + '/delete-form/:api_key', delete_form);
   app.get(prefix + '/edit-form/:api_key', edit_form);
   app.get(prefix + '/stats/:api_key', stats);
-  app.get(prefix + '/confirm/sms', confirm_sms);
-  app.get(prefix + '/confirm/sms/confirmed', confirmed_sms);
-  app.get(prefix + '/confirm/email/confirmed', confirmed_email);
+  app.get(prefix + '/confirm/sms/:api_key', confirm_sms);
+  app.get(prefix + '/confirm/sms/confirmed/:api_key', confirmed_sms);
+  app.get(prefix + '/confirm/email/confirmed/:api_key', confirmed_email);
 };
