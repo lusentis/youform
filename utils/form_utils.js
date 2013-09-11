@@ -15,6 +15,7 @@ module.exports = function (db) {
     if (api_key === null) {
       api_key = undefined;
     }
+    form.action = 'update';
     db.atomic('youform', 'forms', api_key, form, function (err, body) {
       callback(err, body);
     });
@@ -57,6 +58,7 @@ module.exports = function (db) {
           var data = {
             'action': 'delete'
           };
+          data.action = 'update';
           db.atomic('youform', 'forms', api_key, data, function (err) {
             if (err) {
               next(err);

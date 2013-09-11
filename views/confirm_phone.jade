@@ -4,7 +4,7 @@ block content
   .content
     h2 One more thing
     h4 Confirm your phone number
-    form.pure-form.pure-form-stacked(role='form', action='/confirm/sms', method='post')
+    form.pure-form.pure-form-stacked(role='form', action='/api/confirm/sms', method='post')
       input(type='hidden', name='token', value='#{form.token}')
       input(type='hidden', name='api_key', value='#{form._id}')
       fieldset.pure-g

@@ -146,8 +146,67 @@ module.exports = function (app, db, prefix) {
         throw err;
       } else {
         if (form.token === token) {
-          if (!form.confirmed) {
-            res.render('confirm', {form: form});
+          if (form.phone_confirmed === false) {
+            res.render('confirm_phone', {form: form});
+          } else {
+            res.redirect('/');
+          }
+        } else {
+          logger.info('Token error');
+          req.flash('confirm_error', true);
+          res.redirect('/');
+        }
+      }
+    });
+  };
+
+  var confirmed_sms = function (req, res) {
+    var api_key = req.query.api_key
+      , token = req.query.token
+      ;
+
+    if (!api_key || !token) {
+      res.redirect('/');
+      return;
+    }
+
+    form_utils.get_form(api_key, function (err, form) {
+      if (err) {
+        throw err;
+      } else {
+        if (form.token === token) {
+          logger.info('Phone confirmed', form.phone_confirmed);
+          if (form.phone_confirmed === true) {
+            res.render('confirmed_phone');
+          } else {
+            res.redirect('/');
+          }
+        } else {
+          logger.info('Token error');
+          req.flash('confirm_error', true);
+          res.redirect('/');
+        }
+      }
+    });
+  };
+
+  var confirmed_email = function (req, res) {
+    var api_key = req.query.api_key
+      , token = req.query.token
+      ;
+
+    if (!api_key || !token) {
+      res.redirect('/');
+      return;
+    }
+
+    form_utils.get_form(api_key, function (err, form) {
+      if (err) {
+        throw err;
+      } else {
+        if (form.token === token) {
+          if (form.email_confirmed === true) {
+            res.render('confirmed_email');
           } else {
             res.redirect('/');
           }
@@ -169,4 +228,6 @@ module.exports = function (app, db, prefix) {
   app.get(prefix + '/edit-form/:api_key', edit_form);
   app.get(prefix + '/stats/:api_key', stats);
   app.get(prefix + '/confirm/sms', confirm_sms);
+  app.get(prefix + '/confirm/sms/confirmed', confirmed_sms);
+  app.get(prefix + '/confirm/email/confirmed', confirmed_email);
 };

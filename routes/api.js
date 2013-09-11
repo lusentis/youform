@@ -71,7 +71,7 @@ module.exports = function (app, db, redis, prefix) {
       res.redirect('/signup');
     }
 
-    async.waterfall([
+    async.series([
         function (next) {
           
           form_utils.save_form(form, null, function (err, data) {
@@ -96,7 +96,7 @@ module.exports = function (app, db, redis, prefix) {
         function () {
           // send sms
           utils.send_sms(form, function () {
-            res.redirect('/confirm/sms?api_key' + form._id + '&token=' + form.token);
+            res.redirect('/confirm/sms?api_key=' + form._id + '&token=' + form.token);
           });
         }
       ], function (err) {
@@ -327,7 +327,7 @@ module.exports = function (app, db, redis, prefix) {
         },
         function (next) {
           if (data.form_destination.trim() !== form.form_destination) {
-            db.atomic('youform', 'forms', api_key, {'action': 'change_email'}, {email: data.form_destination}, function (err) {
+            db.atomic('youform', 'forms', api_key, {'action': 'change_email', email: data.form_destination}, function (err) {
               if (err) {
                 next(err);
               } else {
@@ -365,7 +365,7 @@ module.exports = function (app, db, redis, prefix) {
       });
   };
 
-  var confirm = function (req, res) {
+  var confirm_email = function (req, res) {
     var api_key = req.query.api_key
       , email = req.query.email
       , token = req.query.token
@@ -384,7 +384,10 @@ module.exports = function (app, db, redis, prefix) {
               next(err);
             } else {
               if (form.token === token) {
-                if (email === form.form_destination_not_confirmed || email === form.form_destination) {
+                logger.debug(form.form_destination_not_confirmed);
+                logger.debug(form.form_destination);
+                logger.debug(email);
+                if (email === form.form_destination_not_confirmed && form.email_confirmed === false) {
                   next(null, form);
                 } else {
                   res.redirect('/');
@@ -398,27 +401,13 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (form, next) {
-          if (form.confirmed) {
-            db.atomic('youform', 'forms', api_key, {'action': 'confirm_email'}, function (err) {
-              if (err) {
-                next(err);
-              } else {
-                res.render('confirmed');
-              }
-            });
-          } else {
-            if (!form.sms_sent) {
-              utils.send_sms(form, function (sent) {
-                db.atomic('youform', 'forms', api_key, {'action': 'sms_sent'}, function (err) {
-                  if (err) {
-                    next(err);
-                  } else {
-                    res.render('confirm', {form: form});
-                  }
-                });
-              });
+          db.atomic('youform', 'forms', api_key, {'action': 'confirm_email'}, function (err) {
+            if (err) {
+              next(err);
+            } else {
+              res.redirect('/confirm/sms/confirmed?api_key=' + api_key + '&token=' + token);
             }
-          }
+          });
         }
       ], function (err) {
         if (err) {
@@ -427,30 +416,29 @@ module.exports = function (app, db, redis, prefix) {
       });
   };
 
-  var sms = function (req, res) {
+  var confirm_sms = function (req, res) {
     var api_key = req.body.api_key
-      , email = req.body.email
       , token = req.body.token
       , code = req.body.code
       ;
     
-    if (!api_key || !email_regex.test(email) || !token || !code) {
+    if (!api_key || !token || !code) {
       req.flash('confirm_error', true);
-      req.redirect('/');
+      res.redirect('/');
     }
 
     async.waterfall([
         function (next) {
           // get form
-          form_utils.get_form(api_key, function (err, data) {
+          form_utils.get_form(api_key, function (err, form) {
             if (err) {
               next(err);
             } else {
-              if (data.token === token && email === data.creator_email) {
-                if (data.confirmed === true) {
-                  res.redirect('/');
+              if (form.token === token) {
+                if (form.phone_confirmed === false) {
+                  next(null, form);
                 } else {
-                  next(null, data);
+                  res.redirect('/');
                 }
               } else {
                 req.flash('confirm_error', true);
@@ -462,24 +450,25 @@ module.exports = function (app, db, redis, prefix) {
         function (form, next) {
           logger.info({
             user_code: code
-          , code: form
+          , code: form.code
           });
           if (form.code === code) {
-            db.atomic('youform', 'forms', api_key, {'action': 'confirmed'}, function (err) {
+            db.atomic('youform', 'forms', api_key, {'action': 'phone'}, function (err, form_updated) {
               if (err) {
                 next(err);
               } else {
+                logger.info('updated', form_updated);
                 next(null, form);
               }
             });
           } else {
             req.flash('code_error', true);
-            res.redirect('/confirm');
+            res.redirect('/confirm/sms');
           }
         },
-        function (form) {
+        function () {
           logger.info('code confirmed');
-          res.render('confirm', {form: form});
+          res.redirect('/confirm/sms/confirmed?api_key=' + api_key + '&token=' + token);
         }
       ], function (err) {
         if (err) {
@@ -488,9 +477,7 @@ module.exports = function (app, db, redis, prefix) {
       });
   };
 
-  
-
-  var confirm_email = function (req, res) {
+  var send_confirm_email = function (req, res) {
     var api_key = req.query.api_key
       , token = req.query.token
       ;
@@ -535,9 +522,9 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   // routes
-  app.get('/confirm', confirm);
-  app.post(prefix + '/confirm/sms', sms);
-  app.get(prefix + '/confirm/email', confirm_email);
+  app.get('/confirm/email', confirm_email);
+  app.post(prefix + '/confirm/sms', confirm_sms);
+  app.get(prefix + '/confirm/send-email', send_confirm_email);
 
   app.post(prefix + '/new-form', new_form);
   app.post(prefix + '/edit-form', edit_form);
