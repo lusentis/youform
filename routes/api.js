@@ -8,8 +8,8 @@ module.exports = function (app, db, redis, prefix) {
     , async = require('async')
     , coolog = require('coolog')
     , dns = require('dns')
-    , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
     , uuid = require('node-uuid')
+    , email_utils = require('../utils/email_utils.js')()
     , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
     , spam_list = require('../spam_list.json')
@@ -58,6 +58,9 @@ module.exports = function (app, db, redis, prefix) {
     , colours: req.body.colours
     };
 
+    form.country_code = req.body['country-code'].trim().replace(/\+/g, '');
+    form.phone = req.body.phone.trim().replace(/[\-]/g, '');
+
     if (!test_email(form.creator_email) || !test_email(form.sender_email) || !test_email(form.form_destination)) {
       req.flash('email_error', true);
       res.redirect('/signup');
@@ -70,8 +73,7 @@ module.exports = function (app, db, redis, prefix) {
 
     async.waterfall([
         function (next) {
-          form.country_code = req.body['country-code'].trim().replace(/\+/g, '');
-          form.phone = req.body.phone.trim().replace(/[\-]/g, '');
+          
           form_utils.save_form(form, null, function (err, data) {
             if (err) {
               next(err);
@@ -83,26 +85,19 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (next) {
-          res.render('email/signup', { form: form }, function (err, body) {
+          email_utils.send_form_info(form, res, function (err) {
             if (err) {
               next(err);
             } else {
-              next(null, body);
+              next(null);
             }
           });
         },
-        function (html_body) {
-          postmark.send({
-            'From': process.env.POSTMARK_FROM
-          , 'To': form.creator_email
-          , 'Subject': 'Signup youform: ' + form.form_name
-          , 'HtmlBody': html_body
-          }, function (err) {
-            if (err) {
-              logger.error('email error', err);
-            }
+        function () {
+          // send sms
+          utils.send_sms(form, function () {
+            res.redirect('/confirm/sms?api_key' + form._id + '&token=' + form.token);
           });
-          res.redirect('/success');
         }
       ], function (err) {
         if (err) {
@@ -246,25 +241,8 @@ module.exports = function (app, db, redis, prefix) {
           }
         });
       },
-      function (form, next) {
-        // render email template
-        res.render('email/email', { intro: form.form_intro, form: req.body }, function (err, body) {
-          if (err) {
-            next(err);
-          } else {
-            next(null, form, body);
-          }
-        });
-      },
-      function (form, html_body) {
-        // send email
-        postmark.send({
-          'From': process.env.POSTMARK_FROM
-        , 'To': form.form_destination
-        , 'ReplyTo': form.sender_email
-        , 'Subject': form.form_subject
-        , 'HtmlBody': html_body
-        }, function (err) {
+      function (form) {
+        email_utils.send_form(form, req.body, res, function (err) {
           if (err) {
             logger.error('Postmark error', err);
             logger.info('Redirect to', form.website_error_page);
@@ -274,7 +252,7 @@ module.exports = function (app, db, redis, prefix) {
             res.redirect(form.website_success_page);
           }
         });
-      }
+      },
     ], function (err) {
       if (err) {
         throw err;
@@ -304,7 +282,8 @@ module.exports = function (app, db, redis, prefix) {
 
   var edit_form = function (req, res) {
     var api_key = req.body.api_key
-      , token = req.body.token;
+      , token = req.body.token
+      , form;
 
     var data = {
       form_name: req.body['f-name']
@@ -320,9 +299,6 @@ module.exports = function (app, db, redis, prefix) {
     , colours: req.body.colours
     };
 
-    data.country_code = req.body['country-code'].trim().replace(/\+/g, '');
-    data.phone = req.body.phone.trim().replace(/[\-]/g, '');
-
     if (!api_key || !token) {
       res.redirect('/');
       return;
@@ -333,15 +309,6 @@ module.exports = function (app, db, redis, prefix) {
       res.redirect('/edit-form/' + api_key + '?token=' + token);
       return;
     }
-    if (!phone_regex.test(data.phone.trim()) || !country_code_regex.test(data.country_code.trim())) {
-      logger.error('phone format error', {
-        country_code: data.country_code
-      , phone: data.phone
-      });
-      req.flash('phone_error', true);
-      res.redirect('/edit-form/' + api_key + '?token=' + token);
-      return;
-    }
 
     async.waterfall([
         function (next) {
@@ -349,25 +316,47 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
-              next(null, result);
+              form = result;
+              if (token === form.token && form.confirmed === true) {
+                next(null);
+              } else {
+                res.redirect('/');
+              }
             }
           });
         },
-        function (form, next) {
-          if (token === form.token) {
-            // save
-            form_utils.save_form(data, api_key, function (err, result) {
+        function (next) {
+          if (data.form_destination.trim() !== form.form_destination) {
+            db.atomic('youform', 'forms', api_key, {'action': 'change_email'}, {email: data.form_destination}, function (err) {
               if (err) {
                 next(err);
               } else {
-                logger.info('Form updated', result);
-                req.flash('form_saved', true);
-                res.redirect('/stats/' + form._id + '?token=' + form.token);
+                email_utils.send_confirm_email(form, res, function (err) {
+                  if (err) {
+                    req.flash('send_email_error', true);
+                    res.redirect('/edit-form/' + api_key + '?token=' + token);
+                  } else {
+                    next(null, form);
+                  }
+                });
               }
             });
           } else {
-            res.redirect('/');
+            next(null);
           }
+        },
+        function (next) {
+          // save
+          form_utils.save_form(data, api_key, function (err, result) {
+            if (err) {
+              next(err);
+            } else {
+              form = result;
+              logger.info('Form updated', form);
+              req.flash('form_saved', true);
+              res.redirect('/stats/' + form._id + '?token=' + form.token);
+            }
+          });
         }
       ], function (err) {
         if (err) {
@@ -394,12 +383,11 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
-              if (form.token === token && email === form.creator_email) {
-                if (form.confirmed === true) {
-                  logger.info('Already confirmed');
-                  res.redirect('/');
-                } else {
+              if (form.token === token) {
+                if (email === form.form_destination_not_confirmed || email === form.form_destination) {
                   next(null, form);
+                } else {
+                  res.redirect('/');
                 }
               } else {
                 logger.info('Token/email error');
@@ -410,23 +398,27 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (form, next) {
-          if (!form.sms_sent) {
-            utils.send_sms(form, function (sent) {
-              next(null, form, sent);
+          if (form.confirmed) {
+            db.atomic('youform', 'forms', api_key, {'action': 'confirm_email'}, function (err) {
+              if (err) {
+                next(err);
+              } else {
+                res.render('confirmed');
+              }
             });
-          }
-        },
-        function (form, sent, next) {
-          db.atomic('youform', 'forms', api_key, {'action': 'sms_sent'}, function (err) {
-            if (err) {
-              next(err);
-            } else {
-              next(null, form);
+          } else {
+            if (!form.sms_sent) {
+              utils.send_sms(form, function (sent) {
+                db.atomic('youform', 'forms', api_key, {'action': 'sms_sent'}, function (err) {
+                  if (err) {
+                    next(err);
+                  } else {
+                    res.render('confirm', {form: form});
+                  }
+                });
+              });
             }
-          });
-        },
-        function (form) {
-          res.render('confirm', {form: form});
+          }
         }
       ], function (err) {
         if (err) {
@@ -435,7 +427,7 @@ module.exports = function (app, db, redis, prefix) {
       });
   };
 
-  var confirm_sms = function (req, res) {
+  var sms = function (req, res) {
     var api_key = req.body.api_key
       , email = req.body.email
       , token = req.body.token
@@ -496,9 +488,56 @@ module.exports = function (app, db, redis, prefix) {
       });
   };
 
+  
+
+  var confirm_email = function (req, res) {
+    var api_key = req.query.api_key
+      , token = req.query.token
+      ;
+
+    if (!api_key || !token) {
+      logger.error('apikey/token error');
+      res.redirect('/');
+    }
+
+    async.waterfall([
+        function (next) {
+          form_utils.get_form(api_key, function (err, form) {
+            if (err) {
+              next(err);
+            } else {
+              if (!form) {
+                logger.error('form not found');
+                res.redirect('/');
+                return;
+              } else {
+                next(null, form);
+              }
+            }
+          });
+        },
+        function (form, next) {
+          email_utils.send_confirm_email(form, res, function (err) {
+            if (err) {
+              next(err);
+            } else {
+              logger.info('email sent', form.form_destination);
+              logger.info('redirect to stats');
+              res.redirect('/stats/' + form._id + '?token=' + form.token);
+            }
+          });
+        }
+      ], function (err) {
+        if (err) {
+          throw err;
+        }
+      });
+  };
+
   // routes
   app.get('/confirm', confirm);
-  app.post('/confirm/sms', confirm_sms);
+  app.post(prefix + '/confirm/sms', sms);
+  app.get(prefix + '/confirm/email', confirm_email);
 
   app.post(prefix + '/new-form', new_form);
   app.post(prefix + '/edit-form', edit_form);

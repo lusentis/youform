@@ -10,7 +10,6 @@ module.exports = function (redis) {
     , querystring = require('querystring')
     , https = require('https')
     , logger = coolog.logger('utils.js')
-
     ;
 
   var rateLimitMiddleware
@@ -56,7 +55,7 @@ module.exports = function (redis) {
     data = querystring.stringify({
       'username': process.env.HQ_USERNAME
     , 'password': crypto.createHash('md5').update(process.env.HQ_PASSWORD).digest('hex')
-    , 'to': form.phone
+    , 'to': form.country_code + '' + form.phone
     , 'from': process.env.HQ_SENDER
     , 'message': message
     });

@@ -131,6 +131,35 @@ module.exports = function (app, db, prefix) {
     });
   };
 
+  var confirm_sms = function (req, res) {
+    var api_key = req.query.api_key
+      , token = req.query.token
+      ;
+
+    if (!api_key || !token) {
+      res.redirect('/');
+      return;
+    }
+
+    form_utils.get_form(api_key, function (err, form) {
+      if (err) {
+        throw err;
+      } else {
+        if (form.token === token) {
+          if (!form.confirmed) {
+            res.render('confirm', {form: form});
+          } else {
+            res.redirect('/');
+          }
+        } else {
+          logger.info('Token error');
+          req.flash('confirm_error', true);
+          res.redirect('/');
+        }
+      }
+    });
+  };
+
   // routes
   app.get(prefix + '/', index);
   app.get(prefix + '/success', signup_success);
@@ -139,4 +168,5 @@ module.exports = function (app, db, prefix) {
   app.get(prefix + '/delete-form/:api_key', delete_form);
   app.get(prefix + '/edit-form/:api_key', edit_form);
   app.get(prefix + '/stats/:api_key', stats);
+  app.get(prefix + '/confirm/sms', confirm_sms);
 };
