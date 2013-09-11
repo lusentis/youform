@@ -4,6 +4,10 @@ block content
   .content
     h2 Statistics
 
+    if !form.confirmed
+      p Your email is not confirmed. 
+        a(href='/confirm/email?api_key=#{form._id}&token=#{form.token}') Resend the confirmation email
+
     if saved === true
       p Form salvato
 
