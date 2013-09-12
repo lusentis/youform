@@ -5,7 +5,8 @@ YouForm is a tool for your static websites for sending forms to an e-mail addres
 
 ## Environment Variables
 
-``` Base settings
+Base settings
+```
 export SITE_SECRET= ...
 export DATABASE_URL= ...
 ```
@@ -14,13 +15,15 @@ export DATABASE_URL= ...
 ```
 export POSTMARK_API_KEY= ...
 export POSTMARK_FROM= ...
+```
 
 [Akismet](https://github.com/chrisfosterelli/akismet-api)
 ```
 export AKISMET_API_KEY= ...
 ```
 
-[HQ SMS][http://www.hqsms.com/]
+[HQ SMS](http://www.hqsms.com/)
+
 ```
 export HQ_USERNAME= ...
 export HQ_PASSWORD= ...
