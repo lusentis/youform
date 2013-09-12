@@ -2,78 +2,74 @@ extends layout
 
 block content
   .content
-    if !not_found
-      h2 Edit form
-      form.pure-form.pure-form-stacked(role='form', action='/api/edit-form/#{form._id}', method='post')
-        input(type='hidden', name='api_key', value='#{form._id}')
-        input(type='hidden', name='token', value='#{form.token}')
-        fieldset.pure-g
-          .pure-u-1-2
-            div(style='padding-right: 20px;')
-              .pure-control-group
-                label(for='email-crt') Your email
-                input.pure-input-1(type='email', name='email-crt', placeholder='Creator email address', value='#{form.creator_email}', required)
-              .pure-control-group
-                label(for='email-dest') Destination
-                input.pure-input-1(type='email', name='email-dest', placeholder='Destination email address', value='#{form.form_destination}', required)
-              .pure-control-group
-                label(for='w-name') Name of this form or website
-                input.pure-input-1(type='text', name='f-name', placeholder='Website name', value='#{form.form_name}', required)
-              .pure-control-group
-                label(for='w-url') Website Domain
-                input.pure-input-1(type='url', name='w-url', placeholder='Website url', value='#{form.website_url}', required)
-              .pure-control-group
-                label(for='w-success') Error page URL
-                input.pure-input-1(type='url', name='w-error-page', placeholder='Error page url', value='#{form.website_error_page}', required)
-              .pure-control-group
-                label(for='w-error') Success page URL
-                input.pure-input-1(type='url', name='w-success-page', placeholder='Success page url', value='#{form.website_success_page}', required)
-          
-          .pure-u-1-2
-            div(style='padding-left: 20px;')
-              .pure-control-group
-                label(for='snd-email') Reply-To email address
-                input.pure-input-1(type='email', name='snd-email', placeholder='Email sender', value='#{form.sender_email}', required)
-              .pure-control-group
-                label(for='snd-name') Sender Name
-                input.pure-input-1(type='text', name='snd-name', placeholder='Email sender name', value='#{form.sender_name}', required)
-              .pure-control-group
-                label(for='f-subject') Subject
-                input.pure-input-1(type='text', name='f-subject', placeholder='Email subject', value='#{form.form_subject}', required)
-              .pure-control-group
-                label(for='f-intro') A short text to send
-                textarea.pure-input-1(type='text', name='f-intro', placeholder='Introduction', rows='5', required) #{form.form_intro}
-              .pure-control-group
-                label(for='colours') Pick a color
-                span.radio-palette.radio-palette-1
-                  input(type='radio', name='colours', required, value='palette-1')
-                span.radio-palette.radio-palette-2
-                  input(type='radio', name='colours', required, value='palette-2')
-                span.radio-palette.radio-palette-3
-                  input(type='radio', name='colours', required, value='palette-3')
-                span.radio-palette.radio-palette-4
-                  input(type='radio', name='colours', required, value='palette-4')
+    h2 Edit form
+    form.pure-form.pure-form-stacked(role='form', action='/api/edit-form/#{form._id}', method='post')
+      input(type='hidden', name='api_key', value='#{form._id}')
+      input(type='hidden', name='token', value='#{form.token}')
+      fieldset.pure-g
+        .pure-u-1-2
+          div(style='padding-right: 20px;')
+            .pure-control-group
+              label(for='email-crt') Your email
+              input.pure-input-1(type='email', name='email-crt', placeholder='Creator email address', value='#{form.creator_email}', required)
+            .pure-control-group
+              label(for='email-dest') Destination
+              input.pure-input-1(type='email', name='email-dest', placeholder='Destination email address', value='#{form.form_destination}', required)
+            .pure-control-group
+              label(for='w-name') Name of this form or website
+              input.pure-input-1(type='text', name='f-name', placeholder='Website name', value='#{form.form_name}', required)
+            .pure-control-group
+              label(for='w-url') Website Domain
+              input.pure-input-1(type='url', name='w-url', placeholder='Website url', value='#{form.website_url}', required)
+            .pure-control-group
+              label(for='w-success') Error page URL
+              input.pure-input-1(type='url', name='w-error-page', placeholder='Error page url', value='#{form.website_error_page}', required)
+            .pure-control-group
+              label(for='w-error') Success page URL
+              input.pure-input-1(type='url', name='w-success-page', placeholder='Success page url', value='#{form.website_success_page}', required)
+        
+        .pure-u-1-2
+          div(style='padding-left: 20px;')
+            .pure-control-group
+              label(for='snd-email') Reply-To email address
+              input.pure-input-1(type='email', name='snd-email', placeholder='Email sender', value='#{form.sender_email}', required)
+            .pure-control-group
+              label(for='snd-name') Sender Name
+              input.pure-input-1(type='text', name='snd-name', placeholder='Email sender name', value='#{form.sender_name}', required)
+            .pure-control-group
+              label(for='f-subject') Subject
+              input.pure-input-1(type='text', name='f-subject', placeholder='Email subject', value='#{form.form_subject}', required)
+            .pure-control-group
+              label(for='f-intro') A short text to send
+              textarea.pure-input-1(type='text', name='f-intro', placeholder='Introduction', rows='5', required) #{form.form_intro}
+            .pure-control-group
+              label(for='colours') Pick a color
+              span.radio-palette.radio-palette-1
+                input(type='radio', name='colours', required, value='palette-1')
+              span.radio-palette.radio-palette-2
+                input(type='radio', name='colours', required, value='palette-2')
+              span.radio-palette.radio-palette-3
+                input(type='radio', name='colours', required, value='palette-3')
+              span.radio-palette.radio-palette-4
+                input(type='radio', name='colours', required, value='palette-4')
 
-          .pure-u-1
-            .spacer
-            .pure-controls
-              button.pure-button.pure-button-success(type='submit') Save
+        .pure-u-1
+          .spacer
+          .pure-controls
+            button.pure-button.pure-button-success(type='submit') Save
 
-          block scripts
-            script.
-              document.querySelector('.radio-palette.radio-#{form.colours}').querySelector('input').setAttribute('checked', 'checked');
-              document.querySelector('.radio-palette.radio-#{form.colours}').classList.add('active');
+        block scripts
+          script.
+            document.querySelector('.radio-palette.radio-#{form.colours}').querySelector('input').setAttribute('checked', 'checked');
+            document.querySelector('.radio-palette.radio-#{form.colours}').classList.add('active');
 
-              Array.prototype.forEach.call(document.querySelectorAll('.radio-palette'), function (el) {
-                
-                el.addEventListener('click', function () {
-                  document.querySelector('.radio-palette.active input').removeAttribute('checked');
-                  document.querySelector('.radio-palette.active').classList.remove('active');
-
-                  el.querySelector('input').setAttribute('checked', 'checked');
-                  el.classList.add('active');
-                });
-              });
+            Array.prototype.forEach.call(document.querySelectorAll('.radio-palette'), function (el) {
               
-    else
-      p Form not found
+              el.addEventListener('click', function () {
+                document.querySelector('.radio-palette.active input').removeAttribute('checked');
+                document.querySelector('.radio-palette.active').classList.remove('active');
+
+                el.querySelector('input').setAttribute('checked', 'checked');
+                el.classList.add('active');
+              });
+            });

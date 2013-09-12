@@ -38,10 +38,11 @@ module.exports = function (redis) {
   };
 
   check_origin = function (req, form) {
-    var origin =  req.headers.referer;
-    logger.debug({
-      'origin': origin
-    , 'website_url': form.website_url
+    var origin =  req.headers.referer || req.headers.origin;
+    logger.info('origin', {
+      referer: req.headers.referer
+    , origin: req.headers.origin
+    , website_url: form.website_url
     });
     return (origin && (origin.has(form.website_url) || form.website_url.has(origin)));
   };
@@ -75,7 +76,7 @@ module.exports = function (redis) {
         response += chunk;
       });
       res.on('end', function () {
-        logger.info('HQSMS response', response);
+        logger.ok('HQSMS response', response);
         callback(response.has('ERROR'));
       });
     });

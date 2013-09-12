@@ -5,10 +5,11 @@ module.exports = function (app, db, prefix) {
 
   var async = require('async')
     , coolog = require('coolog')
-    , logger = coolog.logger('site.js')
-    , log_utils = require('../utils/log_utils.js')(db)
-    , form_utils = require('../utils/form_utils.js')(db)
     , moment = require('moment')
+    , logger = coolog.logger('site.js')
+    , error_utils = require('../utils/error_utils.js')()
+    , form_utils = require('../utils/form_utils.js')(db)
+    , log_utils = require('../utils/log_utils.js')(db)
     ;
 
   var index = function (req, res) {
@@ -31,25 +32,35 @@ module.exports = function (app, db, prefix) {
 
   var delete_form = function (req, res) {
     var api_key = req.param('api_key', null)
-      , token = req.query.token;
-    if (api_key && token) {
-      form_utils.get_form(api_key, function (err, form) {
-        if (err) {
-          throw err;
-        } else {
-          var not_found = (!form || form.token !== token);
-          logger.info('form not found', not_found);
-          res.render('delete', {not_found: not_found, form: form});
-        }
-      });
-    } else {
-      res.render('delete', {not_found: true});
+      , token = req.query.token
+      ;
+
+    if (!api_key || !token) {
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
+      return;
     }
+
+    form_utils.get_form(api_key, function (err, form) {
+      if (err) {
+        throw err;
+      } else {
+        var not_found = (!form || form.token !== token);
+        logger.info('form not found', not_found);
+        res.render('delete', {not_found: not_found, form: form});
+      }
+    });
   };
 
   var stats = function (req, res) {
     var api_key = req.param('api_key', null)
-      , token = req.query.token;
+      , token = req.query.token
+      ;
+
+    if (!api_key || !token) {
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
+      return;
+    }
+
     async.waterfall([
         function (next) {
           form_utils.get_form(api_key, function (err, form) {
@@ -66,7 +77,8 @@ module.exports = function (app, db, prefix) {
         },
         function (form, next) {
           if (!form) {
-            next(null, null, null);
+            req.flash('form_not_found', true);
+            res.redirect('/404');
           } else {
             log_utils.get_stats(api_key, function (err, stats) {
               if (err) {
@@ -87,7 +99,7 @@ module.exports = function (app, db, prefix) {
           }
           var form_saved = req.flash('form_saved').length > 0;
           var form_save_error = req.flash('form_save_error').length > 0;
-          form.created_at = moment(form.created_at).format('YYYY-MM-DD')
+          form.created_at = moment(form.created_at).format('YYYY-MM-DD');
           res.render('stats', {
             not_found: not_found
           , form: form
@@ -114,11 +126,11 @@ module.exports = function (app, db, prefix) {
 
   var edit_form = function (req, res) {
     var api_key = req.param('api_key', null)
-      , token = req.query.token;
+      , token = req.query.token
+      ;
 
     if (!api_key || !token) {
-      req.flash('param_error', true);
-      res.redirect('/');
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
 
@@ -126,9 +138,11 @@ module.exports = function (app, db, prefix) {
       if (err) {
         throw err;
       } else {
-        var not_found = (!form || form.token !== token);
-        logger.info('form not found', not_found);
-        res.render('edit', {not_found: not_found, form: form});
+        if (!form || form.token !== token) {
+          error_utils.params_error({api_key: api_key, token: token}, req, res);
+          return;
+        }
+        res.render('edit', {form: form});
       }
     });
   };
@@ -139,7 +153,7 @@ module.exports = function (app, db, prefix) {
       ;
 
     if (!api_key || !token) {
-      res.redirect('/');
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
 
@@ -154,9 +168,8 @@ module.exports = function (app, db, prefix) {
             res.redirect('/');
           }
         } else {
-          logger.info('Token error');
-          req.flash('confirm_error', true);
-          res.redirect('/');
+          error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
+          return;
         }
       }
     });
@@ -168,7 +181,7 @@ module.exports = function (app, db, prefix) {
       ;
 
     if (!api_key || !token) {
-      res.redirect('/');
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
 
@@ -184,9 +197,8 @@ module.exports = function (app, db, prefix) {
             res.redirect('/');
           }
         } else {
-          logger.info('Token error');
-          req.flash('confirm_error', true);
-          res.redirect('/');
+          error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
+          return;
         }
       }
     });
@@ -198,7 +210,7 @@ module.exports = function (app, db, prefix) {
       ;
 
     if (!api_key || !token) {
-      res.redirect('/');
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
 
@@ -213,12 +225,33 @@ module.exports = function (app, db, prefix) {
             res.redirect('/');
           }
         } else {
-          logger.info('Token error');
-          req.flash('confirm_error', true);
-          res.redirect('/');
+          error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
+          return;
         }
       }
     });
+  };
+
+  var error_page = function (req, res) {
+    var origin_error = req.flash('origin_error');
+    if (origin_error.length > 0) {
+      var error = 'origin';
+      res.render('errors/index', {error: error});
+    } else {
+      res.redirect('/');
+    }
+  };
+
+  var form_not_found = function (req, res) {
+    var not_found = req.flash('form_not_found')
+      , param_error = req.flash('param_error')
+      ;
+
+    if (param_error.length > 0 || not_found.length > 0) {
+      res.render('errors/404');
+    } else {
+      res.redirect('/');
+    }
   };
 
   // routes
@@ -232,4 +265,7 @@ module.exports = function (app, db, prefix) {
   app.get(prefix + '/confirm/sms/:api_key', confirm_sms);
   app.get(prefix + '/confirm/sms/confirmed/:api_key', confirmed_sms);
   app.get(prefix + '/confirm/email/confirmed/:api_key', confirmed_email);
+  // errors
+  app.get(prefix + '/error', error_page);
+  app.get(prefix + '/404', form_not_found);
 };

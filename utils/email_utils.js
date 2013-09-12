@@ -89,7 +89,7 @@ module.exports = function () {
             if (err) {
               next(err);
             } else {
-              next(null, form, body);
+              next(null, body);
             }
           });
         },

@@ -3,8 +3,7 @@
 
 module.exports = function (db) {
   
-  var async = require('async')
-    , coolog = require('coolog')
+  var coolog = require('coolog')
     , logger = coolog.logger('form_utils.js')
     , save_form
     , get_form
@@ -17,13 +16,25 @@ module.exports = function (db) {
     }
     form.action = 'update';
     db.atomic('youform', 'forms', api_key, form, function (err, body) {
-      callback(err, body);
+      if (err) {
+        callback(err);
+      } else {
+        logger.ok({
+          api_key: api_key
+        , message: 'form saved'
+        });
+        callback(null, body);
+      }
     });
   };
 
-  get_form = function (form_id, callback) {
-    db.get(form_id, {include_docs: true}, function (err, body) {
+  get_form = function (api_key, callback) {
+    db.get(api_key, {include_docs: true}, function (err, body) {
       if (err && err.status_code === 404) {
+        logger.info({
+          api_key: api_key
+        , message: 'form not found'
+        });
         body = null;
         err = null;
       }
@@ -31,47 +42,21 @@ module.exports = function (db) {
     });
   };
 
-  delete_form = function (api_key, token, callback) {
-    async.waterfall([
-        function (next) {
-          db.get(api_key, { include_docs: true }, function (err, form) {
-            if (err) {
-              // form not found
-              if (err.status_code === 404) {
-                logger.info('Form not found');
-                callback(null, false);
-              } else {
-                callback(err);
-              }
-            } else {
-              // check token
-              if (form.token !== token) {
-                logger.info('Token error');
-                callback(null, false);
-              } else {
-                next(null, form);
-              }
-            }
-          });
-        },
-        function (form, next) {
-          var data = {
-            'action': 'delete'
-          };
-          data.action = 'update';
-          db.atomic('youform', 'forms', api_key, data, function (err) {
-            if (err) {
-              next(err);
-            } else {
-              callback(null, true);
-            }
-          });
-        }
-      ], function (err) {
-        if (err) {
-          throw err;
-        }
-      });
+  delete_form = function (form, callback) {
+    var data = {
+      action: 'delete'
+    };
+    db.atomic('youform', 'forms', form._id, data, function (err) {
+      if (err) {
+        throw err;
+      } else {
+        logger.ok({
+          api_key: form._id
+        , message: 'form deleted'
+        });
+        callback(null, true);
+      }
+    });
   };
  
   return {

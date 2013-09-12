@@ -10,6 +10,7 @@ module.exports = function (app, db, redis, prefix) {
     , dns = require('dns')
     , uuid = require('node-uuid')
     , email_utils = require('../utils/email_utils.js')()
+    , error_utils = require('../utils/error_utils.js')()
     , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
     , spam_list = require('../spam_list.json')
@@ -73,7 +74,6 @@ module.exports = function (app, db, redis, prefix) {
 
     async.series([
         function (next) {
-          
           form_utils.save_form(form, null, function (err, data) {
             if (err) {
               next(err);
@@ -98,6 +98,8 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
+              logger.info('email sent', form.form_destination_not_confirmed);
+              req.flash('waiting_confirm', true);
               next(null);
             }
           });
@@ -148,15 +150,14 @@ module.exports = function (app, db, redis, prefix) {
                   ret(err);
                 }
               } else {
-                logger.error(domain + ' has your IP on it\'s blacklist!');
+                logger.error(domain + ' has your IP on it\'s blacklist');
                 next(true);
               }
             });
           };
           async.detect(spam_list, host, function (result) {
-            logger.debug(result);
             result = result !== undefined;
-            logger.debug('Check Spam', result);
+            logger.debug('check Spam', result);
             ret(null, result);
           });
         }
@@ -174,6 +175,12 @@ module.exports = function (app, db, redis, prefix) {
 
   var form = function (req, res) {
     var api_key = req.param('api_key', null);
+
+    if (!api_key) {
+      error_utils.param_errors({api_key: api_key}, req, res);
+      return;
+    }
+
     async.waterfall([
       function (next) {
         // save connection
@@ -194,45 +201,35 @@ module.exports = function (app, db, redis, prefix) {
         // get form
         form_utils.get_form(api_key, function (err, result) {
           if (!result) {
-            logger.error({
-              error: true
-            , form_id: api_key
-            , description: 'Form not found'
-            });
-            res.json({
-              error: true
-            , description: 'Form not found. Check your API key'
-            });
-          } else {
-            // check origin url
-            if (utils.check_origin(req, result)) {
-              logger.debug('results', result);
-              if (result.deleted === true) {
-                // deleted
-                logger.error({
-                  error: true
-                , form_id: api_key
-                , description: 'Form deleted'
-                });
-                res.json({
-                  error: true
-                , description: 'Form deleted.'
-                });
-              } else {
-                next(null, result);
-                
-              }
-            } else {
+            error_utils.form_not_found(api_key, req, res);
+            return;
+          }
+          // check origin url
+          if (utils.check_origin(req, result)) {
+            logger.debug('results', result);
+            if (result.deleted === true) {
+              // deleted
               logger.error({
                 error: true
               , form_id: api_key
-              , description: 'Origin error'
+              , description: 'Form deleted'
               });
               res.json({
                 error: true
-              , description: 'Origin error.'
+              , description: 'Form deleted.'
               });
+            } else {
+              next(null, result);
+              
             }
+          } else {
+            logger.error({
+              error: true
+            , form_id: api_key
+            , description: 'Origin error'
+            });
+            req.flash('origin_error', true);
+            res.redirect('/error');
           }
         });
       },
@@ -271,28 +268,56 @@ module.exports = function (app, db, redis, prefix) {
   
   var delete_form = function (req, res) {
     var api_key = req.param('api_key', null)
-      , token = req.body.token;
+      , token = req.body.token
+      ;
     
-    if (api_key && token) {
-      req.flash('form_deleted', false);
-      res.redirect('/deleted');
+    if (!api_key || !token) {
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
 
-    form_utils.delete_form(api_key, token, function (err, deleted) {
-      if (err) {
-        throw err;
-      } else {
-        req.flash('form_deleted', deleted);
-        res.redirect('/deleted');
-      }
-    });
+    async.waterfall([
+        function (next) {
+          db.get(api_key, { include_docs: true }, function (err, form) {
+            if (err) {
+              // form not found
+              if (err.status_code === 404) {
+                error_utils.form_not_found(api_key, req, res);
+                return;
+              }
+              next(err);
+            } else {
+              // check token
+              if (form.token !== token) {
+                error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
+                return;
+              }
+              next(null, form);
+            }
+          });
+        },
+        function (form, next) {
+          form_utils.delete_form(form, function (err) {
+            if (err) {
+              next(err);
+            } else {
+              req.flash('form_deleted', true);
+              res.redirect('/deleted');
+            }
+          });
+        }
+      ], function (err) {
+        if (err) {
+          throw err;
+        }
+      });
   };
 
   var edit_form = function (req, res) {
     var api_key = req.param('api_key', null)
       , token = req.body.token
-      , form;
+      , form
+      ;
 
     var data = {
       form_name: req.body['f-name']
@@ -309,9 +334,10 @@ module.exports = function (app, db, redis, prefix) {
     };
 
     if (!api_key || !token) {
-      res.redirect('/');
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
+
     if (!test_email(data.creator_email) || !test_email(data.sender_email) || !test_email(data.form_destination)) {
       logger.error('emails format error');
       req.flash('email_error', true);
@@ -345,6 +371,7 @@ module.exports = function (app, db, redis, prefix) {
                     req.flash('send_email_error', true);
                     res.redirect('/edit-form/' + api_key + '?token=' + token);
                   } else {
+                    logger.info('email sent', form.form_destination_not_confirmed);
                     req.flash('waiting_confirm', true);
                     next(null, form);
                   }
@@ -382,7 +409,7 @@ module.exports = function (app, db, redis, prefix) {
       ;
 
     if (!api_key || !email_regex.test(email) || !token) {
-      res.redirect('/signup');
+      error_utils.params_error({api_key: api_key, token: token, email: email}, req, res);
       return;
     }
 
@@ -394,9 +421,6 @@ module.exports = function (app, db, redis, prefix) {
               next(err);
             } else {
               if (form.token === token) {
-                logger.debug(form.form_destination_not_confirmed);
-                logger.debug(form.form_destination);
-                logger.debug(email);
                 if (email === form.form_destination_not_confirmed && form.email_confirmed === false) {
                   next(null, form);
                 } else {
@@ -431,10 +455,10 @@ module.exports = function (app, db, redis, prefix) {
       , token = req.body.token
       , code = req.body.code
       ;
-    
+
     if (!api_key || !token || !code) {
-      req.flash('confirm_error', true);
-      res.redirect('/');
+      error_utils.param_errors({api_key: api_key, token: token, code: code}, req, res);
+      return;
     }
 
     async.waterfall([
@@ -493,8 +517,8 @@ module.exports = function (app, db, redis, prefix) {
       ;
 
     if (!api_key || !token) {
-      logger.error('api key - token error');
-      res.redirect('/');
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
+      return;
     }
 
     async.waterfall([
@@ -504,12 +528,10 @@ module.exports = function (app, db, redis, prefix) {
               next(err);
             } else {
               if (!form) {
-                logger.error('form not found');
-                res.redirect('/');
+                error_utils.form_not_found(api_key, req, res);
                 return;
-              } else {
-                next(null, form);
               }
+              next(null, form);
             }
           });
         },
