@@ -6,7 +6,6 @@ module.exports = function () {
   var async = require('async')
     , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
     , coolog = require('coolog')
-    , crypto = require('crypto')
     , querystring = require('querystring')
     , https = require('https')
     ;
@@ -128,7 +127,7 @@ module.exports = function () {
       ;
     data = querystring.stringify({
       'username': process.env.HQ_USERNAME
-    , 'password': crypto.createHash('md5').update(process.env.HQ_PASSWORD).digest('hex')
+    , 'password': process.env.HQ_PASSWORD
     , 'to': form.country_code + '' + form.phone
     , 'from': process.env.HQ_SENDER
     , 'message': message

@@ -530,7 +530,7 @@ module.exports = function (app, db, redis, prefix) {
                 , now: now.format('YYYY-MM-DD')
                 , sms_date: moment(time).format('YYYY-MM-DD')
                 });
-                res.redirect('/');
+                res.redirect('/stats/' + form._id + '?token=' + form.token);
               }
             }
           });

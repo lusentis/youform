@@ -18,7 +18,7 @@ module.exports = function (redis) {
 
   var akismet_client = akismet.client({
     key  : process.env.AKISMET_API_KEY,
-    blog : 'http://youform.me'
+    blog : 'http:/www.youform.me'
   });
 
   var rateLimitMiddleware = rate.middleware({
