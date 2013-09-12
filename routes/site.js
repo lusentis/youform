@@ -8,6 +8,7 @@ module.exports = function (app, db, prefix) {
     , logger = coolog.logger('site.js')
     , log_utils = require('../utils/log_utils.js')(db)
     , form_utils = require('../utils/form_utils.js')(db)
+    , moment = require('moment')
     ;
 
   var index = function (req, res) {
@@ -86,6 +87,7 @@ module.exports = function (app, db, prefix) {
           }
           var form_saved = req.flash('form_saved').length > 0;
           var form_save_error = req.flash('form_save_error').length > 0;
+          form.created_at = moment(form.created_at).format('YYYY-MM-DD')
           res.render('stats', {
             not_found: not_found
           , form: form
