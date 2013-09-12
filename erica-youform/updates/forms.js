@@ -56,7 +56,7 @@ function(doc, req) {
       doc.confirmed = true;
     }
   } else if (data.action === 'change_email') {
-    doc.form_destination_not_confirmed = doc.email.trim();
+    doc.form_destination_not_confirmed = data.email.trim();
     doc.email_confirmed = false;
   } else if (data.action === 'confirm_email') {
     doc.form_destination = doc.form_destination_not_confirmed;

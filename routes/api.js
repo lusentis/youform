@@ -345,6 +345,7 @@ module.exports = function (app, db, redis, prefix) {
                     req.flash('send_email_error', true);
                     res.redirect('/edit-form/' + api_key + '?token=' + token);
                   } else {
+                    req.flash('waiting_confirm', true);
                     next(null, form);
                   }
                 });
@@ -492,7 +493,7 @@ module.exports = function (app, db, redis, prefix) {
       ;
 
     if (!api_key || !token) {
-      logger.error('apikey/token error');
+      logger.error('api key - token error');
       res.redirect('/');
     }
 
@@ -517,8 +518,9 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
-              logger.info('email sent', form.form_destination);
+              logger.info('email sent', form.form_destination_not_confirmed);
               logger.info('redirect to stats');
+              req.flash('waiting_confirm', true);
               res.redirect('/stats/' + form._id + '?token=' + form.token);
             }
           });
@@ -531,14 +533,12 @@ module.exports = function (app, db, redis, prefix) {
   };
 
   // routes
-  app.get('/confirm/email/:api_key', confirm_email);
   app.post(prefix + '/confirm/sms/:api_key', confirm_sms);
   app.get(prefix + '/confirm/send-email/:api_key', send_confirm_email);
-
   app.post(prefix + '/new-form', new_form);
   app.post(prefix + '/edit-form/:api_key', edit_form);
   app.post(prefix + '/delete-form/:api_key', delete_form);
-  //app.get(prefix + '/form/:api_key', utils.rateLimit(), form);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form);
-  
+
+  app.get('/confirm/email/:api_key', confirm_email);
 };

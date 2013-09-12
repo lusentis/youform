@@ -27,7 +27,7 @@ module.exports = function () {
           // send email
           postmark.send({
             'From': process.env.POSTMARK_FROM
-          , 'To': form.form_destination
+          , 'To': form.form_destination_not_confirmed
           , 'Subject': 'Youform: confirm your email address'
           , 'HtmlBody': html_body
           }, function (err) {
