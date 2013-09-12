@@ -1,7 +1,11 @@
 doctype 5
 html
   body
-    div API KEY: #{form._id}
+    h3 YouForm
     div
+      p Copy the following url and paste it in your form's action attribute:
+        a(href='http://www.youform.me/api/form/#{form._id}') http://www.youform.me/api/form/#{form._id}
+    div#stats
       a(href='http://www.youform.me/stats/#{form._id}?token=#{form.token}') Statistics
+    div#del
       a(href='http://www.youform.me/delete-form/#{form._id}?token=#{form.token}') Delete form

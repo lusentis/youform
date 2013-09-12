@@ -12,20 +12,11 @@ block content
       p Your phone is not confirmed!<br>If you have not received the confirmation SMS: 
         a(href='/api/confirm/send-sms/#{form._id}?token=#{form.token}') Resend confirmation SMS
 
-    if saved === true
-      p Form salvato
-
-    if saved === false
-      p Errore. Form non salvato
-
-
-    if not_found
-      p Form not found. Check your params
-    else
-      p API KEY: #{form._id}
-      p Form: #{form.form_name}
-      if form.deleted === true
-        p FORM ELIMINATO
+    p API KEY: #{form._id}
+    p Form: #{form.form_name}
+    if form.deleted === true
+      p This form has been deleted.
+        
       else
         p Website: 
           a(href=form.website_url) #{form.website_url}
@@ -38,5 +29,5 @@ block content
             for value, month in row
               p #{month}: #{value}
 
-      a.pure-button(href='/edit-form/#{form._id}?token=#{form.token}') Edit form
-      a.pure-button(href='/delete-form/#{form._id}?token=#{form.token}') Delete form
+        a.pure-button(href='/edit-form/#{form._id}?token=#{form.token}') Edit form
+        a.pure-button(href='/delete-form/#{form._id}?token=#{form.token}') Delete form
