@@ -8,7 +8,7 @@ block content
       p Your email is not confirmed!<br>If you have not received the confirmation email: 
         a(href='/api/confirm/send-email/#{form._id}?token=#{form.token}') Resend confirmation email
 
-    if !phone_confirmed
+    if !form.phone_confirmed
       p Your phone is not confirmed!<br>If you have not received the confirmation SMS: 
         a(href='/api/confirm/send-sms/#{form._id}?token=#{form.token}') Resend confirmation SMS
 
