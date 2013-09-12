@@ -504,6 +504,10 @@ module.exports = function (app, db, redis, prefix) {
                 error_utils.form_not_found(api_key, req, res);
                 return;
               }
+              if (form.confirmed_phone === true) {
+                res.redirect('/');
+                return;
+              }
               next(null, form);
             }
           });

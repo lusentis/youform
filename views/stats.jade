@@ -5,10 +5,12 @@ block content
     h2 Statistics
 
     if !form.confirmed
-      p Your email is not confirmed. 
-        a(href='/api/confirm/send-email/#{form._id}?token=#{form.token}') Resend the confirmation email
+      p Your email is not confirmed!<br>If you have not received the confirmation email: 
+        a(href='/api/confirm/send-email/#{form._id}?token=#{form.token}') Resend confirmation email
 
-    a(href='/api/confirm/send-sms/#{form._id}?token=#{form.token}') Resend the confirmation sms
+    if !phone_confirmed
+      p Your phone is not confirmed!<br>If you have not received the confirmation SMS: 
+        a(href='/api/confirm/send-sms/#{form._id}?token=#{form.token}') Resend confirmation SMS
 
     if saved === true
       p Form salvato
