@@ -5,11 +5,9 @@ module.exports = function () {
   
   var coolog = require('coolog')
     , logger = coolog.logger('error_utils.js')
-    , params_error
-    , form_not_found
     ;
 
-  params_error = function (params, req, res, message) {
+  var params_error = function (params, req, res, message) {
     var err = {
       error: true
     , message: message || 'params error'
@@ -29,7 +27,7 @@ module.exports = function () {
     res.redirect('/404');
   };
 
-  form_not_found = function (api_key, req, res) {
+  var form_not_found = function (api_key, req, res) {
     logger.error({
       error: true
     , form_id: api_key

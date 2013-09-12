@@ -4,16 +4,13 @@
 
 module.exports = function (app, db, redis, prefix) {
 
-  var akismet = require('akismet-api')
-    , async = require('async')
+  var async = require('async')
     , coolog = require('coolog')
-    , dns = require('dns')
     , uuid = require('node-uuid')
-    , email_utils = require('../utils/email_utils.js')()
+    , comm_utils = require('../utils/comm_utils.js')()
     , error_utils = require('../utils/error_utils.js')()
     , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
-    , spam_list = require('../spam_list.json')
     , utils = require('../utils/utils.js')(redis)
     , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
     , phone_regex = /^[0-9\-().\s]{10,15}$/
@@ -21,20 +18,6 @@ module.exports = function (app, db, redis, prefix) {
     ;
   
   var logger = coolog.logger('api.js');
-
-  var akismet_client = akismet.client({
-    key  : process.env.AKISMET_API_KEY,
-    blog : 'http://youform.me'
-  });
-
-  //akismet_client.verifyKey(function (err, valid) {
-  //  if (valid) {
-  //    logger.info('Valid key!');
-  //  } else {
-  //    logger.err('Key validation failed...');
-  //    logger.err(err.message);
-  //  }
-  //});
 
   var test_email = function (email) {
     return email_regex.test(email) && email.length < 100;
@@ -85,7 +68,7 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (next) {
-          email_utils.send_form_info(form, res, function (err) {
+          comm_utils.send_form_info(form, res, function (err) {
             if (err) {
               next(err);
             } else {
@@ -94,7 +77,7 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (next) {
-          email_utils.send_confirm_email(form, res, function (err) {
+          comm_utils.send_confirm_email(form, res, function (err) {
             if (err) {
               next(err);
             } else {
@@ -106,69 +89,13 @@ module.exports = function (app, db, redis, prefix) {
         },
         function () {
           // send sms
-          utils.send_sms(form, function () {
+          comm_utils.send_sms(form, function () {
             res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
           });
         }
       ], function (err) {
         if (err) {
           throw err;
-        }
-      });
-  };
-
-  var spam_filter = function (req, res, callback) {
-    var ip = req.ip.split('.').reverse().join('.');
-    async.parallel([
-        function (ret) {
-          // Akismet filter
-          akismet_client.checkSpam({
-            user_ip : req.ip,
-            user_agent : req.headers['user-agent'],
-            referer : req.headers.referer
-          }, function (err, spam) {
-            if (err) {
-              ret(err);
-            }
-            if (spam) {
-              logger.error({
-                spam: true
-              , user_ip: req.ip
-              , referrer: req.headers.referer
-              });
-            }
-            ret(null, spam);
-          });
-        },
-        function (ret) {
-          var host = function (item, next) {
-            dns.resolve4(ip + '.' + item.dns, function (err, domain) {
-              if (err) {
-                if (err.code === 'ENOTFOUND') {
-                  next(false);
-                } else {
-                  ret(err);
-                }
-              } else {
-                logger.error(domain + ' has your IP on it\'s blacklist');
-                next(true);
-              }
-            });
-          };
-          async.detect(spam_list, host, function (result) {
-            result = result !== undefined;
-            logger.debug('check Spam', result);
-            ret(null, result);
-          });
-        }
-      ],
-      function (err, results) {
-        if (err) {
-          callback(err);
-        } else {
-          var spam = (results[0] || results[1]);
-          logger.info('Spam', spam);
-          callback(null, spam);
         }
       });
   };
@@ -234,7 +161,7 @@ module.exports = function (app, db, redis, prefix) {
         });
       },
       function (form, next) {
-        spam_filter(req, res, function (err, spam) {
+        utils.spam_filter(req, res, function (err, spam) {
           if (err) {
             next(err);
           } else {
@@ -248,7 +175,7 @@ module.exports = function (app, db, redis, prefix) {
         });
       },
       function (form) {
-        email_utils.send_form(form, req.body, res, function (err) {
+        comm_utils.send_form(form, req.body, res, function (err) {
           if (err) {
             logger.error('Postmark error', err);
             logger.info('Redirect to', form.website_error_page);
@@ -366,7 +293,7 @@ module.exports = function (app, db, redis, prefix) {
               if (err) {
                 next(err);
               } else {
-                email_utils.send_confirm_email(form, res, function (err) {
+                comm_utils.send_confirm_email(form, res, function (err) {
                   if (err) {
                     req.flash('send_email_error', true);
                     res.redirect('/edit-form/' + api_key + '?token=' + token);
@@ -536,7 +463,7 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (form, next) {
-          email_utils.send_confirm_email(form, res, function (err) {
+          comm_utils.send_confirm_email(form, res, function (err) {
             if (err) {
               next(err);
             } else {

@@ -6,9 +6,12 @@ module.exports = function () {
   var async = require('async')
     , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
     , coolog = require('coolog')
+    , crypto = require('crypto')
+    , querystring = require('querystring')
+    , https = require('https')
     ;
 
-  var logger = coolog.logger('email_utils.js');
+  var logger = coolog.logger('comm_utils.js');
 
   var send_confirm_email = function (form, res, callback) {
     async.waterfall([
@@ -117,9 +120,47 @@ module.exports = function () {
       });
   };
 
+  var send_sms = function (form, callback) {
+    var message = 'Youform.me confirmation code: ' + form.code
+      , response = ''
+      , data
+      , post_options
+      ;
+    data = querystring.stringify({
+      'username': process.env.HQ_USERNAME
+    , 'password': crypto.createHash('md5').update(process.env.HQ_PASSWORD).digest('hex')
+    , 'to': form.country_code + '' + form.phone
+    , 'from': process.env.HQ_SENDER
+    , 'message': message
+    });
+    post_options = {
+      host: 'ssl.hqsms.com',
+      port: '443',
+      path: '/sms.do',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': data.length
+      }
+    };
+    var hq_request = https.request(post_options, function (res) {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        response += chunk;
+      });
+      res.on('end', function () {
+        logger.ok('HQSMS response', response);
+        callback(response.has('ERROR'));
+      });
+    });
+    hq_request.write(data);
+    hq_request.end();
+  };
+
   return {
     'send_form': send_form
   , 'send_form_info': send_form_info
   , 'send_confirm_email': send_confirm_email
+  , 'send_sms': send_sms
   };
 };

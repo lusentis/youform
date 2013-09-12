@@ -3,19 +3,15 @@
 
 module.exports = function (db) {
   
-  var moment = require('moment')
-    , save_log
-    , get_logs
-    , get_stats
-    ;
+  var moment = require('moment');
 
-  save_log = function (log, callback) {
+  var save_log = function (log, callback) {
     db.atomic('youform', 'logs', undefined, log, function (err, body) {
       callback(err, body);
     });
   };
 
-  get_logs = function (api_key, callback) {
+  var get_logs = function (api_key, callback) {
     db.view('youform', 'logs', {
       key: api_key
     , include_docs: true
@@ -24,7 +20,7 @@ module.exports = function (db) {
     });
   };
 
-  get_stats = function (api_key, callback) {
+  var get_stats = function (api_key, callback) {
     get_logs(api_key, function (err, result) {
       if (err) {
         callback(err, null);

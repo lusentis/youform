@@ -4,22 +4,24 @@
 module.exports = function (redis) {
 
   // npm modules
-  var rate = require('express-rate')
+  var async = require('async')
+    , akismet = require('akismet-api')
+    , rate = require('express-rate')
     , coolog = require('coolog')
-    , crypto = require('crypto')
-    , querystring = require('querystring')
-    , https = require('https')
-    , logger = coolog.logger('utils.js')
+    , dns = require('dns')
+    , spam_list = require('../spam_list.json')
     ;
 
-  var rateLimitMiddleware
-    , rateLimit
-    , check_origin
-    , send_sms
-    , rl_client = redis.createClient()
-    ;
+  var logger = coolog.logger('utils.js');
 
-  rateLimitMiddleware = rate.middleware({
+  var rl_client = redis.createClient();
+
+  var akismet_client = akismet.client({
+    key  : process.env.AKISMET_API_KEY,
+    blog : 'http://youform.me'
+  });
+
+  var rateLimitMiddleware = rate.middleware({
     handler: new rate.Redis.RedisRateHandler({ client: rl_client })
   , interval: 5
   , limit: 2
@@ -31,13 +33,13 @@ module.exports = function (redis) {
     }
   });
 
-  rateLimit = function () {
+  var rateLimit = function () {
     return function (req, res, next) {
       return rateLimitMiddleware(req, res, next);
     };
   };
 
-  check_origin = function (req, form) {
+  var check_origin = function (req, form) {
     var origin =  req.headers.referer || req.headers.origin;
     logger.info('origin', {
       referer: req.headers.referer
@@ -47,46 +49,65 @@ module.exports = function (redis) {
     return (origin && (origin.has(form.website_url) || form.website_url.has(origin)));
   };
 
-  send_sms = function (form, callback) {
-    var message = 'Youform.me confirmation code: ' + form.code
-      , response = ''
-      , data
-      , post_options
-      ;
-    data = querystring.stringify({
-      'username': process.env.HQ_USERNAME
-    , 'password': crypto.createHash('md5').update(process.env.HQ_PASSWORD).digest('hex')
-    , 'to': form.country_code + '' + form.phone
-    , 'from': process.env.HQ_SENDER
-    , 'message': message
-    });
-    post_options = {
-      host: 'ssl.hqsms.com',
-      port: '443',
-      path: '/sms.do',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': data.length
-      }
-    };
-    var hq_request = https.request(post_options, function (res) {
-      res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-        response += chunk;
+  var spam_filter = function (req, res, callback) {
+    var ip = req.ip.split('.').reverse().join('.');
+    async.parallel([
+        function (ret) {
+          // Akismet filter
+          akismet_client.checkSpam({
+            user_ip : req.ip,
+            user_agent : req.headers['user-agent'],
+            referer : req.headers.referer
+          }, function (err, spam) {
+            if (err) {
+              ret(err);
+            }
+            if (spam) {
+              logger.error({
+                spam: true
+              , user_ip: req.ip
+              , referrer: req.headers.referer
+              });
+            }
+            ret(null, spam);
+          });
+        },
+        function (ret) {
+          var host = function (item, next) {
+            dns.resolve4(ip + '.' + item.dns, function (err, domain) {
+              if (err) {
+                if (err.code === 'ENOTFOUND') {
+                  next(false);
+                } else {
+                  ret(err);
+                }
+              } else {
+                logger.error(domain + ' has your IP on it\'s blacklist');
+                next(true);
+              }
+            });
+          };
+          async.detect(spam_list, host, function (result) {
+            result = result !== undefined;
+            logger.debug('check Spam', result);
+            ret(null, result);
+          });
+        }
+      ],
+      function (err, results) {
+        if (err) {
+          callback(err);
+        } else {
+          var spam = (results[0] || results[1]);
+          logger.info('Spam', spam);
+          callback(null, spam);
+        }
       });
-      res.on('end', function () {
-        logger.ok('HQSMS response', response);
-        callback(response.has('ERROR'));
-      });
-    });
-    hq_request.write(data);
-    hq_request.end();
   };
 
   return {
     'rateLimit': rateLimit
   , 'check_origin': check_origin
-  , 'send_sms': send_sms
+  , 'spam_filter': spam_filter
   };
 };
