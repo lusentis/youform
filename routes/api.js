@@ -6,6 +6,7 @@ module.exports = function (app, db, redis, prefix) {
 
   var async = require('async')
     , coolog = require('coolog')
+    , moment = require('moment')
     , uuid = require('node-uuid')
     , comm_utils = require('../utils/comm_utils.js')()
     , error_utils = require('../utils/error_utils.js')()
@@ -18,6 +19,8 @@ module.exports = function (app, db, redis, prefix) {
     ;
   
   var logger = coolog.logger('api.js');
+
+  var redis_client = redis.createClient();
 
   var test_email = function (email) {
     return email_regex.test(email) && email.length < 100;
@@ -481,8 +484,68 @@ module.exports = function (app, db, redis, prefix) {
       });
   };
 
+  var send_confirm_sms = function (req, res) {
+    var api_key = req.param('api_key', null)
+      , token = req.query.token
+      ;
+
+    if (!api_key || !token) {
+      error_utils.params_error({api_key: api_key, token: token}, req, res);
+      return;
+    }
+
+    async.waterfall([
+        function (next) {
+          form_utils.get_form(api_key, function (err, form) {
+            if (err) {
+              next(err);
+            } else {
+              if (!form) {
+                error_utils.form_not_found(api_key, req, res);
+                return;
+              }
+              next(null, form);
+            }
+          });
+        },
+        function (form, next) {
+          redis_client.get(api_key, function (err, time) {
+            if (err) {
+              next(err);
+            } else {
+              var now = moment();
+              if (!time || now.diff(time, 'seconds') > 300) {
+                redis_client.set(api_key, now);
+                logger.info('saved', {
+                  sms_date: now.format('YYYY-MM-DD')
+                });
+                next(null, form);
+              } else {
+                logger.info({
+                  message: 'waiting 5 minutes'
+                , now: now.format('YYYY-MM-DD')
+                , sms_date: moment(time).format('YYYY-MM-DD')
+                });
+                res.redirect('/');
+              }
+            }
+          });
+        },
+        function (form) {
+          comm_utils.send_sms(form, function () {
+            res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
+          });
+        }
+      ], function (err) {
+        if (err) {
+          throw err;
+        }
+      });
+  };
+
   // routes
   app.post(prefix + '/confirm/sms/:api_key', confirm_sms);
+  app.get(prefix + '/confirm/send-sms/:api_key', send_confirm_sms);
   app.get(prefix + '/confirm/send-email/:api_key', send_confirm_email);
   app.post(prefix + '/new-form', new_form);
   app.post(prefix + '/edit-form/:api_key', edit_form);
