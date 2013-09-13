@@ -1,35 +1,26 @@
 YouForm
 =======
-
 YouForm is a tool for your static websites for sending forms to an e-mail address.
-
-## Environment Variables
-
-Base settings
-```
-export SITE_SECRET= ...
+## Environment Variables ##
+Add the following to your .env file.
+```bash
+# COUCHDB URL
 export DATABASE_URL= ...
-```
 
-[Postmark](https://github.com/voodootikigod/postmark.js)
-```
+# POSTMARK settings
 export POSTMARK_API_KEY= ...
 export POSTMARK_FROM= ...
-```
 
-[Akismet](https://github.com/chrisfosterelli/akismet-api)
-```
+# AKISMET API KEY
 export AKISMET_API_KEY= ...
-```
 
-[HQ SMS](http://www.hqsms.com/)
-
-```
+# HQ SMS settings
 export HQ_USERNAME= ...
 export HQ_PASSWORD= ...
 export HQ_SENDER= ...
-```
 
+export SITE_SECRET= ...
+```
 ## License ##
 
 Copyright (c) 2013 PlasticPanda.com
