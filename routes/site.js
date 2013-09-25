@@ -191,7 +191,7 @@ module.exports = function (app, db, prefix) {
         if (form.token === token) {
           logger.info('Phone confirmed', form.phone_confirmed);
           if (form.phone_confirmed === true) {
-            res.render('confirmed_phone');
+            res.render('confirmed_phone', {api_key: api_key, token: token});
           } else {
             res.redirect('/');
           }
@@ -219,7 +219,7 @@ module.exports = function (app, db, prefix) {
       } else {
         if (form.token === token) {
           if (form.email_confirmed === true) {
-            res.render('confirmed_email');
+            res.render('confirmed_email', {api_key: api_key, token: token});
           } else {
             res.redirect('/');
           }
