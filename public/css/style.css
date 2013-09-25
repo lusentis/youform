@@ -142,6 +142,15 @@ body {
 #layout .content .stats {
   padding-top: 20px;
 }
+#layout .content .stats table.stats-data {
+  border: none;
+}
+#layout .content .stats table.stats-data > tr > td:first-child {
+  width: 30%;
+}
+#layout .content .stats table.stats-data > tr > td:last-child {
+  width: 70%;
+}
 #layout h1,
 #layout h2,
 #layout h3 {
