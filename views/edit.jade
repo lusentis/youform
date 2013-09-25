@@ -58,18 +58,19 @@ block content
           .pure-controls
             button.pure-button.pure-button-success(type='submit') Save
 
-        block scripts
-          script.
-            document.querySelector('.radio-palette.radio-#{form.colours}').querySelector('input').setAttribute('checked', 'checked');
-            document.querySelector('.radio-palette.radio-#{form.colours}').classList.add('active');
 
-            Array.prototype.forEach.call(document.querySelectorAll('.radio-palette'), function (el) {
-              
-              el.addEventListener('click', function () {
-                document.querySelector('.radio-palette.active input').removeAttribute('checked');
-                document.querySelector('.radio-palette.active').classList.remove('active');
+block scripts
+  script.
+    document.querySelector('.radio-palette.radio-#{form.colours}').querySelector('input').setAttribute('checked', 'checked');
+    document.querySelector('.radio-palette.radio-#{form.colours}').classList.add('active');
 
-                el.querySelector('input').setAttribute('checked', 'checked');
-                el.classList.add('active');
-              });
-            });
+    Array.prototype.forEach.call(document.querySelectorAll('.radio-palette'), function (el) {
+      
+      el.addEventListener('click', function () {
+        document.querySelector('.radio-palette.active input').removeAttribute('checked');
+        document.querySelector('.radio-palette.active').classList.remove('active');
+
+        el.querySelector('input').setAttribute('checked', 'checked');
+        el.classList.add('active');
+      });
+    });

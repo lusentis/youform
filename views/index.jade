@@ -2,13 +2,26 @@ extends layout
 
 block content
   .content
-    h1 What is YouForm?
+    .homepage
+      hgroup
+        h1 What is YouForm?
+
+        h2
+          | We reinvent old school
+          br
+          | contact-form-makers from '00s!
+
+        h3
+          | Simple create, make your form
+          br
+          | the way you like, copy and paste
+          br
+          | the url we provide in your 
+          br
+          | static (or not) website.
 
 block sidebar
-  header.header
-    hgroup.text-right
-        img.logo(src='/img/youform-logo-white.svg')
-        h2.brand-tagline Giving life to your static HTML Form
-        .spacer
-        a.pure-button.pure-button-success(href='/signup')
-          | Signup
+  h2.brand-tagline Giving life to your static HTML Form
+  .spacer
+  a.pure-button.pure-button-success(href='/signup')
+    | Signup

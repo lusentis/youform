@@ -3,7 +3,11 @@
 
 _white = #FFFFFF
 _green = #4EB360
-_blue  = #0378A6
+_darkblue = #34495e
+//_blue  = #0378A6
+_blue = #2c3e50
+_red = #c0392b
+_purple = #8e44ad
 
 .open-sans
   font-family 'Open Sans', sans-serif
@@ -35,7 +39,7 @@ body
     bottom 0
     width 25%
     margin-left -25%
-    background _green
+    background _darkblue
     color _white
     overflow hidden
 
@@ -54,10 +58,14 @@ body
           height auto
 
     .pure-button.pure-button-success
-      background darken(_green, 20%)
+      background darken(_darkblue, 20%)
 
   .content
     padding 20px 40px
+    color _blue
+
+    .homepage
+      padding-top 20px
 
     form
       label
@@ -73,6 +81,14 @@ body
         padding 10px
         font-size 14px
         resize none
+        border none
+        border-left 3px solid _white
+        box-shadow none
+        border-radius 3px
+        color rgba(0, 0, 0, 0.80)
+        &:focus
+          border-left 3px solid _darkblue
+          color _darkblue
       
       .radio-palette
         display inline-block
@@ -88,21 +104,21 @@ body
         input[type='radio']
           display none
         &.radio-palette-1
-          box-shadow inset 0 0 0 2px _green
-          &.active
-            background _green
-        &.radio-palette-2
           box-shadow inset 0 0 0 2px _blue
           &.active
             background _blue
+        &.radio-palette-2
+          box-shadow inset 0 0 0 2px _green
+          &.active
+            background _green
         &.radio-palette-3
-          box-shadow inset 0 0 0 2px purple
+          box-shadow inset 0 0 0 2px _purple
           &.active
-            background purple
+            background _purple
         &.radio-palette-4
-          box-shadow inset 0 0 0 2px red
+          box-shadow inset 0 0 0 2px _red
           &.active
-            background red
+            background _red
 
   h1,
   h2,
@@ -127,7 +143,7 @@ body
     padding-bottom 10px
 
     &.pure-button-success
-      background _green
+      background _darkblue
       color _white
       transition opacity 0.5s ease
       &:hover
