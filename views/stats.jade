@@ -67,9 +67,9 @@ block content
               a.pure-button.pure-button-danger(href='/delete-form/#{form._id}?token=#{form.token}') Delete form
                   
 block scripts
-  script(type='text/javascript', src='/js/vendor/moment.min.js')
   script.
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     Array.prototype.forEach.call(document.querySelectorAll('.month-name'), function (el) {      
       var monthNumber = parseInt(el.innerHTML, 10);
-      el.innerHTML = moment().month(monthNumber - 1).format('MMMM') + ': ';
+      el.innerHTML = months[monthNumber - 1] + ': ';
     });
