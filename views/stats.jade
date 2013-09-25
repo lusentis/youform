@@ -16,18 +16,17 @@ block content
     p Form: #{form.form_name}
     if form.deleted === true
       p This form has been deleted.
-        
-      else
-        p Website: 
-          a(href=form.website_url) #{form.website_url}
-        p Date: #{form.created_at}
+    else
+      p Website: 
+        a(href=form.website_url) #{form.website_url}
+      p Date: #{form.created_at}
 
-        p Total requests: #{stats.total_rows}
+      p Total requests: #{stats.total_rows}
 
-        for row, year in stats.counter
-          h5 Year: #{year}
-            for value, month in row
-              p #{month}: #{value}
+      for row, year in stats.counter
+        h5 Year: #{year}
+        for value, month in row
+          p #{month}: #{value}
 
-        a.pure-button(href='/edit-form/#{form._id}?token=#{form.token}') Edit form
-        a.pure-button(href='/delete-form/#{form._id}?token=#{form.token}') Delete form
+      a.pure-button(href='/edit-form/#{form._id}?token=#{form.token}') Edit form
+      a.pure-button(href='/delete-form/#{form._id}?token=#{form.token}') Delete form

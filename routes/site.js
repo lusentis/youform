@@ -18,38 +18,68 @@ module.exports = function (app, db, prefix) {
     });
   };
 
-  var new_form = function (req, res) {
-    res.render('signup', {
-      title: 'New form'
-    });
-  };
+  var form = {
+    signup: function (req, res) {
+      res.render('signup', {
+        title: 'New form'
+      });
+    },
+    signup_success: function (req, res) {
+      res.render('signup_success', {
+        title: 'Sign success'
+      });
+    },
+    del: function (req, res) {
+      var api_key = req.param('api_key', null)
+        , token = req.query.token
+        ;
 
-  var signup_success = function (req, res) {
-    res.render('signup_success', {
-      title: 'Sign success'
-    });
-  };
-
-  var delete_form = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , token = req.query.token
-      ;
-
-    if (!api_key || !token) {
-      error_utils.params_error({api_key: api_key, token: token}, req, res);
-      return;
-    }
-
-    form_utils.get_form(api_key, function (err, form) {
-      if (err) {
-        throw err;
-      } else {
-        var not_found = (!form || form.token !== token);
-        logger.info('form not found', not_found);
-        res.render('delete', {not_found: not_found, form: form});
+      if (!api_key || !token) {
+        error_utils.params_error({api_key: api_key, token: token}, req, res);
+        return;
       }
-    });
+
+      form_utils.get_form(api_key, function (err, form) {
+        if (err) {
+          throw err;
+        } else {
+          var not_found = (!form || form.token !== token);
+          logger.info('form not found', not_found);
+          res.render('delete', {not_found: not_found, form: form});
+        }
+      });
+    },
+    deleted: function (req, res) {
+      if (req.flash('form_deleted').length > 0) {
+        res.render('deleted', {deleted: req.flash('form_deleted')[0]});
+      } else {
+        res.redirect('/');
+      }
+    },
+    edit: function (req, res) {
+      var api_key = req.param('api_key', null)
+        , token = req.query.token
+        ;
+
+      if (!api_key || !token) {
+        error_utils.params_error({api_key: api_key, token: token}, req, res);
+        return;
+      }
+
+      form_utils.get_form(api_key, function (err, form) {
+        if (err) {
+          throw err;
+        } else {
+          if (!form || form.token !== token) {
+            error_utils.params_error({api_key: api_key, token: token}, req, res);
+            return;
+          }
+          res.render('edit', {form: form});
+        }
+      });
+    }
   };
+
 
   var stats = function (req, res) {
     var api_key = req.param('api_key', null)
@@ -114,37 +144,6 @@ module.exports = function (app, db, prefix) {
           throw err;
         }
       });
-  };
-
-  var form_deleted = function (req, res) {
-    if (req.flash('form_deleted').length > 0) {
-      res.render('deleted', {deleted: req.flash('form_deleted')[0]});
-    } else {
-      res.redirect('/');
-    }
-  };
-
-  var edit_form = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , token = req.query.token
-      ;
-
-    if (!api_key || !token) {
-      error_utils.params_error({api_key: api_key, token: token}, req, res);
-      return;
-    }
-
-    form_utils.get_form(api_key, function (err, form) {
-      if (err) {
-        throw err;
-      } else {
-        if (!form || form.token !== token) {
-          error_utils.params_error({api_key: api_key, token: token}, req, res);
-          return;
-        }
-        res.render('edit', {form: form});
-      }
-    });
   };
 
   var confirm_sms = function (req, res) {
@@ -256,11 +255,11 @@ module.exports = function (app, db, prefix) {
 
   // routes
   app.get(prefix + '/', index);
-  app.get(prefix + '/success', signup_success);
-  app.get(prefix + '/deleted', form_deleted);
-  app.get(prefix + '/signup', new_form);
-  app.get(prefix + '/delete-form/:api_key', delete_form);
-  app.get(prefix + '/edit-form/:api_key', edit_form);
+  app.get(prefix + '/success', form.signup_success);
+  app.get(prefix + '/deleted', form.deleted);
+  app.get(prefix + '/signup', form.signup);
+  app.get(prefix + '/delete-form/:api_key', form.del);
+  app.get(prefix + '/edit-form/:api_key', form.del);
   app.get(prefix + '/stats/:api_key', stats);
   app.get(prefix + '/confirm/sms/:api_key', confirm_sms);
   app.get(prefix + '/confirm/sms/confirmed/:api_key', confirmed_sms);
