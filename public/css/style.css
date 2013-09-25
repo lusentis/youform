@@ -142,14 +142,33 @@ body {
 #layout .content .stats {
   padding-top: 20px;
 }
+#layout .content .stats .pure-table td {
+  border-color: rgba(44,62,80,0.15);
+}
 #layout .content .stats table.stats-data {
   border: none;
 }
-#layout .content .stats table.stats-data > tr > td:first-child {
-  width: 30%;
+#layout .content .stats table.stats-data tr td {
+  vertical-align: top;
+  text-align: left;
 }
-#layout .content .stats table.stats-data > tr > td:last-child {
-  width: 70%;
+#layout .content .stats table.stats-data tr td:first-child {
+  width: 30%;
+  text-align: right;
+}
+#layout .content .stats table.stats-data tr td[colspan='2'] {
+  text-align: center;
+}
+#layout .content .stats table.stats-data tr td h4 {
+  font-weight: bold;
+  font-size: 14px;
+  margin: 0;
+}
+#layout .content .stats table.stats-data tr td table {
+  font-size: 13px;
+}
+#layout .content .stats table.stats-data tr td table td {
+  border: none !important;
 }
 #layout h1,
 #layout h2,

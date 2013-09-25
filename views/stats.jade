@@ -77,12 +77,8 @@ block content
                   td
                     | Requests
                   td
-                    | #{stats.total_rows}
-                tr
-                  td(colspan='2')
                     for row, year in stats.counter
-                      hr
-                      b #{year}
+                      h4 #{year}
                       table
                         for value, month in row
                           tr
@@ -92,6 +88,8 @@ block content
                               | #{value}
                 tr
                   td(colspan='2')
+                    br
+                    br
                     .pure-g
                       .pure-u-1-2
                         a.pure-button.pure-button-primary(href='/edit-form/#{form._id}?token=#{form.token}') Edit form

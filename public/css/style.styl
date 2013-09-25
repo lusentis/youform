@@ -123,14 +123,29 @@ body
     .stats
       padding-top 20px
 
+      .pure-table
+        td
+          border-color rgba(_blue, 0.15)
+
       table.stats-data
         border none
-        & > tr
-          & > td
+        tr
+          td
+            vertical-align top
+            text-align left
             &:first-child
               width 30%
-            &:last-child
-              width 70%
+              text-align right
+            &[colspan='2']
+              text-align center
+            h4
+              font-weight bold
+              font-size 14px
+              margin 0
+            table
+              font-size 13px
+              td
+                border none!important
 
   h1,
   h2,
