@@ -1,18 +1,3 @@
-doctype 5
-html
-  body
-    h3 YouForm
-    div
-      p Copy the following url and paste it in your form's action attribute:
-        a(href='http://www.youform.me/api/form/#{form._id}') http://www.youform.me/api/form/#{form._id}
-    div#stats
-      a(href='http://www.youform.me/stats/#{form._id}?token=#{form.token}') Statistics
-    div#del
-      a(href='http://www.youform.me/delete-form/#{form._id}?token=#{form.token}') Delete form
-
-
-
-
 !!! 5
 html(lang='en')
 head
@@ -21,11 +6,11 @@ meta(name='viewport', content='initial-scale=1.0')
 //- So that mobile webkit will display zoomed in 
 meta(name='format-detection', content='telephone=no')
 //- disable auto telephone linking in iOS 
-title Antwort - responsive Email Layout
-style(type='text/css')
+title YouFrom - Successful registration!
+style.
   /* Resets: see reset.css for details */
-  .ReadMsgBody { width: 100%; background-color: #ebebeb;}
-  .ExternalClass {width: 100%; background-color: #ebebeb;}
+  .ReadMsgBody { width: 100%; background-color: #ecf0f1;}
+  .ExternalClass {width: 100%; background-color: #ecf0f1;}
   .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height:100%;}
   body {-webkit-text-size-adjust:none; -ms-text-size-adjust:none;}
   body {margin:0; padding:0;}
@@ -45,78 +30,59 @@ style(type='text/css')
       padding-right: 12px !important;
     }
   }
-body(style='margin: 0; padding: 10px 0;', bgcolor='#ebebeb', leftmargin='0', topmargin='0', marginwidth='0', marginheight='0')
+body(style='margin: 0; padding: 10px 0;', bgcolor='#ecf0f1', leftmargin='0', topmargin='0', marginwidth='0', marginheight='0')
 br
 //- 100% wrapper (grey background) 
-table(border='0', width='100%', height='100%', cellpadding='0', cellspacing='0', bgcolor='#ebebeb')
+table(border='0', width='100%', height='100%', cellpadding='0', cellspacing='0', bgcolor='#ecf0f1')
   tr
-    td(align='center', valign='top', bgcolor='#ebebeb', style='background-color: #ebebeb;')
+    td(align='center', valign='top', bgcolor='#ecf0f1', style='background-color: #ecf0f1;')
       //- 600px container (white background) 
       table.container(border='0', width='600', cellpadding='0', cellspacing='0', bgcolor='#ffffff')
         tr
+          td(bgcolor='#2c3e50', style='background-color: #2c3e50; color: #ffffff; font-family: Helvetica, sans-serif; text-align: center; padding-top: 20px; padding-bottom: 20px;')
+            img(src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNy4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxpdmVsbG9fMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHdpZHRoPSIxMDBweCIgaGVpZ2h0PSI3MHB4IiB2aWV3Qm94PSIwIDAgMTAwIDcwIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCAxMDAgNzAiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGc+DQoJPHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTMzLjEyNSwyNC4zMmMtMC40MTctMS44NTYtMC44MzUtMy40NjItMS4yNTEtNC44MThjLTAuNDE4LTEuMzU1LTAuODM1LTIuNDgyLTEuMjUyLTMuMzc5DQoJCWMtMC40MTctMC44OTctMC44MTMtMS42MzYtMS4xODktMi4yMjFjLTAuODc2LTEuMzM1LTEuNzUyLTEuOTgxLTIuNjI4LTEuOTRjLTAuNTQzLTAuMDgzLTEuMDg1LTAuMDQxLTEuNjI3LDAuMTI1DQoJCWMtMC40NiwwLjEyNS0wLjk2LDAuMzU1LTEuNTAyLDAuNjg4Yy0wLjU0MywwLjMzNC0xLjA0NCwwLjg1NS0xLjUwMiwxLjU2NGMtMC42MjYsMC45Ni0xLjIsMS45NC0xLjcyMSwyLjk0MQ0KCQljLTAuNTIyLDEuMDAxLTEuMDIzLDEuOTA5LTEuNTAyLDIuNzIyYy0wLjQ4LDAuODEzLTAuOTYsMS40Ny0xLjQzOSwxLjk3MWMtMC40OCwwLjUwMS0wLjk3LDAuNzEtMS40NzEsMC42MjYNCgkJYy0wLjU4NS0wLjA0MS0wLjk3LTAuMzM0LTEuMTU4LTAuODc2Yy0wLjE4OC0wLjU0MS0wLjI5Mi0xLjIwOS0wLjMxMy0yLjAwMmMtMC4wMjEtMC43OTItMC4wMTEtMS42NDcsMC4wMzEtMi41NjUNCgkJYzAuMDQxLTAuOTE3LDAtMS43ODMtMC4xMjUtMi41OTdjLTAuMTI1LTAuODEzLTAuMzY2LTEuNTEyLTAuNzE5LTIuMDk2Yy0wLjM1NS0wLjU4NC0wLjk0OS0wLjkxNy0xLjc4My0xLjAwMQ0KCQljLTAuNDU5LTAuMDQxLTAuOTI5LDAuMzIzLTEuNDA4LDEuMDk1Yy0wLjQ4LDAuNzcyLTAuODQ1LDEuNzUyLTEuMDk1LDIuOTQxYy0wLjI1LDEuMTg5LTAuMzY2LDIuNDkzLTAuMzQ0LDMuOTExDQoJCWMwLjAyMSwxLjQxOCwwLjI5MSwyLjczMywwLjgxMywzLjk0MmMwLjUyMSwxLjIxLDEuMzQ1LDIuMjIxLDIuNDcyLDMuMDM1YzEuMTI2LDAuODEzLDIuNjI4LDEuMjIsNC41MDUsMS4yMg0KCQljMS4yNTEsMCwyLjM4Ny0wLjM0NCwzLjQxLTEuMDMzYzEuMDIyLTAuNjg4LDEuODg3LTEuNDQ5LDIuNTk3LTIuMjg0YzAuODM0LTEuMDAxLDEuNTg1LTIuMTI4LDIuMjUzLTMuMzc5DQoJCWMxLjE2NywzLjgzOCwxLjk2LDcuNTA5LDIuMzc4LDExLjAxM2MwLjE2NiwxLjUwMiwwLjI2LDMuMDI1LDAuMjgyLDQuNTY4YzAuMDIsMS41NDMtMC4wOTQsMy4wMzUtMC4zNDQsNC40NzQNCgkJYy0wLjI1MSwxLjQzOS0wLjY2OCwyLjc2My0xLjI1MiwzLjk3NGMtMC41ODQsMS4yMDktMS4zNzYsMi4yMzEtMi4zNzgsMy4wNjZjLTIuMDAyLDEuNjY4LTMuODE3LDIuNjQ5LTUuNDQ0LDIuOTQxDQoJCWMtMS42MjcsMC4yOTItMi44ODksMC4xMzUtMy43ODYtMC40NjljLTAuODk3LTAuNjA1LTEuMzY3LTEuNTMzLTEuNDA4LTIuNzg1Yy0wLjA0Mi0xLjI1MSwwLjUyMS0yLjYwNywxLjY5LTQuMDY3DQoJCWMxLjE2Ny0xLjQ2MSwyLjM0Ny0yLjY2LDMuNTM1LTMuNTk4YzEuMTg5LTAuOTM5LDIuMjUzLTEuNzExLDMuMTkxLTIuMzE1YzAuOTM4LTAuNjA1LDEuNzEtMS4wOTUsMi4zMTUtMS40Nw0KCQljMC42MDQtMC4zNzYsMC45MDctMC43MjksMC45MDctMS4wNjRjMC4wNDEtMC4yOTItMC41MDEtMC40NTktMS42MjctMC41MDFjLTEuMTI2LTAuMDQxLTIuNTE0LDAuMTU2LTQuMTYxLDAuNTk0DQoJCWMtMS42NDgsMC40MzgtMy4zNjksMS4xNjgtNS4xNjIsMi4xOWMtMS43OTQsMS4wMjItMy4zMzgsMi40MDktNC42MzEsNC4xNjFjLTEuMzM2LDEuNzUyLTIuMDk2LDMuNjE5LTIuMjg0LDUuNjAxDQoJCWMtMC4xODgsMS45ODEsMC4wMzEsMy44NDgsMC42NTcsNS42YzAuNjI2LDEuNzUyLDEuNTU0LDMuMjg1LDIuNzg1LDQuNTk5YzEuMjMsMS4zMTQsMi42MzgsMi4yLDQuMjIzLDIuNjU5DQoJCWMxLjY2OCwwLjQ1OSwzLjM3OSwwLjU1Miw1LjEzMSwwLjI4MmMxLjc1Mi0wLjI3MiwzLjQ0MS0wLjg5Nyw1LjA2OC0xLjg3N2MxLjYyNy0wLjk4MSwzLjEzOC0yLjMwNSw0LjUzNy0zLjk3Mw0KCQljMS4zOTctMS42NjksMi41NDQtMy42NjEsMy40NDItNS45NzZjMC44OTctMi4zMTUsMS41MDItNC45NTQsMS44MTQtNy45MTZjMC4zMTMtMi45NjIsMC4xOTgtNi4yMTUtMC4zNDQtOS43NjENCgkJQzMzLjkzOSwyOC4zNTYsMzMuNTQxLDI2LjE3NywzMy4xMjUsMjQuMzJ6Ii8+DQoJPHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTQxLjk3MywzNS4wODJjMS42NDcsMS4xMDYsMy42ODEsMS42MzcsNi4xMDEsMS41OTZjMS45MTgtMC4wNDEsMy42MjktMC41NDIsNS4xMzEtMS41MDINCgkJYzEuNTAyLTAuOTU5LDIuNzQzLTIuMTgsMy43MjMtMy42NjFjMC45NzktMS40OCwxLjY3OS0zLjEzOCwyLjA5Ni00Ljk3NGMwLjQxNi0xLjgzNSwwLjQ3LTMuNjgxLDAuMTU2LTUuNTM4DQoJCWMtMC4zMTMtMS44NTYtMC45OTEtMy42MjktMi4wMzMtNS4zMTljLTEuMDQzLTEuNjg5LTIuNTI1LTMuMTE4LTQuNDQzLTQuMjg2Yy0wLjQ2LTAuMjUtMC43NjEtMC4zMzQtMC45MDctMC4yNQ0KCQljLTAuMTQ3LDAuMDg0LTAuNDA3LDAuMjQxLTAuNzgyLDAuNDY5Yy0wLjM3NiwwLjIzLTAuOTgxLDAuNDgtMS44MTQsMC43NTFjLTAuODM1LDAuMjcyLTIuMTcsMC40NjktNC4wMDUsMC41OTQNCgkJYy0yLjAwMiwwLjEyNS0zLjY3MSwwLjgxMy01LjAwNiwyLjA2NWMtMS4zMzYsMS4yNTEtMi4yOTUsMi43NjQtMi44NzksNC41MzdjLTAuNTg0LDEuNzc0LTAuODAzLDMuNjcxLTAuNjU3LDUuNjk0DQoJCWMwLjE0NiwyLjAyNCwwLjY1NywzLjg5LDEuNTMzLDUuNkMzOS4wNjMsMzIuNTcsNDAuMzI1LDMzLjk3OCw0MS45NzMsMzUuMDgyeiBNNDQuNDEzLDIyLjAzNmMwLjA2Mi0xLjI5MywwLjE3Ny0yLjQxOSwwLjM0NC0zLjM3OQ0KCQljMC4xNjYtMC45NTksMC4zNzUtMS41NjQsMC42MjYtMS44MTRjMC44MzQtMC43OTIsMS42NTgtMS4xMzYsMi40NzEtMS4wMzNjMC44MTMsMC4xMDUsMS44MDQsMC43NjEsMi45NzIsMS45NzENCgkJYzAuNTAxLDAuNTAxLDAuODU1LDEuMjMxLDEuMDY0LDIuMTljMC4yMDgsMC45NiwwLjI4MSwyLjAyNCwwLjIxOSwzLjE5MWMtMC4wNjIsMS4xNjktMC4yMywyLjM2OC0wLjUwMSwzLjU5OA0KCQljLTAuMjcyLDEuMjMxLTAuNjI2LDIuMzU3LTEuMDY0LDMuMzc5Yy0wLjQzOCwxLjAyMi0wLjkyOSwxLjg3Ny0xLjQ3LDIuNTY1Yy0wLjU0MywwLjY4OC0xLjEwNiwxLjA3NS0xLjY5LDEuMTU4DQoJCWMtMC41ODUsMC4wODQtMS4wODUtMC4yNS0xLjUwMi0xLjAwMWMtMC40MTgtMC43NTEtMC43NDEtMS43MS0wLjk3LTIuODc4Yy0wLjIzLTEuMTY4LTAuMzg2LTIuNDYxLTAuNDctMy44OA0KCQlDNDQuMzYsMjQuNjg1LDQ0LjM1MSwyMy4zMjksNDQuNDEzLDIyLjAzNnoiLz4NCgk8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNOTIuODIsMzQuOTg4Yy0wLjI5Mi0wLjMzNC0wLjgzNS0wLjYwNC0xLjYyNy0wLjgxM2MtMC44NzYtMC4yMDgtMS41NTQtMC43ODItMi4wMzMtMS43MjENCgkJYy0wLjQ4LTAuOTM5LTAuODM1LTIuMDY1LTEuMDY0LTMuMzc5Yy0wLjIyOS0xLjMxNC0wLjM0NC0yLjc1NC0wLjM0NC00LjMxOGMwLTEuNTY0LDAuMDMxLTMuMDg3LDAuMDkzLTQuNTY4DQoJCWMwLjA2My0xLjQ4LDAuMTM1LTIuODE2LDAuMjE5LTQuMDA1YzAuMDgzLTEuMTg5LDAuMTA0LTIuMDk2LDAuMDYyLTIuNzIyYy0wLjA0Mi0wLjQ1OS0wLjI1LTAuOTI4LTAuNjI2LTEuNDA4DQoJCWMtMC4zNzUtMC40NzktMC44NTUtMC45MDctMS40MzktMS4yODNjLTAuNTg1LTAuMzc2LTEuMjExLTAuNjg4LTEuODc3LTAuOTM5Yy0wLjY2OC0wLjI1LTEuMjk0LTAuMzY1LTEuODc3LTAuMzQ0DQoJCWMtMC41ODQsMC4wMjItMS4wNzQsMC4xOTgtMS40NywwLjUzMmMtMC4zOTcsMC4zMzQtMC42MTYsMC44NzYtMC42NTcsMS42MjdjLTAuMDQyLDAuNjI2LTAuMDk0LDEuNTAyLTAuMTU2LDIuNjI4DQoJCWMtMC4wNjIsMS4xMjctMC4xODgsMi4zMzctMC4zNzYsMy42MjljLTAuMTg4LDEuMjk0LTAuNDI4LDIuNjE4LTAuNzE5LDMuOTczYy0wLjI5MiwxLjM1Ni0wLjY4OCwyLjU3Ni0xLjE4OSwzLjY2MQ0KCQljLTAuNTAxLDEuMDg1LTEuMDk1LDEuOTgxLTEuNzgzLDIuNjkxYy0wLjY4OCwwLjcxLTEuNTEyLDEuMDY0LTIuNDcxLDEuMDY0Yy0wLjY2OCwwLTEuMjExLTAuMzU0LTEuNjI3LTEuMDY0DQoJCWMtMC40MTctMC43MDktMC43My0xLjYxNi0wLjkzOS0yLjcyMmMtMC4yMDktMS4xMDUtMC4zNTUtMi4zMjUtMC40MzgtMy42NmMtMC4wODQtMS4zMzUtMC4xMjUtMi42MTgtMC4xMjUtMy44NDgNCgkJYzAtMS4yMywwLjAyLTIuMzQ3LDAuMDYyLTMuMzQ4YzAuMDQxLTEuMDAxLDAuMDgzLTEuNzEsMC4xMjUtMi4xMjhjMC4wNDEtMC44NzYtMC4yNzItMS40Ni0wLjkzOS0xLjc1Mg0KCQljLTAuNjY4LTAuMjkyLTEuNDI5LTAuNDI3LTIuMjg0LTAuNDA3Yy0wLjg1NiwwLjAyMS0xLjY4LDAuMTU2LTIuNDcyLDAuNDA3Yy0wLjc5MywwLjI1LTEuMzE0LDAuNDgtMS41NjQsMC42ODgNCgkJYy0wLjIwOSwwLjIwOS0wLjM5NywwLjY2OC0wLjU2MywxLjM3NmMtMC4xNjcsMC43MS0wLjI5MiwxLjU2NS0wLjM3NSwyLjU2NmMtMC4wODQsMS4wMDEtMC4xMjUsMi4wODYtMC4xMjUsMy4yNTQNCgkJYzAsMS4xNjgsMC4wNjMsMi4zMzcsMC4xODgsMy41MDRjMC4xMjUsMS40NjEsMC4zNTQsMi45MSwwLjY4OCw0LjM0OWMwLjMzMywxLjQzOSwwLjg0NSwyLjc2NCwxLjUzMywzLjk3NA0KCQljMC42ODgsMS4yMSwxLjU4NSwyLjI0MywyLjY5MSwzLjA5N2MxLjEwNSwwLjg1NSwyLjUxMiwxLjQwOCw0LjIyMywxLjY1OGMxLjcxLDAuMjUsMy4xNi0wLjAxLDQuMzQ5LTAuNzgyDQoJCWMxLjE4OS0wLjc3MSwyLjE1OS0xLjY5OSwyLjkxLTIuNzg0YzAuODc2LTEuMjEsMS41ODUtMi42NDksMi4xMjgtNC4zMThjMC4xMjUsMS41MDIsMC40NzksMi44NzksMS4wNjQsNC4xMw0KCQljMC41MDEsMS4wODUsMS4yNzIsMi4xMjcsMi4zMTUsMy4xMjhjMS4wNDIsMS4wMDEsMi41MjMsMS42NjksNC40NDMsMi4wMDJjMS4xNjcsMC4yMDgsMi4wOTYsMC4yMjksMi43ODQsMC4wNjMNCgkJYzAuNjg4LTAuMTY2LDEuMTQ3LTAuNDA3LDEuMzc3LTAuNzJDOTMuMTQyLDM1LjY0NSw5My4xMTEsMzUuMzIzLDkyLjgyLDM0Ljk4OHoiLz4NCgk8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNNDcuMTY4LDQyLjAyM2gtNy44NjFjLTAuMTU4LDAtMC4zMDYsMC4wMjgtMC40NDIsMC4wODVjLTAuMTMzLDAuMDU2LTAuMjUyLDAuMTM2LTAuMzU0LDAuMjM4DQoJCWMtMC4xMDMsMC4xMDMtMC4xODMsMC4yMjQtMC4yMzgsMC4zNmMtMC4wNTYsMC4xMzYtMC4wODUsMC4yODMtMC4wODUsMC40MzZ2MTEuNzk2YzAsMC4zMDksMC4xMSwwLjU3NSwwLjMyNywwLjc5MQ0KCQljMC4yMTYsMC4yMTcsMC40ODMsMC4zMjcsMC43OTEsMC4zMjdjMC4zMDgsMCwwLjU3NC0wLjExLDAuNzkxLTAuMzI3YzAuMjE3LTAuMjE3LDAuMzI3LTAuNDgzLDAuMzI3LTAuNzkxdi00Ljc4aDQuNzgNCgkJYzAuMzA4LDAsMC41NzQtMC4xMSwwLjc5MS0wLjMyN2MwLjIxNy0wLjIxNywwLjMyNy0wLjQ4MywwLjMyNy0wLjc5MWMwLTAuMzA3LTAuMTEtMC41NzQtMC4zMjctMC43OTENCgkJYy0wLjIxOC0wLjIxNy0wLjQ4NC0wLjMyNy0wLjc5MS0wLjMyN2gtNC43OFY0NC4yNmg2Ljc0M2MwLjMwOCwwLDAuNTc0LTAuMTEsMC43OTEtMC4zMjdjMC4yMTctMC4yMTcsMC4zMjctMC40ODMsMC4zMjctMC43OTENCgkJYzAtMC4zMDctMC4xMS0wLjU3NC0wLjMyNy0wLjc5MUM0Ny43NDIsNDIuMTMzLDQ3LjQ3NSw0Mi4wMjMsNDcuMTY4LDQyLjAyM3oiLz4NCgk8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNNjEuNjkxLDQ0LjA4NGMtMS4zNjgtMS4zNjctMy4wMzUtMi4wNjEtNC45NTYtMi4wNjFjLTEuOTI2LDAtMy41OTcsMC42OTQtNC45NjQsMi4wNjENCgkJYy0xLjM2MiwxLjM2Mi0yLjA1MiwzLjAyOS0yLjA1Miw0Ljk1NmMwLDEuOTMyLDAuNjkxLDMuNjAyLDIuMDUyLDQuOTY0YzEuMzYyLDEuMzYyLDMuMDMyLDIuMDUyLDQuOTY0LDIuMDUyDQoJCWMxLjkyNiwwLDMuNTk0LTAuNjkxLDQuOTU2LTIuMDUyYzEuMzY3LTEuMzY3LDIuMDYxLTMuMDM4LDIuMDYxLTQuOTY0YzAtMC45NzEtMC4xNzMtMS44NzctMC41MTQtMi42OTMNCgkJQzYyLjg5Nyw0NS41MzEsNjIuMzc3LDQ0Ljc3LDYxLjY5MSw0NC4wODR6IE01Ni43MzUsNTMuODE5Yy0xLjMxNiwwLTIuNDU0LTAuNDctMy4zODItMS4zOThjLTAuOTI4LTAuOTI3LTEuMzk4LTIuMDY1LTEuMzk4LTMuMzgyDQoJCWMwLTAuNjcxLDAuMTE2LTEuMjg5LDAuMzQ1LTEuODM3YzAuMjI4LTAuNTQ5LDAuNTgzLTEuMDY1LDEuMDUzLTEuNTM2YzAuNDctMC40NywwLjk4OS0wLjgyNiwxLjU0MS0xLjA1OA0KCQljMC41NTEtMC4yMzEsMS4xNzEtMC4zNDgsMS44NDEtMC4zNDhjMS4zMSwwLDIuNDQ4LDAuNDczLDMuMzgyLDEuNDA3YzAuOTI4LDAuOTI4LDEuMzk4LDIuMDYzLDEuMzk4LDMuMzczDQoJCWMwLDEuMzE2LTAuNDcsMi40NTQtMS4zOTgsMy4zODJTNTguMDUxLDUzLjgxOSw1Ni43MzUsNTMuODE5eiIvPg0KCTxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik03My4yODYsNTAuMTc2YzAuMjk5LTAuMTg2LDAuNTctMC4zOTcsMC44MDYtMC42MjhjMC4yODctMC4yODEsMC41My0wLjU5MSwwLjcyNC0wLjkyMQ0KCQljMC4xOTMtMC4zMzEsMC4zNDEtMC42ODcsMC40MzktMS4wNTdzMC4xNDctMC43NTcsMC4xNDctMS4xNDhjMC0wLjU5OS0wLjExOC0xLjE3My0wLjM1LTEuNzA2DQoJCWMtMC4yMy0wLjUyOC0wLjU0Ny0wLjk5OC0wLjk0Mi0xLjM5NmMtMC4zOTUtMC4zOTctMC44NjMtMC43MTYtMS4zOTMtMC45NDdjLTAuNTMyLTAuMjMyLTEuMTA3LTAuMzUtMS43MDYtMC4zNWgtMy4yODENCgkJYy0wLjE1OCwwLTAuMzA2LDAuMDI4LTAuNDQyLDAuMDg1Yy0wLjEzMywwLjA1Ni0wLjI1MiwwLjEzNi0wLjM1NCwwLjIzOGMtMC4xMDMsMC4xMDMtMC4xODMsMC4yMjQtMC4yMzgsMC4zNg0KCQljLTAuMDU2LDAuMTM2LTAuMDg1LDAuMjgzLTAuMDg1LDAuNDM2djExLjc5NmMwLDAuMzA5LDAuMTEsMC41NzUsMC4zMjcsMC43OTFjMC40MzIsMC40MzQsMS4xNDgsMC40MzUsMS41ODIsMA0KCQljMC4yMTctMC4yMTcsMC4zMjctMC40ODMsMC4zMjctMC43OTF2LTQuMTI1aDIuMTk0bDIuOTQsNC43MDVjMC4yNCwwLjM1NywwLjU2MSwwLjUzOCwwLjk1NCwwLjUzOGMwLjE1MywwLDAuMy0wLjAyOCwwLjQzNS0wLjA4NA0KCQljMC4xMzYtMC4wNTYsMC4yNTgtMC4xMzYsMC4zNjEtMC4yMzljMC4xMDItMC4xMDIsMC4xODItMC4yMjEsMC4yMzgtMC4zNTRjMC4wNTctMC4xMzUsMC4wODUtMC4yODMsMC4wODUtMC40NDENCgkJYzAtMC4yMDktMC4wNTktMC40MTItMC4xNzgtMC42MDhMNzMuMjg2LDUwLjE3NnogTTczLjE2NSw0Ni40MjJjMCwwLjI5MS0wLjA1NywwLjU2OS0wLjE2OSwwLjgyNw0KCQljLTAuMTE0LDAuMjYxLTAuMjY5LDAuNDk0LTAuNDYyLDAuNjkyYy0wLjE5MSwwLjE5Ny0wLjQyMSwwLjM1NC0wLjY4MiwwLjQ2NmMtMC4yNiwwLjExMi0wLjU0MiwwLjE2OS0wLjg0LDAuMTY5SDY4Ljg1VjQ0LjI2DQoJCWgyLjE2MmMwLjI5MiwwLDAuNTcxLDAuMDU3LDAuODMyLDAuMTY5YzAuMjYyLDAuMTEzLDAuNDk0LDAuMjY5LDAuNjg5LDAuNDY0YzAuMTk1LDAuMTk1LDAuMzUxLDAuNDI3LDAuNDY0LDAuNjg5DQoJCUM3My4xMDksNDUuODQyLDczLjE2NSw0Ni4xMjUsNzMuMTY1LDQ2LjQyMnoiLz4NCgk8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNOTIuNTAzLDQyLjM0NWMtMC4xMDItMC4xMDItMC4yMjQtMC4xODItMC4zNi0wLjIzOGMtMC4xMzctMC4wNTYtMC4yODMtMC4wODQtMC40MzUtMC4wODQNCgkJYy0wLjQwNywwLTAuNzM3LDAuMTk3LTAuOTkzLDAuNjA1bC00LjkwNSw5LjgwMWwtNC45MS05LjgxMWMtMC4yMTktMC4zODktMC41Ni0wLjU5NS0wLjk4OC0wLjU5NQ0KCQljLTAuMTU4LDAtMC4zMDYsMC4wMjgtMC40NDIsMC4wODVjLTAuMTMzLDAuMDU2LTAuMjUyLDAuMTM2LTAuMzU0LDAuMjM4Yy0wLjEwMywwLjEwMy0wLjE4MywwLjIyNC0wLjIzOCwwLjM2DQoJCWMtMC4wNTYsMC4xMzYtMC4wODUsMC4yODMtMC4wODUsMC40MzZ2MTEuNzk2YzAsMC4zMDksMC4xMSwwLjU3NSwwLjMyNywwLjc5MWMwLjQzMiwwLjQzNCwxLjE0OCwwLjQzNSwxLjU4MiwwDQoJCWMwLjIxNy0wLjIxNywwLjMyNy0wLjQ4MywwLjMyNy0wLjc5MXYtNy4wNTJsMy43NTksNy41MDRjMC4yMTEsMC40MzYsMC41NjQsMC42NjcsMS4wMiwwLjY2N2MwLjQyMSwwLDAuNzU2LTAuMTkzLDAuOTc3LTAuNTcxDQoJCWwzLjgwMy03LjU5OXY3LjA1MWMwLDAuMzA5LDAuMTEsMC41NzUsMC4zMjcsMC43OTFjMC4yMTYsMC4yMTcsMC40ODMsMC4zMjcsMC43OTEsMC4zMjdjMC4zMDgsMCwwLjU3NC0wLjExLDAuNzkxLTAuMzI3DQoJCWMwLjIxNy0wLjIxNywwLjMyNy0wLjQ4MywwLjMyNy0wLjc5MVY0My4xNDFjMC0wLjE1Mi0wLjAyOC0wLjI5OC0wLjA4NS0wLjQzNkM5Mi42ODYsNDIuNTcsOTIuNjA2LDQyLjQ0OSw5Mi41MDMsNDIuMzQ1eiIvPg0KPC9nPg0KPC9zdmc+DQo=')
+        tr
           td.container-padding(bgcolor='#ffffff', style='background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Helvetica, sans-serif; color: #333;')
             br
+            br
             //- ### BEGIN CONTENT ### 
-            div(style='font-weight: bold; font-size: 18px; line-height: 24px; color: #D03C0F;')
-              | Basic Email Container
-            br
-            | The 100% wrapper
-            span(style='font-family: Andale Mono, Courier, monospace; color: #666;') <table>
-            | is included for clients that strip out the
-            span(style='font-family: Andale Mono, Courier, monospace; color: #666;') <body>
-            | tag. Change background color as required.
+            div(style='font-weight: bold; font-size: 18px; line-height: 24px; color: #2c3e50; text-align: center;')
+              | Hooray! You've successful register a contact form!
             br
             br
-            | The inner
-            span(style='font-family: Andale Mono, Courier, monospace; color: #666;') <table>
-            | with
-            span(style='font-family: Andale Mono, Courier, monospace; color: #666;') container
-            | class has the following functions:
+            | Only three steps to make it works!
             br
-            br
-            strong On desktop:
-            ul
+            ol
               li
-                | Wraps the email to a max recommended width of
-                span(style='font-family: Andale Mono, Courier, monospace; color: #666;') 600px
+                | Make a form with some fields (eg: name, surname, email, message). Be sure to add 
+                span(style='font-family: Andale Mono, Courier, monospace; color: #666;') name 
+                | attribute to fields you want to track.
+                br
+                br
               li
-                | Adds
-                span(style='font-family: Andale Mono, Courier, monospace; color: #666;') 30px
-                | left and right padding. (Hint: that means you have
-                span(style='font-family: Andale Mono, Courier, monospace; color: #666;') 540px
-                | for content.
-            strong On mobile:
-            ul
+                | Add 
+                span(style='font-family: Andale Mono, Courier, monospace; color: #666;') http://www.youform.me/api/form/#{form._id}
+                | as your form 
+                em(style='font-style: italic; color: #aaa;') action 
+                | attribute and 
+                span(style='font-family: Andale Mono, Courier, monospace; color: #666;') POST 
+                | as 
+                em(style='font-style: italic; color: #aaa;') method 
+                | attribute.
+                br
+                br
               li
-                | Wraps email to fluid
-                span(style='font-family: Andale Mono, Courier, monospace; color: #666;') 95%
-              li
-                | Reduces left and right padding to
-                span(style='font-family: Andale Mono, Courier, monospace; color: #666;') 12px
-                | for more content real estate
-              li See breakpoints in CSS
-            br
-            em(style='font-style: italic; font-size: 12px; color: #aaa;')
-              | N.B. The above is provided as explanation only and has not been live tested in clients.
+                | Whops, there's no step three!
             br
             br
-            div(style='font-weight: bold; font-size: 18px; line-height: 24px; color: #D03C0F;')
-              | The world scouts at us whale hunters
-            br
-            | At the same foam-fountain, Queequeg seemed to drink and reel with me. His dusky nostrils swelled apart;
-            | he showed his filed and pointed teeth. On, on we flew; and our offing gained, the Moss did homage to the
-            | blast; ducked and dived her bows as a slave before the Sultan. Sideways leaning, we sideways darted; every
-            | ropeyarn tingling like a wire; the two tall masts buckling like Indian canes in land tornadoes.
-            br
-            br
-            | So full of this reeling scene were we, as we stood by the plunging bowsprit, that for some time we did not
-            | notice the jeering glances of the passengers, a lubber-like assembly, who marvelled that two fellow beings
-            | should be so companionable; as though a white man were anything more dignified than a whitewashed negro.
-            br
-            br
-            em(style='font-style: italic; font-size: 12px; color: #aaa;') Excerpt from Moby Dick, by Herman Melville
-            br
-            br
+        tr
+          td(bgcolor='#2c3e50', style='background-color: #2c3e50; color: #ffffff; font-family: Helvetica, sans-serif; text-align: center; padding-top: 20px; padding-bottom: 20px;')
+            table(border='0', width='100%', height='100%', cellpadding='0', cellspacing='0', bgcolor='#2c3e50')
+              tr
+                td(style='font-size: 16px; line-height: 22px; text-align: center;')
+                  a(href='http://www.youform.me/stats/#{form._id}?token=#{form.token}', style='color: #ffffff; font-family: Helvetica, sans-serif; text-decoration: none;') Statistics
+                td(style='font-size: 16px; line-height: 22px; text-align: center;')
+                  a(href='http://www.youform.me/delete-form/#{form._id}?token=#{form.token}', style='color: #ffffff; font-family: Helvetica, sans-serif; text-decoration: none;') Delete form
             //- ### END CONTENT ### 
       //- /600px container 
 //- /100% wrapper
