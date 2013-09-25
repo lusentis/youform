@@ -259,7 +259,7 @@ module.exports = function (app, db, prefix) {
   app.get(prefix + '/deleted', form.deleted);
   app.get(prefix + '/signup', form.signup);
   app.get(prefix + '/delete-form/:api_key', form.del);
-  app.get(prefix + '/edit-form/:api_key', form.del);
+  app.get(prefix + '/edit-form/:api_key', form.edit);
   app.get(prefix + '/stats/:api_key', stats);
   app.get(prefix + '/confirm/sms/:api_key', confirm_sms);
   app.get(prefix + '/confirm/sms/confirmed/:api_key', confirmed_sms);

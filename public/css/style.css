@@ -61,9 +61,6 @@ body {
   padding: 20px 40px;
   color: #2c3e50;
 }
-#layout .content .homepage {
-  padding-top: 20px;
-}
 #layout .content form label {
   font-weight: 600;
   font-size: 12px;
@@ -139,6 +136,12 @@ body {
 #layout .content form .radio-palette.radio-palette-4.active {
   background: #c0392b;
 }
+#layout .content .homepage {
+  padding-top: 20px;
+}
+#layout .content .stats {
+  padding-top: 20px;
+}
 #layout h1,
 #layout h2,
 #layout h3 {
@@ -184,6 +187,20 @@ body {
   transition: opacity 0.5s ease;
 }
 #layout .pure-button.pure-button-primary:hover {
+  opacity: 0.8;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+  filter: alpha(opacity=80);
+}
+#layout .pure-button.pure-button-danger {
+  background: #c0392b;
+  color: #fff;
+  -webkit-transition: opacity 0.5s ease;
+  -moz-transition: opacity 0.5s ease;
+  -o-transition: opacity 0.5s ease;
+  -ms-transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease;
+}
+#layout .pure-button.pure-button-danger:hover {
   opacity: 0.8;
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   filter: alpha(opacity=80);
