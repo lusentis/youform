@@ -8,6 +8,8 @@ _darkblue = #34495e
 _blue = #2c3e50
 _red = #c0392b
 _purple = #8e44ad
+_emeraldgreen = #1abc9c
+_redlight = #e74c3c
 
 .open-sans
   font-family 'Open Sans', sans-serif
@@ -122,6 +124,20 @@ body
 
     .stats
       padding-top 20px
+
+      #mailphone
+        span.confirmed,
+        span.unconfirmed
+          padding 2px 4px
+          border-radius 2px
+          color #fff
+          line-height 24px
+          i.icon-2x
+            font-size 1.5em
+        span.confirmed
+          background rgba(#27ae60, 0.85)
+        span.unconfirmed
+          background rgba(#c0392b, 0.85)
 
       .pure-table
         td

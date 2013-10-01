@@ -6,39 +6,48 @@ block content
     .stats
       .pure-g
 
-        .pure-u-1-3
+        .pure-u-1-3#mailphone
           div(style='padding-right: 20px;')
             h2 Your info
 
             if !form.email_confirmed
-              p Your email is not confirmed!<br>If you have not received the confirmation email: 
+              p 
+                | Your email is not confirmed!
+                br
+                | If you have not received the confirmation email: 
                 a(href='/api/confirm/send-email/#{form._id}?token=#{form.token}') Resend confirmation email
             else
               p 
-                | Your email (
-                small
-                  em #{form.form_destination}
-                | ) was previously confirmed! 
+                span.confirmed
+                  i.icon-ok.icon-white
+                  | &nbsp; Your email was previously confirmed!
                 br
                 sub 
-                  em Well done dude!
+                  em Well done dude! Psst, your email is #{form.form_destination}
 
             br
 
             if !form.phone_confirmed
-              p Your phone is not confirmed!<br>If you have not received the confirmation SMS: 
-                a(href='/api/confirm/send-sms/#{form._id}?token=#{form.token}') Resend confirmation SMS
+              p 
+                span.unconfirmed
+                  i.icon-exclamation.icon-white
+                  | &nbsp; Your phone is not confirmed!
+                br
+                sub
+                  | If you have not received the confirmation SMS  
+                  a(href='/api/confirm/send-sms/#{form._id}?token=#{form.token}') 
+                    | click here&nbsp;
+                  | .
             else
               p 
                 | Your phone (
                 small
                   em +#{form.country_code} #{form.phone}
-                | ) was previously confirmed! 
-                br
+                | ) was previously confirmed!
                 sub 
                   em Awww yeah!
         
-        .pure-u-2-3
+        .pure-u-2-3#formstats
           div(style='padding-left: 20px;')
             h2 Your form
 
@@ -67,12 +76,8 @@ block content
                   td
                     | Website
                   td
-                    | #{form.website_url}
-                    sub 
-                      | (
-                      a(href='#{form.website_url', target='_blank')
-                        | link
-                      | )
+                    a(href='#{form.website_url', target='_blank')
+                      | #{form.website_url}
                 tr
                   td
                     | Requests
@@ -90,11 +95,13 @@ block content
                   td(colspan='2')
                     br
                     br
-                    .pure-g
-                      .pure-u-1-2
-                        a.pure-button.pure-button-primary(href='/edit-form/#{form._id}?token=#{form.token}') Edit form
-                      .pure-u-1-2
-                        a.pure-button.pure-button-danger(href='/delete-form/#{form._id}?token=#{form.token}') Delete form
+                    a.pure-button.pure-button-primary(href='/edit-form/#{form._id}?token=#{form.token}') 
+                      i.icon-cog.icon-white
+                      | &nbsp;Edit form
+                    | &nbsp;&nbsp;&nbsp;
+                    a.pure-button.pure-button-danger(href='/delete-form/#{form._id}?token=#{form.token}')
+                      i.icon-remove.icon-white
+                      | &nbsp;Delete form
           //-
             p API KEY: #{form._id}
             p Form: #{form.form_name}

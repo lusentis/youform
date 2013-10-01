@@ -142,6 +142,24 @@ body {
 #layout .content .stats {
   padding-top: 20px;
 }
+#layout .content .stats #mailphone span.confirmed,
+#layout .content .stats #mailphone span.unconfirmed {
+  padding: 2px 4px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  color: #fff;
+  line-height: 24px;
+}
+#layout .content .stats #mailphone span.confirmed i.icon-2x,
+#layout .content .stats #mailphone span.unconfirmed i.icon-2x {
+  font-size: 1.5em;
+}
+#layout .content .stats #mailphone span.confirmed {
+  background: rgba(39,174,96,0.85);
+}
+#layout .content .stats #mailphone span.unconfirmed {
+  background: rgba(192,57,43,0.85);
+}
 #layout .content .stats .pure-table td {
   border-color: rgba(44,62,80,0.15);
 }
