@@ -82,7 +82,7 @@ block content
                   td
                     | Requests
                   td
-                    for row, year in stats.counter
+                    for row, year in dashboard.counter
                       h4 #{year}
                       table
                         for value, month in row
@@ -95,11 +95,11 @@ block content
                   td(colspan='2')
                     br
                     br
-                    a.pure-button.pure-button-primary(href='/edit-form/#{form._id}?token=#{form.token}') 
+                    a.pure-button.pure-button-primary(href='/edit/#{form._id}?token=#{form.token}') 
                       i.icon-cog.icon-white
                       | &nbsp;Edit form
                     | &nbsp;&nbsp;&nbsp;
-                    a.pure-button.pure-button-danger(href='/delete-form/#{form._id}?token=#{form.token}')
+                    a.pure-button.pure-button-danger(href='/delete/#{form._id}?token=#{form.token}')
                       i.icon-remove.icon-white
                       | &nbsp;Delete form
           //-
@@ -112,9 +112,9 @@ block content
                 a(href=form.website_url) #{form.website_url}
               p Date: #{form.created_at}
 
-              p Total requests: #{stats.total_rows}
+              p Total requests: #{dashboard.total_rows}
 
-              for row, year in stats.counter
+              for row, year in dashboard.counter
                 h5 Year: #{year}
                 for value, month in row
                   p 
@@ -123,9 +123,9 @@ block content
                     span.month-value
                       | #{value}
 
-              a.pure-button.pure-button-primary(href='/edit-form/#{form._id}?token=#{form.token}') Edit form
+              a.pure-button.pure-button-primary(href='/edit/#{form._id}?token=#{form.token}') Edit form
               | &nbsp;
-              a.pure-button.pure-button-danger(href='/delete-form/#{form._id}?token=#{form.token}') Delete form
+              a.pure-button.pure-button-danger(href='/delete/#{form._id}?token=#{form.token}') Delete form
                   
 block scripts
   script.

@@ -21,6 +21,9 @@
     "connect-flash": "~0.1.1",
     "express-rate": "0.0.1",
     "moment": "~2.1.0",
-    "akismet-api": "~1.1.0"
+    "akismet-api": "~1.1.0",
+    "bcrypt": "~0.7.7",
+    "uuid": "~1.4.1",
+    "slug": "~0.3.3"
   }
 }

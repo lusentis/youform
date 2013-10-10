@@ -45,13 +45,13 @@ function(doc, req) {
       doc.sender_name = data.sender_name;
       doc.sender_email = data.sender_email.trim();
       doc.colours = data.colours.trim();
+      doc.phone = data.phone.trim();
+      doc.country_code = data.country_code.trim();
     }
   } else if (data.action === 'delete') {
     doc.deleted = true;
   } else if (data.action === 'phone') {
     doc.phone_confirmed = true;
-    delete doc.phone;
-    delete doc.country_code;
     if (doc.email_confirmed === true) {
       doc.confirmed = true;
     }

@@ -20,13 +20,56 @@ module.exports = function (app, db, prefix) {
 
   var form = {
     signup: function (req, res) {
+      var form = {
+        _id: ''
+      , token: ''
+      , code: ''
+      , form_name: ''
+      , website_url: ''
+      , website_success_page: ''
+      , website_error_page: ''
+      , form_subject: ''
+      , form_intro: ''
+      , form_destination: ''
+      , creator_email: ''
+      , sender_name: ''
+      , sender_email: ''
+      , colours: ''
+      , phone: ''
+      , country_code: ''
+      };
       res.render('signup', {
         title: 'New form'
+      , form: form
+      , action: 'create'
       });
     },
-    signup_success: function (req, res) {
-      res.render('signup_success', {
-        title: 'Sign success'
+    success: function (req, res) {
+      var api_key = req.param('api_key', null)
+        , token = req.query.token
+        ;
+
+      if (!api_key || !token) {
+        error_utils.params_error({api_key: api_key, token: token}, req, res);
+        return;
+      }
+
+      form_utils.get_form(api_key, function (err, form) {
+        if (err) {
+          throw err;
+        } else {
+          if (!form || form.token !== token) {
+            error_utils.params_error({api_key: api_key, token: token}, req, res);
+            return;
+          } else if (form.confirmed === true) {
+            res.redirect('/dashboard/' + form._id + '?token=' + form.token);
+          } else {
+            res.render('signup_success', {
+              title: 'sign success'
+            , form: form
+            });
+          }
+        }
       });
     },
     del: function (req, res) {
@@ -74,14 +117,17 @@ module.exports = function (app, db, prefix) {
             error_utils.params_error({api_key: api_key, token: token}, req, res);
             return;
           }
-          res.render('edit', {form: form});
+          res.render('signup', {
+            form: form
+          , action: 'edit'
+          });
         }
       });
     }
   };
 
 
-  var stats = function (req, res) {
+  var dashboard = function (req, res) {
     var api_key = req.param('api_key', null)
       , token = req.query.token
       ;
@@ -109,18 +155,20 @@ module.exports = function (app, db, prefix) {
           if (!form) {
             req.flash('form_not_found', true);
             res.redirect('/404');
+          } else if (!form.confirmed) {
+            res.redirect('/success/' + form._id + '?token=' + form.token);
           } else {
-            log_utils.get_stats(api_key, function (err, stats) {
+            log_utils.get_dashboard(api_key, function (err, dashboard) {
               if (err) {
                 next(err);
               } else {
-                logger.info('stats', stats);
-                next(null, form, stats);
+                logger.info('dashboard', dashboard);
+                next(null, form, dashboard);
               }
             });
           }
         },
-        function (form, stats) {
+        function (form, dashboard) {
           var not_found = !form;
           if (form) {
             not_found = form.token !== token;
@@ -130,10 +178,10 @@ module.exports = function (app, db, prefix) {
           var form_saved = req.flash('form_saved').length > 0;
           var form_save_error = req.flash('form_save_error').length > 0;
           form.created_at = moment(form.created_at).format('YYYY-MM-DD');
-          res.render('stats', {
+          res.render('dashboard', {
             not_found: not_found
           , form: form
-          , stats: stats
+          , dashboard: dashboard
           , form_saved: form_saved
           , form_save_error: form_save_error
           });
@@ -144,63 +192,6 @@ module.exports = function (app, db, prefix) {
           throw err;
         }
       });
-  };
-
-  var confirm_sms = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , token = req.query.token
-      ;
-
-    if (!api_key || !token) {
-      error_utils.params_error({api_key: api_key, token: token}, req, res);
-      return;
-    }
-
-    form_utils.get_form(api_key, function (err, form) {
-      if (err) {
-        throw err;
-      } else {
-        if (form.token === token) {
-          if (form.phone_confirmed === false) {
-            res.render('confirm_phone', {form: form});
-          } else {
-            res.redirect('/');
-          }
-        } else {
-          error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
-          return;
-        }
-      }
-    });
-  };
-
-  var confirmed_sms = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , token = req.query.token
-      ;
-
-    if (!api_key || !token) {
-      error_utils.params_error({api_key: api_key, token: token}, req, res);
-      return;
-    }
-
-    form_utils.get_form(api_key, function (err, form) {
-      if (err) {
-        throw err;
-      } else {
-        if (form.token === token) {
-          logger.info('Phone confirmed', form.phone_confirmed);
-          if (form.phone_confirmed === true) {
-            res.render('confirmed_phone', {api_key: api_key, token: token});
-          } else {
-            res.redirect('/');
-          }
-        } else {
-          error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
-          return;
-        }
-      }
-    });
   };
 
   var confirmed_email = function (req, res) {
@@ -219,7 +210,7 @@ module.exports = function (app, db, prefix) {
       } else {
         if (form.token === token) {
           if (form.email_confirmed === true) {
-            res.render('confirmed_email', {api_key: api_key, token: token});
+            res.render('confirmed_email', {form: form});
           } else {
             res.redirect('/');
           }
@@ -255,14 +246,12 @@ module.exports = function (app, db, prefix) {
 
   // routes
   app.get(prefix + '/', index);
-  app.get(prefix + '/success', form.signup_success);
+  app.get(prefix + '/success/:api_key', form.success);
   app.get(prefix + '/deleted', form.deleted);
   app.get(prefix + '/signup', form.signup);
-  app.get(prefix + '/delete-form/:api_key', form.del);
-  app.get(prefix + '/edit-form/:api_key', form.edit);
-  app.get(prefix + '/stats/:api_key', stats);
-  app.get(prefix + '/confirm/sms/:api_key', confirm_sms);
-  app.get(prefix + '/confirm/sms/confirmed/:api_key', confirmed_sms);
+  app.get(prefix + '/delete/:api_key', form.del);
+  app.get(prefix + '/edit/:api_key', form.edit);
+  app.get(prefix + '/dashboard/:api_key', dashboard);
   app.get(prefix + '/confirm/email/confirmed/:api_key', confirmed_email);
   // errors
   app.get(prefix + '/error', error_page);

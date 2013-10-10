@@ -52,7 +52,42 @@ module.exports = function () {
     async.waterfall([
         function (next) {
           // render email template
-          res.render('email/signup', { form: form }, function (err, body) {
+          res.render('email/config', { form: form }, function (err, body) {
+            if (err) {
+              next(err);
+            } else {
+              next(null, body);
+            }
+          });
+        },
+        function (html_body) {
+          // send email
+          postmark.send({
+            'From': process.env.POSTMARK_FROM
+          , 'To': form.creator_email
+          , 'Subject': 'Signup YouForm: ' + form.form_name
+          , 'HtmlBody': html_body
+          }, function (err) {
+            if (err) {
+              logger.error('Postmark error', err);
+              callback(err);
+            } else {
+              callback(null);
+            }
+          });
+        }
+      ], function (err) {
+        if (err) {
+          throw err;
+        }
+      });
+  };
+
+  var send_thanks = function (form, res, callback) {
+    async.waterfall([
+        function (next) {
+          // render email template
+          res.render('email/thanks', { form: form }, function (err, body) {
             if (err) {
               next(err);
             } else {
@@ -159,6 +194,7 @@ module.exports = function () {
   return {
     'send_form': send_form
   , 'send_form_info': send_form_info
+  , 'send_thanks': send_thanks
   , 'send_confirm_email': send_confirm_email
   , 'send_sms': send_sms
   };

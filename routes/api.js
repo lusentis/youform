@@ -44,10 +44,9 @@ module.exports = function (app, db, redis, prefix) {
       , sender_name: req.body['snd-name']
       , sender_email: req.body['snd-email']
       , colours: req.body.colours
+      , country_code: req.body['country-code'].trim().replace(/\+/g, '')
+      , phone: req.body.phone.trim().replace(/[\-]/g, '')
       };
-
-      form.country_code = req.body['country-code'].trim().replace(/\+/g, '');
-      form.phone = req.body.phone.trim().replace(/[\-]/g, '');
 
       if (!test_email(form.creator_email) || !test_email(form.sender_email) || !test_email(form.form_destination)) {
         req.flash('email_error', true);
@@ -72,7 +71,7 @@ module.exports = function (app, db, redis, prefix) {
             });
           },
           function (next) {
-            comm_utils.send_form_info(form, res, function (err) {
+            comm_utils.send_form_thanks(form, res, function (err) {
               if (err) {
                 next(err);
               } else {
@@ -85,7 +84,7 @@ module.exports = function (app, db, redis, prefix) {
               if (err) {
                 next(err);
               } else {
-                logger.info('email sent', form.form_destination_not_confirmed);
+                logger.ok('email sent', form.form_destination_not_confirmed);
                 req.flash('waiting_confirm', true);
                 next(null);
               }
@@ -94,7 +93,8 @@ module.exports = function (app, db, redis, prefix) {
           function () {
             // send sms
             comm_utils.send_sms(form, function () {
-              res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
+              res.redirect('/success/' + form._id + '?token=' + form.token);
+              //res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
             });
           }
         ], function (err) {
@@ -107,7 +107,7 @@ module.exports = function (app, db, redis, prefix) {
       var api_key = req.param('api_key', null);
 
       if (!api_key) {
-        error_utils.param_errors({api_key: api_key}, req, res);
+        error_utils.params_error({api_key: api_key}, req, res);
         return;
       }
 
@@ -122,7 +122,7 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
-              logger.info('log saved', log);
+              logger.ok('log saved', log);
               next(null);
             }
           });
@@ -142,11 +142,22 @@ module.exports = function (app, db, redis, prefix) {
                 logger.error({
                   error: true
                 , form_id: api_key
-                , description: 'Form deleted'
+                , description: 'not found'
                 });
-                res.json({
+                res.json(403, {
                   error: true
-                , description: 'Form deleted.'
+                , description: 'not found.'
+                });
+              } else if (!result.confirmed) {
+                // deleted
+                logger.error({
+                  error: true
+                , form_id: api_key
+                , description: 'not found'
+                });
+                res.json(403, {
+                  error: true
+                , description: 'not found'
                 });
               } else {
                 next(null, result);
@@ -156,7 +167,7 @@ module.exports = function (app, db, redis, prefix) {
               logger.error({
                 error: true
               , form_id: api_key
-              , description: 'Origin error'
+              , description: 'origin error'
               });
               req.flash('origin_error', true);
               res.redirect('/error');
@@ -259,7 +270,10 @@ module.exports = function (app, db, redis, prefix) {
       , sender_name: req.body['snd-name']
       , sender_email: req.body['snd-email']
       , colours: req.body.colours
+      , country_code: req.body['country-code'].trim().replace(/\+/g, '')
+      , phone: req.body.phone.trim().replace(/[\-]/g, '')
       };
+
 
       if (!api_key || !token) {
         error_utils.params_error({api_key: api_key, token: token}, req, res);
@@ -269,7 +283,13 @@ module.exports = function (app, db, redis, prefix) {
       if (!test_email(data.creator_email) || !test_email(data.sender_email) || !test_email(data.form_destination)) {
         logger.error('emails format error');
         req.flash('email_error', true);
-        res.redirect('/edit-form/' + api_key + '?token=' + token);
+        res.redirect('/edit/' + api_key + '?token=' + token);
+        return;
+      }
+
+      if (!phone_regex.test(data.phone.trim()) || !country_code_regex.test(data.country_code.trim())) {
+        req.flash('phone_error', true);
+        res.redirect('/edit/' + api_key + '?token=' + token);
         return;
       }
 
@@ -280,7 +300,7 @@ module.exports = function (app, db, redis, prefix) {
                 next(err);
               } else {
                 form = result;
-                if (token === form.token && form.confirmed === true) {
+                if (token === form.token) {
                   next(null);
                 } else {
                   res.redirect('/');
@@ -297,9 +317,9 @@ module.exports = function (app, db, redis, prefix) {
                   comm_utils.send_confirm_email(form, res, function (err) {
                     if (err) {
                       req.flash('send_email_error', true);
-                      res.redirect('/edit-form/' + api_key + '?token=' + token);
+                      res.redirect('/edit/' + api_key + '?token=' + token);
                     } else {
-                      logger.info('email sent', form.form_destination_not_confirmed);
+                      logger.ok('email sent', form.form_destination_not_confirmed);
                       req.flash('waiting_confirm', true);
                       next(null, form);
                     }
@@ -317,9 +337,9 @@ module.exports = function (app, db, redis, prefix) {
                 next(err);
               } else {
                 form = result;
-                logger.info('Form updated', form);
+                logger.ok('Form updated', form);
                 req.flash('form_saved', true);
-                res.redirect('/stats/' + form._id + '?token=' + form.token);
+                res.redirect('/dashboard/' + form._id + '?token=' + form.token);
               }
             });
           }
@@ -363,10 +383,21 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (form, next) {
-          db.atomic('youform', 'forms', api_key, {'action': 'confirm_email'}, function (err) {
+          db.atomic('youform', 'forms', api_key, {'action': 'confirm_email'}, function (err, data) {
             if (err) {
               next(err);
             } else {
+              if (data.confirmed === true) {
+                comm_utils.send_form_info(data, res, function (err) {
+                  if (err) {
+                    next(err);
+                  } else {
+                    logger.ok('info email sent', {
+                      email: form.creator_email
+                    });
+                  }
+                });
+              }
               res.redirect('/confirm/email/confirmed/' + api_key + '?token=' + token);
             }
           });
@@ -385,7 +416,7 @@ module.exports = function (app, db, redis, prefix) {
       ;
 
     if (!api_key || !token || !code) {
-      error_utils.param_errors({api_key: api_key, token: token, code: code}, req, res);
+      error_utils.params_error({api_key: api_key, token: token, code: code}, req, res);
       return;
     }
 
@@ -415,22 +446,33 @@ module.exports = function (app, db, redis, prefix) {
           , code: form.code
           });
           if (form.code === code) {
-            db.atomic('youform', 'forms', api_key, {'action': 'phone'}, function (err, form_updated) {
+            db.atomic('youform', 'forms', api_key, {'action': 'phone'}, function (err, data) {
               if (err) {
                 next(err);
               } else {
-                logger.info('updated', form_updated);
-                next(null, form);
+                logger.info('updated', data);
+                next(null, data);
               }
             });
           } else {
             req.flash('code_error', true);
-            res.redirect('/confirm/sms/' + api_key + '?token=' + token);
+            res.redirect('/success/' + api_key + '?token=' + token);
           }
         },
-        function () {
-          logger.info('code confirmed');
-          res.redirect('/confirm/sms/confirmed/' + api_key + '?token=' + token);
+        function (form, next) {
+          logger.ok('code confirmed');
+          if (form.confirmed === true) {
+            comm_utils.send_form_info(form, res, function (err) {
+              if (err) {
+                next(err);
+              } else {
+                logger.ok('info email sent', {
+                  email: form.creator_email
+                });
+              }
+            });
+          }
+          res.redirect('/success/' + api_key + '?token=' + token);
         }
       ], function (err) {
         if (err) {
@@ -468,10 +510,10 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
-              logger.info('email sent', form.form_destination_not_confirmed);
-              logger.info('redirect to stats');
+              logger.ok('email sent', form.form_destination_not_confirmed);
+              logger.info('redirect to dashboard');
               req.flash('waiting_confirm', true);
-              res.redirect('/stats/' + form._id + '?token=' + form.token);
+              res.redirect('/dashboard/' + form._id + '?token=' + form.token);
             }
           });
         }
@@ -518,7 +560,7 @@ module.exports = function (app, db, redis, prefix) {
               var now = moment();
               if (!time || now.diff(time, 'seconds') > 300) {
                 redis_client.set(api_key, now);
-                logger.info('saved', {
+                logger.ok('saved', {
                   sms_date: now.format('YYYY-MM-DD')
                 });
                 next(null, form);
@@ -528,7 +570,7 @@ module.exports = function (app, db, redis, prefix) {
                 , now: now.format('YYYY-MM-DD')
                 , sms_date: moment(time).format('YYYY-MM-DD')
                 });
-                res.redirect('/stats/' + form._id + '?token=' + form.token);
+                res.redirect('/dashboard/' + form._id + '?token=' + form.token);
               }
             }
           });
@@ -551,8 +593,8 @@ module.exports = function (app, db, redis, prefix) {
   app.get(prefix + '/confirm/send-email/:api_key', send_confirm_email);
   app.post(prefix + '/new-form', form.create);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form.get);
-  app.post(prefix + '/edit-form/:api_key', form.edit);
-  app.post(prefix + '/delete-form/:api_key', form.del);
+  app.post(prefix + '/edit/:api_key', form.edit);
+  app.post(prefix + '/delete/:api_key', form.del);
 
   app.get('/confirm/email/:api_key', confirm_email);
 };
