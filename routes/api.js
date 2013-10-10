@@ -71,7 +71,7 @@ module.exports = function (app, db, redis, prefix) {
             });
           },
           function (next) {
-            comm_utils.send_form_thanks(form, res, function (err) {
+            comm_utils.send_thanks(form, res, function (err) {
               if (err) {
                 next(err);
               } else {

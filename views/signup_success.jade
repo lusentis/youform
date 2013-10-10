@@ -31,35 +31,47 @@ block content
     .container
       .pure-g
         .pure-u-1-6 &nbsp;
-        if form.email_confirmed === false
-          .pure-u-1-3
-            .confirm-box.no-right
-              h2 confirm 
-                strong e-mail address
+        .pure-u-1-3
+          .confirm-box.no-right
+            h2 confirm 
+              strong e-mail address
+            if form.email_confirmed === false
               h3 not yet verified
-        else
-          .pure-u-1-3
-            .confirm-box.no-right
-              h2 confirm 
-                strong e-mail address
+            else
               h3.success verified
 
-        if form.phone_confirmed === false
-          .pure-u-1-3
-            .confirm-box
-              h2 confirm 
-                strong phone number
+        .pure-u-1-3
+          .confirm-box
+            h2 confirm 
+              strong phone number
+            if form.phone_confirmed === false
               form.pure-form(action='/api/confirm/sms/#{form._id}', method='post')
                 input(type='hidden', name='token', value='#{form.token}')
                 input(type='text', name='code', placeholder='verification code')
                 button.pure-button.pure-button-form.pure-button-form-success(type='submit', style='padding: 7px 15px;') Ok
-        else
-          .pure-u-1-3
-            .confirm-box
-              h2 confirm 
-                strong phone number
+            else
               h3.success verified
 
         .pure-u-1-6 &nbsp;
+
+
+      .pure-g
+        .pure-u-1-6 &nbsp;
+        .pure-u-1-3
+          .text-center
+            if form.email_confirmed === false
+              p.small Have not received the e-mail yet?&nbsp;&nbsp;
+                br
+                a() Send e-mail again
+
+        .pure-u-1-3
+          .text-center
+            if form.phone_confirmed === false
+              p.small Have not received the text yet?&nbsp;&nbsp;
+                br
+                a() Send a new text
+
+        .pure-u-1-6 &nbsp;
+
 
     .spacer(style='height: 100px;')
