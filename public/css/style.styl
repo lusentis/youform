@@ -1,15 +1,21 @@
 @import ('nib')
-@import url('http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700')
+@import url('http://fonts.googleapis.com/css?family=Open+Sans:300,400,400italic,600,700')
 
-_white = #FFFFFF
-_green = #4EB360
-_darkblue = #34495e
-//_blue  = #0378A6
-_blue = #2c3e50
-_red = #c0392b
-_purple = #8e44ad
-_emeraldgreen = #1abc9c
-_redlight = #e74c3c
+
+_light = #FFFFFF
+_dark = #666666
+_accent = #EB5055
+_success = #45BF55
+
+
+_paletteDark = #666666
+_paletteBrown = #846c5b
+_paletteYellow = #FFBA00
+_paletteEmerald = #019875
+_paletteCyan = #14A6B5
+_palettePurple = #A948AD
+_paletteCoral = #FF4E3E
+
 
 .open-sans
   font-family 'Open Sans', sans-serif
@@ -17,12 +23,92 @@ _redlight = #e74c3c
 html,
 body
   width 100%
+  min-width 1000px
   height 100%
-  @extends .open-sans
   font-size 15px
+  line-height 150%
   font-weight 400
-  background #F2F2F2
-  overflow-x hidden
+  background _light
+
+*
+  @extends .open-sans
+
+h1
+  font-size 19px
+  font-weight 600
+  margin 5px 0
+
+h2
+  font-size 17px
+  font-weight 400
+  margin 5px 0
+
+h3
+  font-size 25px
+  font-weight 300
+  color _accent
+  margin 5px 0
+
+.inline
+  display inline-block
+  vertical-align middle
+
+a
+  cursor pointer
+
+a.link
+  display inline-block
+  padding-bottom 8px
+  border-bottom 2px solid rgba(_accent, 0.4)
+  text-decoration none
+
+  transition border 0.2s ease
+
+  &:hover
+    text-decoration none
+    border-bottom-color rgba(_accent, 0.8)
+
+strong
+  font-weight 700
+
+p.small
+  font-size 12px
+  letter-spacing 1px
+  color lighten(_dark, 50%)
+  font-weight 400
+
+  a
+    display inline-block
+    font-weight 700
+    color inherit
+    text-decoration none
+    border-bottom 2px solid rgba(lighten(_dark, 50%), 0.4)
+
+    transition border 0.2s ease, color 0.2s ease
+    
+    &:hover
+      color lighten(_dark, 30%)
+      border-bottom-color rgba(lighten(_dark, 50%), 0.8)
+
+  &.note
+    line-height 16px
+    color darken(_accent, 50%)
+    a
+      border none
+      font-weight 600
+      &:hover
+        color darken(_accent, 70%)
+
+
+.container
+  width 960px
+  margin auto
+
+.full-container
+  width 90%
+  min-width 960px
+  margin auto
+
 
 .text-center
   text-align center
@@ -31,177 +117,224 @@ body
 .text-left
   text-align left
 
-#layout
-  padding-left 25%
+.pure-button
+  @extends .open-sans
+  background none !important
+  display inline-block
+  font-weight 700
+  font-size 16px
+  letter-spacing 1px
+  text-transform uppercase
+  border-radius 5px
+  padding 12px 24px
+
+  border 3px solid _dark
+  color _dark
+
+  &.pure-button-accent
+    border-color _accent
+    color _accent
+
+  &.pure-button-light
+    border-color _light
+    color _light
+
+  transition opacity 0.2s ease
+
+  &:hover
+    background none
+    opacity 0.8
+
+.spacer
+  height 20px
+
+.text-spacer
+  height 15px
+
+.separator
+  width 100%
+  height 2px
+  background darken(_light, 10%)
+
+  &.separator-accent
+    background darken(_accent, 30%)
+
+.page
+  width 100%
+  position relative
+  clearfix()
+  color _dark
+  overflow hidden
+
+  &.page-fullscreen
+    height 100%
+    min-height 600px
+    background-repeat no-repeat
+    background-position center center
+    background-size cover
+    color _light
+
+  &.page-accent
+    background-color _accent
+    color darken(_accent, 50%)
+    
+  &.page-gray
+    background-color darken(_light, 5%)
+
+  &.page-shadow
+    background-repeat no-repeat
+    background-position center top
+    background-image url('../img/shadow.jpg')
+    background-color _light
+
+    padding 100px 0 50px
+
+  &.page-letters
+    background-repeat no-repeat
+    background-position center bottom
+    background-image url('../img/letters.jpg')
+    background-color _light
+
+    padding 150px 0 200px
+
+  .page-vertical
+    display table
+    width 100%
+    height 100%
+
+    .page-inner
+      display table-cell
+      width 100%
+      vertical-align middle
+
+
+img.brand
+  margin 20px 30px
+
+img.footer-brand
+  width 50px
+  height 50px
+
+img.small-brand
+  width 25px
+  height 25px
+
+
+.pricing-box
+  text-align center
+  border 2px solid darken(_light, 10%)
+  padding 35px 0 20px
+  height 80px
+
   position relative
 
-  .sidebar
-    position fixed
-    top 0
-    bottom 0
-    width 25%
-    margin-left -25%
-    background _darkblue
-    color _white
-    overflow hidden
+  &.no-right
+    border-right none
 
-    .sidebar-table
-      display table
-      height 100%
-      width 100%
+  .pricing-icon
+    position absolute
+    height 50px
+    width 50px
 
-      .header
-        display table-cell
-        vertical-align middle
-        padding 20px 20px 150px 20px
+    top -25px
+    left 50%
+    margin-left -25px
 
-        .logo
-          width 80px
-          height auto
+    img
+      height 50px
+      width 50px
 
-    .pure-button.pure-button-success
-      background darken(_darkblue, 20%)
+#detail
+  height auto
+  max-height 0
+  
+  transition max-height 0.4s ease
 
-  .content
-    padding 20px 40px
-    color _blue
+  &.open
+    max-height 1000px
 
-    form
-      label
-        font-weight 600
-        font-size 12px
-        color #999
-        text-transform uppercase
-        margin-top 15px
-      input,
-      textarea,
-      select
-        @extends .open-sans
-        padding 10px
-        font-size 14px
-        resize none
-        border none
-        border-left 3px solid _white
-        box-shadow none
-        border-radius 3px
-        color rgba(0, 0, 0, 0.80)
-        &:focus
-          border-left 3px solid _darkblue
-          color _darkblue
-      
-      .radio-palette
-        display inline-block
-        line-height 0
-        width 14px
-        height 14px
-        border-radius 9px
-        margin-right 10px
-        background _white
-        transition background 0.2s ease
-        margin-top 14px
-        cursor pointer
-        input[type='radio']
-          display none
-        &.radio-palette-1
-          box-shadow inset 0 0 0 2px _blue
-          &.active
-            background _blue
-        &.radio-palette-2
-          box-shadow inset 0 0 0 2px _green
-          &.active
-            background _green
-        &.radio-palette-3
-          box-shadow inset 0 0 0 2px _purple
-          &.active
-            background _purple
-        &.radio-palette-4
-          box-shadow inset 0 0 0 2px _red
-          &.active
-            background _red
+  .text-center
+    padding 30px 10px
 
-    .homepage
-      padding-top 20px
+  img
+    width 120px
+    height 60px
+    margin 20px 0
 
-    .stats
-      padding-top 20px
 
-      #mailphone
-        span.confirmed,
-        span.unconfirmed
-          padding 2px 4px
-          border-radius 2px
-          color #fff
-          line-height 24px
-          i.icon-2x
-            font-size 1.5em
-        span.confirmed
-          background rgba(#27ae60, 0.85)
-        span.unconfirmed
-          background rgba(#c0392b, 0.85)
-
-      .pure-table
-        td
-          border-color rgba(_blue, 0.15)
-
-      table.stats-data
-        border none
-        tr
-          td
-            vertical-align top
-            text-align left
-            &:first-child
-              width 30%
-              text-align right
-            &[colspan='2']
-              text-align center
-            h4
-              font-weight bold
-              font-size 14px
-              margin 0
-            table
-              font-size 13px
-              td
-                border none!important
-
-  h1,
-  h2,
-  h3
-    font-weight 300
-
-  h4,
-  h5,
-  h6
-    font-weight 400
-
-  .spacer
-    height 20px
-
-  .pure-button
-    @extends .open-sans
-    font-weight 700
+form.pure-form
+  label
+    font-weight 600
+    font-size 12px
+    color #999
     text-transform uppercase
-    letter-spacing 1px
+    margin-top 15px
+
+  input[type=text], input[type=password], input[type=email], input[type=url], input[type=date], input[type=month], input[type=time], input[type=datetime], input[type=datetime-local], input[type=week], input[type=number], input[type=search], input[type=tel], input[type=color], select, textarea
+    @extends .open-sans
+    background _light
+    border 2px solid darken(_light, 10%)
+    box-shadow none
+    padding 10px
     font-size 14px
-    padding-top 10px
-    padding-bottom 10px
+    &:focus
+      border 2px solid darken(_light, 30%) !important
 
-    &.pure-button-success
-      background _darkblue
-      color _white
-      transition opacity 0.5s ease
-      &:hover
-        opacity 0.8
+  textarea
+    min-height 180px
 
-    &.pure-button-primary
-      background _blue
-      color _white
-      transition opacity 0.5s ease
-      &:hover
-        opacity 0.8
+  .radio-palette
+    display inline-block
+    line-height 0
+    width 14px
+    height 14px
+    border-radius 9px
+    margin-right 10px
+    background _white
+    transition background 0.2s ease
+    margin-top 5px
+    cursor pointer
+    box-shadow inset 0 0 0 2px _light
+    input[type='radio']
+      display none
+    &.radio-palette-0
+      box-shadow inset 0 0 0 2px _paletteDark
+      &.active
+        background _paletteDark
+    &.radio-palette-1
+      box-shadow inset 0 0 0 2px _paletteBrown
+      &.active
+        background _paletteBrown
+    &.radio-palette-2
+      box-shadow inset 0 0 0 2px _paletteEmerald
+      &.active
+        background _paletteEmerald
+    &.radio-palette-3
+      box-shadow inset 0 0 0 2px _paletteCyan
+      &.active
+        background _paletteCyan
+    &.radio-palette-4
+      box-shadow inset 0 0 0 2px _palettePurple
+      &.active
+        background _palettePurple
+    &.radio-palette-5
+      box-shadow inset 0 0 0 2px _paletteCoral
+      &.active
+        background _paletteCoral
+    &.radio-palette-6
+      box-shadow inset 0 0 0 2px _paletteYellow
+      &.active
+        background _paletteYellow
 
-    &.pure-button-danger
-      background _red
-      color _white
-      transition opacity 0.5s ease
-      &:hover
-        opacity 0.8
+
+  .pure-button-form
+    background darken(_light, 35%) !important
+    border 3px solid _light !important
+    color _light !important
+    margin 0 5px
+    &:hover
+      opacity 0.8
+
+    &.pure-button-form-success
+      background _success !important
+      border 3px solid _success !important

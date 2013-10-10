@@ -1,27 +1,208 @@
 extends layout
 
 block content
-  .content
-    .homepage
-      hgroup
-        h1 What is YouForm?
 
-        h2
-          | We reinvent old school
-          br
-          | contact-form-makers from '00s!
+  .page.page-fullscreen(style='background-image: url("/img/mailbox.jpg");')
+    .page-vertical
+      .page-inner
+        .container
+          .pure-g
+            .pure-u-1-2
+              a(href='#')
+                img.brand(src='/img/youform.svg')
 
-        h3
-          | Simple create, make your form
-          br
-          | the way you like, copy and paste
-          br
-          | the url we provide in your 
-          br
-          | static (or not) website.
+              .spacer
+              .spacer
 
-block sidebar
-  h2.brand-tagline Giving life to your static HTML Form
-  .spacer
-  a.pure-button.pure-button-success(href='/signup')
-    | Signup
+              h1 What is YouForm?
+              h2 We have reinvented 
+                em old school 
+                | contact-form-makers
+
+              .text-spacer
+
+              h2 Create and make your form the way You like,
+                br
+                | with the style You like, and let’s us do the rest
+              
+              .text-spacer
+
+              h2 No 
+                em server-side 
+                | code, no 
+                em language skill 
+                | needed
+                br
+                | Just relax and make your static website comes to life!
+
+              .spacer
+              .spacer
+
+              a.pure-button.pure-button-light(href='#discover')
+                | Excited?
+
+              .spacer
+              .spacer
+
+
+  #discover.page.page-letters
+    .container
+      .pure-g
+        .pure-u-1-4 &nbsp;
+        .pure-u-1-2
+          .text-center
+            h1 Everything made simple!
+            h2 Single scalable plan. Free trial. Cancel when you want.
+
+            .spacer
+            .spacer
+
+            a.pure-button.pure-button-accent(href='/signup')
+              | Start Here!
+
+
+  .separator
+
+  .page.page-shadow
+    .container
+      .pure-g
+        .pure-u-1-8 &nbsp;
+        .pure-u-1-4
+          .pricing-box.no-right
+            h2 first 
+              strong 100 e-mails
+            h3 FREE
+        .pure-u-1-4
+          .pricing-box.no-right
+            h2 every 
+              strong 500 e-mails
+            h3 1,00 €
+
+            .pricing-icon
+              img(src='/img/plane.svg')
+
+        .pure-u-1-4
+          .pricing-box
+            h2 volume licenses
+            h3
+              a.link() ask a quote
+        .pure-u-1-8 &nbsp;
+
+      .spacer
+      .spacer
+
+      .pure-g
+        .pure-u-1
+          .text-center
+            p.small
+              | I’m a little bit paranoid... I want to 
+              a#mask(href='#detail') know everything
+              |  !
+
+      .spacer
+      .spacer
+
+    #detail.page.page-gray
+      .separator
+      .container
+        .spacer
+        .spacer
+        .spacer
+
+        .pure-g
+          .pure-u-1-3
+            .text-center
+              img(src='/img/icon-way.png')
+              h1 Spam? No thanks!
+              p 
+                | We use intelligent Spam filters to
+                br
+                | automatically reduce the number
+                br
+                | of fake e-mails
+
+          .pure-u-1-3
+            .text-center
+              img(src='/img/icon-dollar.png')
+              h1 No surprises in the bill
+              p
+                | To make you comfortable and safe,
+                br
+                | we have added the possibility to limit
+                br
+                | the monthly number of e-mails
+
+          .pure-u-1-3
+            .text-center
+              img(src='/img/icon-way.png')
+              h1 Instant delete
+              p
+                | If you want to move somewhere else
+                br
+                | you can easily opt-out. You will not
+                br
+                | receive any further e-mails or bills!
+
+        .spacer
+
+        .pure-g
+          .pure-u-1-3
+            .text-center
+              img(src='/img/icon-device.png')
+              h1 Modern Layout
+              p
+                | Your customers will be impressed
+                br
+                | by the modern and clean look and feel
+                br
+                | of the e-mails
+
+          .pure-u-1-3
+            .text-center
+              img(src='/img/icon-lock.png')
+              h1 We respect your Privacy
+              p
+                | Everything passes from our server
+                br
+                | is encrypted and not stored.
+                br
+                | Only you will read these messages!
+
+          .pure-u-1-3
+            .text-center
+              img(src='/img/icon-report.png')
+              h1 Monthly report
+              p
+                | Every month we will send you a
+                br
+                | report with the total number of
+                br
+                | e-mails sent in the past month
+
+        .spacer
+        .spacer
+        .spacer
+
+      .separator
+
+
+  .separator.separator-accent
+
+  .page.page-accent
+    .spacer
+    .container
+      .pure-g
+        .pure-u-1
+          .text-center
+            img.footer-brand(src='/img/youform.svg')
+
+            p.small.note
+              | YouForm is designed and built by Plastic Panda in Milan
+              br
+              | If you want to say Hello, please contact us at 
+              a(href='mailto:hello@plasticpanda.com') hello@plasticpanda.com
+              br
+              | We’re happy to know new people around the globe! And don’t forget to 
+              a(href='http://www.plasticpanda.com', target='_blank') spread the word!
+
+    .spacer
