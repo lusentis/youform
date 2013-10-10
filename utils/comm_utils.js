@@ -122,7 +122,7 @@ module.exports = function () {
     async.waterfall([
         function (next) {
           // render email template
-          res.render('email/email', { intro: form.form_intro, color: form.colours, form: post_data }, function (err, body) {
+          res.render('email/email', { form: form, user_form: post_data }, function (err, body) {
             if (err) {
               next(err);
             } else {

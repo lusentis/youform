@@ -1,6 +1,10 @@
 extends base
 
 
+block title
+  | - Verify the e-mail address
+
+
 block mailtitle
   | Hooray! One little thing before!
 
@@ -9,4 +13,4 @@ block mailcontent
 
   p Click here to confirm your email address and activate it.
     br
-    a(href='http://www.youform.me/confirm/email/#_{form._id}?token=#_{form.token}&email=#_{form.form_destination}', style='font-family: Andale Mono, Courier, monospace; color: #666;') http://www.youform.me/confirm/email/#_{form._id}?token=#_{form.token}&email=#_{form.form_destination_not_confirmed}
+    a(href='http://www.youform.me/confirm/email/#{form._id}?token=#{form.token}&email=#{form.form_destination}', style='font-family: Andale Mono, Courier, monospace; color: #666;') http://www.youform.me/confirm/email/#{form._id}?token=#{form.token}&amp;email=#{form.form_destination_not_confirmed}
