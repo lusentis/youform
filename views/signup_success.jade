@@ -1,6 +1,117 @@
 extends layout
 
 block content
-  .container
-    .panel.panel-default
-      .panel-heading Success
+
+  .page.page-accent
+    .text-spacer
+    .container
+      .pure-g
+        .pure-u-1
+          .text-center
+            a(href='/')
+              img.small-brand(src='/img/youform.svg')
+    .text-spacer
+
+  .separator.separator-accent
+
+
+  .page.page-gray
+    .spacer
+    .container
+      .pure-g
+        .pure-u-1
+          h1.inline Success!&nbsp;&nbsp;
+          h2.inline Your form has been created, now you have to complete these simple steps.
+    .spacer
+
+  .separator
+
+  .page
+    .spacer(style='height: 100px;')
+    .container
+      .pure-g
+        .pure-u-1-6 &nbsp;
+        .pure-u-1-3
+          .confirm-box.no-right
+            h2 confirm 
+              strong e-mail address
+            form.pure-form
+              input(type='text', name='confirmemail', placeholder='verification code')
+              button.pure-button.pure-button-form.pure-button-form-success(type='submit', style='padding: 7px 15px;') Ok
+
+        .pure-u-1-3
+          .confirm-box
+            h2 confirm 
+              strong phone number
+            form.pure-form
+              input(type='text', name='confirmemail', placeholder='verification code')
+              button.pure-button.pure-button-form.pure-button-form-success(type='submit', style='padding: 7px 15px;') Ok
+
+        .pure-u-1-6 &nbsp;
+
+      .pure-g
+        .pure-u-1-6 &nbsp;
+        .pure-u-1-3
+          .text-center
+            p.small Have not received the e-mail yet?&nbsp;&nbsp;
+              br
+              a() Send e-mail again
+
+        .pure-u-1-3
+          .text-center
+            p.small Have not received the text yet?&nbsp;&nbsp;
+              br
+              a() Send a new text
+
+        .pure-u-1-6 &nbsp;
+
+
+    .spacer(style='height: 100px;')
+    .container
+      .pure-g
+        .pure-u-1-6 &nbsp;
+        .pure-u-1-3
+          .confirm-box.no-right
+            h2 confirm 
+              strong e-mail address
+            form.pure-form
+              input(type='text', name='confirmemail', placeholder='verification code')
+              button.pure-button.pure-button-form.pure-button-form-success(type='submit', style='padding: 7px 15px;') Ok
+
+        .pure-u-1-3
+          .confirm-box
+            h2 confirm 
+              strong phone number
+            h3.success verified
+
+        .pure-u-1-6 &nbsp;
+
+      .pure-g
+        .pure-u-1-6 &nbsp;
+        .pure-u-1-3
+          .text-center
+            p.small Have not received the e-mail yet?&nbsp;&nbsp;
+              br
+              a() Send e-mail again
+
+
+    .spacer(style='height: 100px;')
+    .container
+      .pure-g
+        .pure-u-1-6 &nbsp;
+        .pure-u-1-3
+          .confirm-box.no-right
+            h2 confirm 
+              strong e-mail address
+            h3.success verified
+            
+        .pure-u-1-3
+          .confirm-box
+            h2 confirm 
+              strong phone number
+            h3.success verified
+
+        .pure-u-1-6 &nbsp;
+
+
+    .spacer(style='height: 100px;')

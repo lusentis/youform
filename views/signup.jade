@@ -8,7 +8,8 @@ block content
       .pure-g
         .pure-u-1
           .text-center
-            img.small-brand(src='/img/youform.svg')
+            a(href='/')
+              img.small-brand(src='/img/youform.svg')
     .text-spacer
 
   .separator.separator-accent
@@ -16,7 +17,7 @@ block content
 
   .page.page-gray
     .spacer
-    .full-container
+    .container
       .pure-g
         .pure-u-1
           h1.inline Start here!&nbsp;&nbsp;
@@ -27,7 +28,7 @@ block content
 
   .page
     .spacer
-    .full-container
+    .container
       .pure-g
         .pure-u-1
           form.pure-form.pure-form-stacked(role='form', action='/api/new-form', method='post')
@@ -107,6 +108,7 @@ block content
 
                   .spacer
                   .spacer
+
 
 block scripts
   script.

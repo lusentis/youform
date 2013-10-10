@@ -8,10 +8,4 @@
 
   'use strict';
 
-  var showMask = function () {
-    document.querySelector('#detail').classList.add('open');
-    document.querySelector('#mask').removeEventListener('click', showMask, false);
-  }
-  document.querySelector('#mask').addEventListener('click', showMask, false);
-
 })();

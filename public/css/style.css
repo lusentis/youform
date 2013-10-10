@@ -46,6 +46,9 @@ h3 {
   color: #eb5055;
   margin: 5px 0;
 }
+h3.success {
+  color: #45bf55;
+}
 .inline {
   display: inline-block;
   vertical-align: middle;
@@ -235,17 +238,20 @@ img.small-brand {
   width: 25px;
   height: 25px;
 }
-.pricing-box {
+.pricing-box,
+.confirm-box {
   text-align: center;
   border: 2px solid #e6e6e6;
   padding: 35px 0 20px;
   height: 80px;
   position: relative;
 }
-.pricing-box.no-right {
+.pricing-box.no-right,
+.confirm-box.no-right {
   border-right: none;
 }
-.pricing-box .pricing-icon {
+.pricing-box .pricing-icon,
+.confirm-box .pricing-icon {
   position: absolute;
   height: 50px;
   width: 50px;
@@ -253,9 +259,13 @@ img.small-brand {
   left: 50%;
   margin-left: -25px;
 }
-.pricing-box .pricing-icon img {
+.pricing-box .pricing-icon img,
+.confirm-box .pricing-icon img {
   height: 50px;
   width: 50px;
+}
+.confirm-box {
+  height: 90px;
 }
 #detail {
   height: auto;
@@ -306,6 +316,7 @@ form.pure-form textarea {
   box-shadow: none;
   padding: 10px;
   font-size: 14px;
+  outline: none;
 }
 form.pure-form input[type=text]:focus,
 form.pure-form input[type=password]:focus,
@@ -323,6 +334,7 @@ form.pure-form input[type=tel]:focus,
 form.pure-form input[type=color]:focus,
 form.pure-form select:focus,
 form.pure-form textarea:focus {
+  outline: none;
   border: 2px solid #b3b3b3 !important;
 }
 form.pure-form textarea {

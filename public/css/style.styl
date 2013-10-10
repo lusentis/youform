@@ -48,6 +48,8 @@ h3
   font-weight 300
   color _accent
   margin 5px 0
+  &.success
+    color _success
 
 .inline
   display inline-block
@@ -180,7 +182,7 @@ p.small
     
   &.page-gray
     background-color darken(_light, 5%)
-
+    
   &.page-shadow
     background-repeat no-repeat
     background-position center top
@@ -220,7 +222,8 @@ img.small-brand
   height 25px
 
 
-.pricing-box
+.pricing-box,
+.confirm-box
   text-align center
   border 2px solid darken(_light, 10%)
   padding 35px 0 20px
@@ -243,6 +246,9 @@ img.small-brand
     img
       height 50px
       width 50px
+
+.confirm-box
+  height 90px
 
 #detail
   height auto
@@ -277,7 +283,9 @@ form.pure-form
     box-shadow none
     padding 10px
     font-size 14px
+    outline none
     &:focus
+      outline none
       border 2px solid darken(_light, 30%) !important
 
   textarea
