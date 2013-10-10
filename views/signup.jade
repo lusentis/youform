@@ -87,20 +87,14 @@ block content
                       textarea.pure-input-1(type='text', name='f-intro', placeholder='Introduction', rows='5', required) #{form.form_intro}
                     .pure-control-group
                       label(for='colours') Pick a color
-                      span.radio-palette.radio-palette-0
-                        input(type='radio', name='colours', required, value='palette-0')
-                      span.radio-palette.radio-palette-1
-                        input(type='radio', name='colours', required, value='palette-1')
-                      span.radio-palette.radio-palette-2
-                        input(type='radio', name='colours', required, value='palette-2')
-                      span.radio-palette.radio-palette-3
-                        input(type='radio', name='colours', required, value='palette-3')
-                      span.radio-palette.radio-palette-4
-                        input(type='radio', name='colours', required, value='palette-4')
-                      span.radio-palette.radio-palette-5
-                        input(type='radio', name='colours', required, value='palette-5')
-                      span.radio-palette.radio-palette-6
-                        input(type='radio', name='colours', required, value='palette-6')
+                      input(type='hidden', name='colours', value='')
+                      span.radio-palette.radio-palette-0(data-palette='palette-0')
+                      span.radio-palette.radio-palette-1(data-palette='palette-1')
+                      span.radio-palette.radio-palette-2(data-palette='palette-2')
+                      span.radio-palette.radio-palette-3(data-palette='palette-3')
+                      span.radio-palette.radio-palette-4(data-palette='palette-4')
+                      span.radio-palette.radio-palette-5(data-palette='palette-5')
+                      span.radio-palette.radio-palette-6(data-palette='palette-6')
 
 
                 .pure-u-1
@@ -124,18 +118,18 @@ block scripts
 
     window.onload = function () {
       var col = (/^palette-[0-6]$/.test('#{form.colours}')) ? '#{form.colours}' : 'palette-0';
-      var el = document.querySelector('.radio-palette.radio-'+col);
-      el.querySelector('input').setAttribute('checked', 'checked');
+      var el = document.querySelector('.radio-palette.radio-' + col);
+      document.querySelector('input[name="colours"]').value = col;
       el.classList.add('active');
     };
 
     document.querySelectorAll('.radio-palette').forEach(function (el) {
       el.addEventListener('click', function () {
-        document.querySelector('.radio-palette.active input').removeAttribute('checked');
         document.querySelector('.radio-palette.active').classList.remove('active');
-
-        el.querySelector('input').setAttribute('checked', 'checked');
+        document.querySelector('input[name="colours"]').value = el.getAttribute('data-palette');
         el.classList.add('active');
+
+        console.log(document.querySelector('input[name="colours"]').value)
       });
     });
     

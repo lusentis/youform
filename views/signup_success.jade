@@ -62,14 +62,19 @@ block content
             if form.email_confirmed === false
               p.small Have not received the e-mail yet?&nbsp;&nbsp;
                 br
-                a() Send e-mail again
+                a(href='/api/confirm/send-email/#{form._id}?token=#{form.token}') Send e-mail again
+
+              //-p.small #{form.form_destination} Wrong e-mail?
+
 
         .pure-u-1-3
           .text-center
             if form.phone_confirmed === false
               p.small Have not received the text yet?&nbsp;&nbsp;
                 br
-                a() Send a new text
+                a(href='/api/confirm/send-sms/#{form._id}?token=#{form.token}') Send a new text
+
+              //-p.small #{form.country_code} #{form.phone} Wrong number?
 
         .pure-u-1-6 &nbsp;
 
