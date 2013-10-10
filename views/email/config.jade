@@ -19,7 +19,7 @@ block mailcontent
       br
     li
       | Add 
-      span(style='font-family: Andale Mono, Courier, monospace; color: #666;') http://www.youform.me/api/form/#_{form._id} 
+      span(style='font-family: Andale Mono, Courier, monospace; color: #666;') http://www.youform.me/api/form/#{form._id} 
       | as your form 
       em(style='font-style: italic; color: #aaa;') action 
       | attribute and 
@@ -31,4 +31,4 @@ block mailcontent
       br
       br
 
-      a(href='http://www.youform.me/dashboard/#_{form._id}?token=#_{form.token}', style='color: #ffffff; font-family: Helvetica, sans-serif; text-decoration: none;') Statistics
+      a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}', style='color: #ffffff; font-family: Helvetica, sans-serif; text-decoration: none;') Statistics

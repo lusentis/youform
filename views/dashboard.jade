@@ -1,52 +1,35 @@
 extends layout
 
 block content
-  .content
 
-    .stats
+  .page.page-accent
+    .text-spacer
+    .container
       .pure-g
+        .pure-u-1
+          .text-center
+            a(href='/')
+              img.small-brand(src='/img/youform.svg')
+    .text-spacer
 
-        .pure-u-1-3#mailphone
-          div(style='padding-right: 20px;')
-            h2 Your info
+  .separator.separator-accent
 
-            if !form.email_confirmed
-              p 
-                | Your email is not confirmed!
-                br
-                | If you have not received the confirmation email: 
-                a(href='/api/confirm/send-email/#{form._id}?token=#{form.token}') Resend confirmation email
-            else
-              p 
-                span.confirmed
-                  i.icon-ok.icon-white
-                  | &nbsp; Your email was previously confirmed!
-                br
-                sub 
-                  em Well done dude! Psst, your email is #{form.form_destination}
 
-            br
+  .page.page-gray
+    .spacer
+    .container
+      .pure-g
+        .pure-u-1
+          h1.inline Dashboard!&nbsp;&nbsp;
+          h2.inline This is the dashboard of the form #{form.form_name}
+    .spacer
 
-            if !form.phone_confirmed
-              p 
-                span.unconfirmed
-                  i.icon-exclamation.icon-white
-                  | &nbsp; Your phone is not confirmed!
-                br
-                sub
-                  | If you have not received the confirmation SMS  
-                  a(href='/api/confirm/send-sms/#{form._id}?token=#{form.token}') 
-                    | click here&nbsp;
-                  | .
-            else
-              p 
-                | Your phone (
-                small
-                  em +#{form.country_code} #{form.phone}
-                | ) was previously confirmed!
-                sub 
-                  em Awww yeah!
-        
+  .separator
+
+  .page
+    .spacer(style='height: 100px;')
+    .container
+      .pure-g
         .pure-u-2-3#formstats
           div(style='padding-left: 20px;')
             h2 Your form
@@ -57,6 +40,11 @@ block content
                   | Form
                 td
                   | #{form.form_name}
+              tr
+                td
+                  | Action
+                td
+                  | http://www.youform.me/api/form/#{form._id}
               tr
                 td
                   | API KEY
