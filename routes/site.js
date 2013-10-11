@@ -156,7 +156,7 @@ module.exports = function (app, db, prefix) {
             req.flash('form_not_found', true);
             res.redirect('/404');
           } else if (!form.confirmed) {
-            res.redirect(prefix + '/success');
+            res.redirect('/success/' + form._id + '?token=' + form.token);
           } else {
             log_utils.get_dashboard(api_key, function (err, dashboard) {
               if (err) {
@@ -267,7 +267,7 @@ module.exports = function (app, db, prefix) {
       } else {
         if (form.token === token) {
           if (form.email_confirmed === true) {
-            res.render('confirmed_email', {api_key: api_key, token: token});
+            res.render('confirmed_email', {form: form});
           } else {
             res.redirect('/');
           }

@@ -107,7 +107,7 @@ module.exports = function (app, db, redis, prefix) {
       var api_key = req.param('api_key', null);
 
       if (!api_key) {
-        error_utils.param_errors({api_key: api_key}, req, res);
+        error_utils.params_error({api_key: api_key}, req, res);
         return;
       }
 
@@ -290,6 +290,7 @@ module.exports = function (app, db, redis, prefix) {
       if (!phone_regex.test(data.phone.trim()) || !country_code_regex.test(data.country_code.trim())) {
         req.flash('phone_error', true);
         res.redirect('/edit/' + api_key + '?token=' + token);
+        return;
       }
 
       async.waterfall([
@@ -404,7 +405,7 @@ module.exports = function (app, db, redis, prefix) {
       ;
 
     if (!api_key || !token || !code) {
-      error_utils.param_errors({api_key: api_key, token: token, code: code}, req, res);
+      error_utils.params_error({api_key: api_key, token: token, code: code}, req, res);
       return;
     }
 
@@ -449,7 +450,7 @@ module.exports = function (app, db, redis, prefix) {
         },
         function () {
           logger.info('code confirmed');
-          res.redirect('/dashboard/' + api_key + '?token=' + token);
+          res.redirect('/success/' + api_key + '?token=' + token);
         }
       ], function (err) {
         if (err) {
