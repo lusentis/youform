@@ -577,7 +577,7 @@ module.exports = function (app, db, redis, prefix) {
         },
         function (form) {
           comm_utils.send_sms(form, function () {
-            res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
+            res.redirect('/dashboard/' + form._id + '?token=' + form.token);
           });
         }
       ], function (err) {
