@@ -71,7 +71,7 @@ module.exports = function (app, db, redis, prefix) {
             });
           },
           function (next) {
-            comm_utils.send_form_info(form, res, function (err) {
+            comm_utils.send_form_thanks(form, res, function (err) {
               if (err) {
                 next(err);
               } else {
@@ -84,7 +84,7 @@ module.exports = function (app, db, redis, prefix) {
               if (err) {
                 next(err);
               } else {
-                logger.info('email sent', form.form_destination_not_confirmed);
+                logger.ok('email sent', form.form_destination_not_confirmed);
                 req.flash('waiting_confirm', true);
                 next(null);
               }
@@ -122,7 +122,7 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
-              logger.info('log saved', log);
+              logger.ok('log saved', log);
               next(null);
             }
           });
@@ -319,7 +319,7 @@ module.exports = function (app, db, redis, prefix) {
                       req.flash('send_email_error', true);
                       res.redirect('/edit/' + api_key + '?token=' + token);
                     } else {
-                      logger.info('email sent', form.form_destination_not_confirmed);
+                      logger.ok('email sent', form.form_destination_not_confirmed);
                       req.flash('waiting_confirm', true);
                       next(null, form);
                     }
@@ -337,7 +337,7 @@ module.exports = function (app, db, redis, prefix) {
                 next(err);
               } else {
                 form = result;
-                logger.info('Form updated', form);
+                logger.ok('Form updated', form);
                 req.flash('form_saved', true);
                 res.redirect('/dashboard/' + form._id + '?token=' + form.token);
               }
@@ -383,10 +383,21 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (form, next) {
-          db.atomic('youform', 'forms', api_key, {'action': 'confirm_email'}, function (err) {
+          db.atomic('youform', 'forms', api_key, {'action': 'confirm_email'}, function (err, data) {
             if (err) {
               next(err);
             } else {
+              if (data.confirmed === true) {
+                comm_utils.send_form_info(data, res, function (err) {
+                  if (err) {
+                    next(err);
+                  } else {
+                    logger.ok('info email sent', {
+                      email: form.creator_email
+                    });
+                  }
+                });
+              }
               res.redirect('/confirm/email/confirmed/' + api_key + '?token=' + token);
             }
           });
@@ -435,12 +446,12 @@ module.exports = function (app, db, redis, prefix) {
           , code: form.code
           });
           if (form.code === code) {
-            db.atomic('youform', 'forms', api_key, {'action': 'phone'}, function (err, form_updated) {
+            db.atomic('youform', 'forms', api_key, {'action': 'phone'}, function (err, data) {
               if (err) {
                 next(err);
               } else {
-                logger.info('updated', form_updated);
-                next(null, form);
+                logger.info('updated', data);
+                next(null, data);
               }
             });
           } else {
@@ -448,8 +459,19 @@ module.exports = function (app, db, redis, prefix) {
             res.redirect('/success/' + api_key + '?token=' + token);
           }
         },
-        function () {
-          logger.info('code confirmed');
+        function (form, next) {
+          logger.ok('code confirmed');
+          if (form.confirmed === true) {
+            comm_utils.send_form_info(form, res, function (err) {
+              if (err) {
+                next(err);
+              } else {
+                logger.ok('info email sent', {
+                  email: form.creator_email
+                });
+              }
+            });
+          }
           res.redirect('/success/' + api_key + '?token=' + token);
         }
       ], function (err) {
@@ -488,7 +510,7 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
-              logger.info('email sent', form.form_destination_not_confirmed);
+              logger.ok('email sent', form.form_destination_not_confirmed);
               logger.info('redirect to dashboard');
               req.flash('waiting_confirm', true);
               res.redirect('/dashboard/' + form._id + '?token=' + form.token);
@@ -538,7 +560,7 @@ module.exports = function (app, db, redis, prefix) {
               var now = moment();
               if (!time || now.diff(time, 'seconds') > 300) {
                 redis_client.set(api_key, now);
-                logger.info('saved', {
+                logger.ok('saved', {
                   sms_date: now.format('YYYY-MM-DD')
                 });
                 next(null, form);

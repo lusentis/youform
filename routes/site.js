@@ -252,8 +252,6 @@ module.exports = function (app, db, prefix) {
   app.get(prefix + '/delete/:api_key', form.del);
   app.get(prefix + '/edit/:api_key', form.edit);
   app.get(prefix + '/dashboard/:api_key', dashboard);
-  //app.get(prefix + '/confirm/sms/:api_key', confirm_sms);
-  //app.get(prefix + '/confirm/sms/confirmed/:api_key', confirmed_sms);
   app.get(prefix + '/confirm/email/confirmed/:api_key', confirmed_email);
   // errors
   app.get(prefix + '/error', error_page);
