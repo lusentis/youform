@@ -44,10 +44,9 @@ module.exports = function (app, db, redis, prefix) {
       , sender_name: req.body['snd-name']
       , sender_email: req.body['snd-email']
       , colours: req.body.colours
+      , country_code: req.body['country-code'].trim().replace(/\+/g, '')
+      , phone: req.body.phone.trim().replace(/[\-]/g, '')
       };
-
-      form.country_code = req.body['country-code'].trim().replace(/\+/g, '');
-      form.phone = req.body.phone.trim().replace(/[\-]/g, '');
 
       if (!test_email(form.creator_email) || !test_email(form.sender_email) || !test_email(form.form_destination)) {
         req.flash('email_error', true);
@@ -94,7 +93,8 @@ module.exports = function (app, db, redis, prefix) {
           function () {
             // send sms
             comm_utils.send_sms(form, function () {
-              res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
+              res.redirect('/success/' + form._id + '?token=' + form.token);
+              //res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
             });
           }
         ], function (err) {
@@ -142,11 +142,22 @@ module.exports = function (app, db, redis, prefix) {
                 logger.error({
                   error: true
                 , form_id: api_key
-                , description: 'Form deleted'
+                , description: 'not found'
                 });
-                res.json({
+                res.json(403, {
                   error: true
-                , description: 'Form deleted.'
+                , description: 'not found.'
+                });
+              } else if (!result.confirmed) {
+                // deleted
+                logger.error({
+                  error: true
+                , form_id: api_key
+                , description: 'not found'
+                });
+                res.json(403, {
+                  error: true
+                , description: 'not found'
                 });
               } else {
                 next(null, result);
@@ -156,7 +167,7 @@ module.exports = function (app, db, redis, prefix) {
               logger.error({
                 error: true
               , form_id: api_key
-              , description: 'Origin error'
+              , description: 'origin error'
               });
               req.flash('origin_error', true);
               res.redirect('/error');
@@ -259,7 +270,10 @@ module.exports = function (app, db, redis, prefix) {
       , sender_name: req.body['snd-name']
       , sender_email: req.body['snd-email']
       , colours: req.body.colours
+      , country_code: req.body['country-code'].trim().replace(/\+/g, '')
+      , phone: req.body.phone.trim().replace(/[\-]/g, '')
       };
+
 
       if (!api_key || !token) {
         error_utils.params_error({api_key: api_key, token: token}, req, res);
@@ -273,6 +287,11 @@ module.exports = function (app, db, redis, prefix) {
         return;
       }
 
+      if (!phone_regex.test(form.phone.trim()) || !country_code_regex.test(form.country_code.trim())) {
+        req.flash('phone_error', true);
+        res.redirect('/signup');
+      }
+
       async.waterfall([
           function (next) {
             form_utils.get_form(api_key, function (err, result) {
@@ -280,7 +299,7 @@ module.exports = function (app, db, redis, prefix) {
                 next(err);
               } else {
                 form = result;
-                if (token === form.token && form.confirmed === true) {
+                if (token === form.token) {
                   next(null);
                 } else {
                   res.redirect('/');
