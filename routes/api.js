@@ -283,7 +283,7 @@ module.exports = function (app, db, redis, prefix) {
       if (!test_email(data.creator_email) || !test_email(data.sender_email) || !test_email(data.form_destination)) {
         logger.error('emails format error');
         req.flash('email_error', true);
-        res.redirect('/edit-form/' + api_key + '?token=' + token);
+        res.redirect('/edit/' + api_key + '?token=' + token);
         return;
       }
 
@@ -316,7 +316,7 @@ module.exports = function (app, db, redis, prefix) {
                   comm_utils.send_confirm_email(form, res, function (err) {
                     if (err) {
                       req.flash('send_email_error', true);
-                      res.redirect('/edit-form/' + api_key + '?token=' + token);
+                      res.redirect('/edit/' + api_key + '?token=' + token);
                     } else {
                       logger.info('email sent', form.form_destination_not_confirmed);
                       req.flash('waiting_confirm', true);
@@ -570,8 +570,8 @@ module.exports = function (app, db, redis, prefix) {
   app.get(prefix + '/confirm/send-email/:api_key', send_confirm_email);
   app.post(prefix + '/new-form', form.create);
   app.post(prefix + '/form/:api_key', utils.rateLimit(), form.get);
-  app.post(prefix + '/edit-form/:api_key', form.edit);
-  app.post(prefix + '/delete-form/:api_key', form.del);
+  app.post(prefix + '/edit/:api_key', form.edit);
+  app.post(prefix + '/delete/:api_key', form.del);
 
   app.get('/confirm/email/:api_key', confirm_email);
 };

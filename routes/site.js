@@ -178,7 +178,7 @@ module.exports = function (app, db, prefix) {
           var form_saved = req.flash('form_saved').length > 0;
           var form_save_error = req.flash('form_save_error').length > 0;
           form.created_at = moment(form.created_at).format('YYYY-MM-DD');
-          res.render('stats', {
+          res.render('dashboard', {
             not_found: not_found
           , form: form
           , dashboard: dashboard
@@ -306,8 +306,8 @@ module.exports = function (app, db, prefix) {
   app.get(prefix + '/success/:api_key', form.success);
   app.get(prefix + '/deleted', form.deleted);
   app.get(prefix + '/signup', form.signup);
-  app.get(prefix + '/delete-form/:api_key', form.del);
-  app.get(prefix + '/edit-form/:api_key', form.edit);
+  app.get(prefix + '/delete/:api_key', form.del);
+  app.get(prefix + '/edit/:api_key', form.edit);
   app.get(prefix + '/dashboard/:api_key', dashboard);
   //app.get(prefix + '/confirm/sms/:api_key', confirm_sms);
   //app.get(prefix + '/confirm/sms/confirmed/:api_key', confirmed_sms);
