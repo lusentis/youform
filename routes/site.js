@@ -194,63 +194,6 @@ module.exports = function (app, db, prefix) {
       });
   };
 
-  /*var confirm_sms = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , token = req.query.token
-      ;
-
-    if (!api_key || !token) {
-      error_utils.params_error({api_key: api_key, token: token}, req, res);
-      return;
-    }
-
-    form_utils.get_form(api_key, function (err, form) {
-      if (err) {
-        throw err;
-      } else {
-        if (form.token === token) {
-          if (form.phone_confirmed === false) {
-            res.render('confirm_phone', {form: form});
-          } else {
-            res.redirect('/');
-          }
-        } else {
-          error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
-          return;
-        }
-      }
-    });
-  };*/
-
-  /*var confirmed_sms = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , token = req.query.token
-      ;
-
-    if (!api_key || !token) {
-      error_utils.params_error({api_key: api_key, token: token}, req, res);
-      return;
-    }
-
-    form_utils.get_form(api_key, function (err, form) {
-      if (err) {
-        throw err;
-      } else {
-        if (form.token === token) {
-          logger.info('Phone confirmed', form.phone_confirmed);
-          if (form.phone_confirmed === true) {
-            res.render('confirmed_phone', {api_key: api_key, token: token});
-          } else {
-            res.redirect('/');
-          }
-        } else {
-          error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
-          return;
-        }
-      }
-    });
-  };*/
-
   var confirmed_email = function (req, res) {
     var api_key = req.param('api_key', null)
       , token = req.query.token
