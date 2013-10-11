@@ -287,9 +287,9 @@ module.exports = function (app, db, redis, prefix) {
         return;
       }
 
-      if (!phone_regex.test(form.phone.trim()) || !country_code_regex.test(form.country_code.trim())) {
+      if (!phone_regex.test(data.phone.trim()) || !country_code_regex.test(data.country_code.trim())) {
         req.flash('phone_error', true);
-        res.redirect('/signup');
+        res.redirect('/edit/' + api_key + '?token=' + token);
       }
 
       async.waterfall([

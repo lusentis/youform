@@ -2,7 +2,7 @@ extends layout
 
 block content
 
-  - var form_url = (action === 'edit') ? '/api/edit/#{form._id}' : '/api/new-form';
+  - var form_url = (action === 'edit') ? '/api/edit/'+form._id : '/api/new-form';
 
   .page.page-accent
     .text-spacer
