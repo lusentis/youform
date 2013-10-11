@@ -62,7 +62,7 @@ module.exports = function (app, db, prefix) {
             error_utils.params_error({api_key: api_key, token: token}, req, res);
             return;
           } else if (form.confirmed === true) {
-            res.redirect('/stats/' + form._id + '?token=' + form.token);
+            res.redirect('/dashboard/' + form._id + '?token=' + form.token);
           } else {
             res.render('signup_success', {
               title: 'sign success'
@@ -127,7 +127,7 @@ module.exports = function (app, db, prefix) {
   };
 
 
-  var stats = function (req, res) {
+  var dashboard = function (req, res) {
     var api_key = req.param('api_key', null)
       , token = req.query.token
       ;
@@ -158,17 +158,17 @@ module.exports = function (app, db, prefix) {
           } else if (!form.confirmed) {
             res.redirect(prefix + '/success');
           } else {
-            log_utils.get_stats(api_key, function (err, stats) {
+            log_utils.get_dashboard(api_key, function (err, dashboard) {
               if (err) {
                 next(err);
               } else {
-                logger.info('stats', stats);
-                next(null, form, stats);
+                logger.info('dashboard', dashboard);
+                next(null, form, dashboard);
               }
             });
           }
         },
-        function (form, stats) {
+        function (form, dashboard) {
           var not_found = !form;
           if (form) {
             not_found = form.token !== token;
@@ -181,7 +181,7 @@ module.exports = function (app, db, prefix) {
           res.render('stats', {
             not_found: not_found
           , form: form
-          , stats: stats
+          , dashboard: dashboard
           , form_saved: form_saved
           , form_save_error: form_save_error
           });
@@ -308,7 +308,7 @@ module.exports = function (app, db, prefix) {
   app.get(prefix + '/signup', form.signup);
   app.get(prefix + '/delete-form/:api_key', form.del);
   app.get(prefix + '/edit-form/:api_key', form.edit);
-  app.get(prefix + '/stats/:api_key', stats);
+  app.get(prefix + '/dashboard/:api_key', dashboard);
   //app.get(prefix + '/confirm/sms/:api_key', confirm_sms);
   //app.get(prefix + '/confirm/sms/confirmed/:api_key', confirmed_sms);
   app.get(prefix + '/confirm/email/confirmed/:api_key', confirmed_email);

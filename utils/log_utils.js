@@ -20,7 +20,7 @@ module.exports = function (db) {
     });
   };
 
-  var get_stats = function (api_key, callback) {
+  var get_dashboard = function (api_key, callback) {
     get_logs(api_key, function (err, result) {
       if (err) {
         callback(err, null);
@@ -51,6 +51,6 @@ module.exports = function (db) {
   return {
     'save_log': save_log
   , 'get_logs': get_logs
-  , 'get_stats': get_stats
+  , 'get_dashboard': get_dashboard
   };
 };

@@ -338,7 +338,7 @@ module.exports = function (app, db, redis, prefix) {
                 form = result;
                 logger.info('Form updated', form);
                 req.flash('form_saved', true);
-                res.redirect('/stats/' + form._id + '?token=' + form.token);
+                res.redirect('/dashboard/' + form._id + '?token=' + form.token);
               }
             });
           }
@@ -444,12 +444,12 @@ module.exports = function (app, db, redis, prefix) {
             });
           } else {
             req.flash('code_error', true);
-            res.redirect('/confirm/sms/' + api_key + '?token=' + token);
+            res.redirect('/success/' + api_key + '?token=' + token);
           }
         },
         function () {
           logger.info('code confirmed');
-          res.redirect('/confirm/sms/confirmed/' + api_key + '?token=' + token);
+          res.redirect('/dashboard/' + api_key + '?token=' + token);
         }
       ], function (err) {
         if (err) {
@@ -488,9 +488,9 @@ module.exports = function (app, db, redis, prefix) {
               next(err);
             } else {
               logger.info('email sent', form.form_destination_not_confirmed);
-              logger.info('redirect to stats');
+              logger.info('redirect to dashboard');
               req.flash('waiting_confirm', true);
-              res.redirect('/stats/' + form._id + '?token=' + form.token);
+              res.redirect('/dashboard/' + form._id + '?token=' + form.token);
             }
           });
         }
@@ -547,7 +547,7 @@ module.exports = function (app, db, redis, prefix) {
                 , now: now.format('YYYY-MM-DD')
                 , sms_date: moment(time).format('YYYY-MM-DD')
                 });
-                res.redirect('/stats/' + form._id + '?token=' + form.token);
+                res.redirect('/dashboard/' + form._id + '?token=' + form.token);
               }
             }
           });
