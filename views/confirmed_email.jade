@@ -1,9 +1,43 @@
 extends layout
 
 block content
-  .content
-    hgroup
-      h1 
-        | Well done!
-      h3 
-        | Your Email Has Been Confirmed.
+
+  .page.page-accent
+    .text-spacer
+    .container
+      .pure-g
+        .pure-u-1
+          .text-center
+            a(href='/')
+              img.small-brand(src='/img/youform.svg')
+    .text-spacer
+
+  .separator.separator-accent
+
+
+  .page.page-gray
+    .spacer
+    .container
+      .pure-g
+        .pure-u-1
+          h1.inline Okay!&nbsp;&nbsp;
+          h2.inline Your e-mail address has been confirmed!
+    .spacer
+
+  .separator
+
+  .page
+    .spacer(style='height: 100px;')
+    .container
+      .pure-g
+        .pure-u-1
+          .text-center
+            p From now on, every contact e-mail coming from your website will be sent to
+            h1 email@email.com
+
+            .spacer
+            .spacer
+
+            img(src='/img/plane.svg')
+            
+    .spacer(style='height: 100px;')
