@@ -21,8 +21,8 @@ block content
       .pure-g
         .pure-u-1
           .text-center
-            h1.inline Dashboard!&nbsp;&nbsp;
-            h2.inline This is the dashboard of the form #{form.form_name}
+            h1.inline Control Panel&nbsp;&nbsp;
+            h2.inline This is the dashboard for #{form.form_name}
     .spacer
 
   .separator
@@ -31,95 +31,91 @@ block content
     .spacer(style='height: 100px;')
     .container
       .pure-g
-        .pure-u-2-3#formstats
-          div(style='padding-left: 20px;')
-            h2 Your form
+        .pure-u-1-2
+          .text-left(style='padding-right: 20px;')
+            h3 Properties
 
-            table.pure-table.stats-data
-              tr
-                td
-                  | Form
-                td
-                  | #{form.form_name}
-              tr
-                td
-                  | Action
-                td
-                  | http://www.youform.me/api/form/#{form._id}
-              tr
-                td
-                  | API KEY
-                td
-                  | #{form._id}
-              if form.deleted === true
-                tr
-                  td(colspan='2')
-                    | This form has been deleted.
-              else
-                tr
-                  td
-                    | Created at
-                  td
-                    | #{form.created_at}
-                tr
-                  td
-                    | Website
-                  td
-                    a(href='#{form.website_url', target='_blank')
-                      | #{form.website_url}
-                tr
-                  td
-                    | Requests
-                  td
-                    for row, year in dashboard.counter
-                      h4 #{year}
-                      table
-                        for value, month in row
-                          tr
-                            td.month-name
-                              | #{month}
-                            td.month-value
-                              | #{value}
-                tr
-                  td(colspan='2')
-                    br
-                    br
-                    a.pure-button.pure-button-primary(href='/edit/#{form._id}?token=#{form.token}') 
-                      i.icon-cog.icon-white
-                      | &nbsp;Edit form
-                    | &nbsp;&nbsp;&nbsp;
-                    a.pure-button.pure-button-danger(href='/delete/#{form._id}?token=#{form.token}')
-                      i.icon-remove.icon-white
-                      | &nbsp;Delete form
-          //-
-            p API KEY: #{form._id}
-            p Form: #{form.form_name}
-            if form.deleted === true
-              p This form has been deleted.
-            else
-              p Website: 
-                a(href=form.website_url) #{form.website_url}
-              p Date: #{form.created_at}
+            .spacer
+            .separator
+            .text-spacer
 
-              p Total requests: #{dashboard.total_rows}
+            dl
+              dt Action
+              dd
+                pre http://www.youform.me/api/form/#{form._id}
 
-              for row, year in dashboard.counter
-                h5 Year: #{year}
-                for value, month in row
-                  p 
-                    span.month-name 
-                      | #{month}: 
-                    span.month-value
-                      | #{value}
+            dl
+              dt API Key
+              dd
+                pre #{form._id}
 
-              a.pure-button.pure-button-primary(href='/edit/#{form._id}?token=#{form.token}') Edit form
-              | &nbsp;
-              a.pure-button.pure-button-danger(href='/delete/#{form._id}?token=#{form.token}') Delete form
+        .pure-u-1-2
+          .text-left(style='padding-left: 20px;')
+            h3 Form
 
-  .separator
+            .spacer
+            .separator
+            .text-spacer
 
-  .graph
-    canvas#dashgraph(style='width:100%; height:450px;')
+            dl
+              dt Form name
+              dd
+                pre #{form.form_name}
+
+            dl
+              dt Created on
+              dd
+                pre #{form.created_at}
+
+            dl
+              dt Website
+              dd
+                pre
+                  a(href='#{form.website_url', target='_blank')
+                    | #{form.website_url}
+
+      .pure-g
+        .pure-u-1
+          .spacer
+          .separator
+          .spacer
+
+          .text-center
+
+
+            a.pure-link(href='/edit/#{form._id}?token=#{form.token}') 
+              | Edit form
+            a.pure-link.pure-link-accent(href='/delete/#{form._id}?token=#{form.token}')
+              | Delete Form
+
+
+    .spacer(style='height: 100px;')
+
+  .page.page-accent
+    .separator.separator-accent
+    .spacer(style='height: 100px;')
+
+    .container
+      .pure-g
+        .pure-u-1
+
+          .text-center
+
+            .helper
+              .helper-color
+              span E-mail sent
+
+            .helper.helper-spam
+              .helper-color
+              span Spam
+
+          .spacer
+          .spacer
+
+          .graph
+            canvas#dashgraph(width='960', height='450')
+
+    .spacer(style='height: 100px;')
                   
 block scripts
   script.
@@ -128,25 +124,29 @@ block scripts
       var monthNumber = parseInt(el.innerHTML, 10);
       el.innerHTML = months[monthNumber - 1] + ': ';
     });
+
   script(src='/js/vendor/Chart.min.js')
   script.
+    var lineChartOptions = {
+          scaleLineColor : '#AF1418',
+          scaleGridLineColor : 'rgba(198, 23, 28, 0.4)',
+          scaleFontColor : '#F2F2F2',
+          scaleFontFamily : 'Open Sans',
+          datasetStrokeWidth : 2,
+          datasetFill : false,
+          pointDot : false
+        }
     var lineChartData = {
-          labels : ["January","February","March","April","May","June","July"],
+          labels : ['January','February','March','April','May','June','July'],
           datasets : [
             {
-              fillColor : "rgba(220,220,220,0.5)",
-              strokeColor : "rgba(220,220,220,1)",
-              pointColor : "rgba(220,220,220,1)",
-              pointStrokeColor : "#fff",
+              strokeColor : '#FFCE4B',
               data : [65,59,90,81,56,55,40]
             },
             {
-              fillColor : "rgba(151,187,205,0.5)",
-              strokeColor : "rgba(151,187,205,1)",
-              pointColor : "rgba(151,187,205,1)",
-              pointStrokeColor : "#fff",
+              strokeColor : '#FFFFFF',
               data : [28,48,40,19,96,27,100]
             }
           ] 
         }
-      , myLine = new Chart(document.getElementById("dashgraph").getContext("2d")).Line(lineChartData);
+      , myLine = new Chart(document.getElementById('dashgraph').getContext('2d')).Line(lineChartData, lineChartOptions);

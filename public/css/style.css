@@ -168,11 +168,8 @@ p.small.note a:hover {
   height: 2px;
   background: #e6e6e6;
 }
-.separator.separator-accent-dark {
-  background: #c6171c;
-}
 .separator.separator-accent {
-  background: #eb5055;
+  background: #c6171c;
 }
 .page {
   width: 100%;
@@ -414,18 +411,80 @@ form.pure-form .radio-palette.radio-palette-6 {
 form.pure-form .radio-palette.radio-palette-6.active {
   background: #ffba00;
 }
-form.pure-form .pure-button-form {
+.pure-button-form {
   background: #a6a6a6 !important;
   border: 3px solid #fff !important;
   color: #fff !important;
   margin: 0 5px;
 }
-form.pure-form .pure-button-form:hover {
+.pure-button-form:hover {
   opacity: 0.8;
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   filter: alpha(opacity=80);
 }
-form.pure-form .pure-button-form.pure-button-form-success {
+.pure-button-form.pure-button-form-success {
   background: #45bf55 !important;
   border: 3px solid #45bf55 !important;
+}
+a.pure-link {
+  border-bottom: 2px solid transparent;
+  text-decoration: none;
+  font-weight: 600;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+  display: inline-block;
+  margin: 5px 10px;
+  padding: 0 2px;
+  color: #b3b3b3;
+  border-bottom-color: rgba(179,179,179,0.3);
+}
+a.pure-link:hover {
+  border-bottom-color: rgba(179,179,179,0.8);
+}
+a.pure-link.pure-link-accent {
+  color: #eb5055;
+  border-bottom-color: rgba(235,80,85,0.3);
+}
+a.pure-link.pure-link-accent:hover {
+  border-bottom-color: rgba(235,80,85,0.8);
+}
+dl dt {
+  font-weight: 600;
+}
+dl dd {
+  border-left: 2px solid #d9d9d9;
+  margin-left: 0;
+  padding-left: 20px;
+}
+dl dd a {
+  color: #eb5055;
+}
+.helper {
+  display: inline-block;
+  color: #f2f2f2;
+  margin: 0 15px;
+}
+.helper span {
+  display: inline-block;
+  vertical-align: middle;
+}
+.helper .helper-color {
+  display: inline-block;
+  vertical-align: middle;
+  height: 2px;
+  width: 30px;
+  -webkit-border-radius: 1px;
+  border-radius: 1px;
+  overflow: hidden;
+  background: #f2f2f2;
+  margin-right: 10px;
+}
+.helper.helper-spam {
+  color: #ffce4b;
+}
+.helper.helper-spam .helper-color {
+  background: #ffce4b;
 }
