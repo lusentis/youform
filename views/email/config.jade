@@ -25,8 +25,8 @@ block mailcontent
       span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') action
       |  attribute this value:
       br
-      p(style='margin: 0; word-break: break-all;')
-        span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666; word-break: break-all;') http://www.youform.me/api/form/#{form._id}
+      span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666; word-break: break-all;') http://www.youform.me/api/form/#{form._id}
+      br
       | and 
       span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') POST
       |  as 
@@ -36,10 +36,10 @@ block mailcontent
   p
     | If you want to edit any information about this form or you want to see the monthly usage, please visit your  
     b
-      a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}', style='') dashboard
+      a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}', style='color: ##{form.colours};') dashboard
 
 
 block mailfooter
 
   | If you are experiencing troubles with something, please let us know at 
-  a(href='mailto:support@youform.me', style='text-decoration: none;') support at youform.me
+  a(href='mailto:support@youform.me', style='text-decoration: none; color: ##{form.colours};') support at youform.me

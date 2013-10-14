@@ -25,10 +25,10 @@ block mailcontent
 
   p You must verify those contact information by clicking the link in the e-mail and entering the text code in your 
     b
-      a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}') dashboard
+      a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}', style='color: ##{form.colours};') dashboard
 
 
 block mailfooter
 
   | If you are experiencing troubles with something, please let us know at 
-  a(href='mailto:support@youform.me', style='text-decoration: none;') support at youform.me
+  a(href='mailto:support@youform.me', style='text-decoration: none; color: ##{form.colours};') support at youform.me
