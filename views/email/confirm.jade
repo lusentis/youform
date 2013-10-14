@@ -21,8 +21,8 @@ block mailcontent
   br    
   p Click here to confirm your email address and activate it.
   
-  p
-    a(href='http://www.youform.me/confirm/email/#{form._id}?token=#{form.token}&email=#{form.form_destination}', style='font-family: Andale Mono, Courier, monospace; font-size: 16px;') http://www.youform.me/confirm/email/#{form._id}?token=#{form.token}&amp;email=#{form.form_destination_not_confirmed}
+  p(style='word-break: break-all;')
+    a(href='http://www.youform.me/confirm/email/#{form._id}?token=#{form.token}&email=#{form.form_destination}', style='font-family: Andale Mono, Courier, monospace; font-size: 16px; word-break: break-all;') http://www.youform.me/confirm/email/#{form._id}?token=#{form.token}&amp;email=#{form.form_destination_not_confirmed}
 
 
 block mailfooter
