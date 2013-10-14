@@ -17,6 +17,7 @@ module.exports = function (app, db, redis, prefix) {
     , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
     , phone_regex = /^[0-9\-().\s]{10,15}$/
     , country_code_regex = /^\+{0,1}[0-9]{1,4}$/
+    , colours_regex = /^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
     ;
   
   var logger = coolog.logger('api.js');
@@ -49,6 +50,12 @@ module.exports = function (app, db, redis, prefix) {
       , phone: req.body.phone.trim().replace(/[\-]/g, '')
       };
 
+      if (form.form_subject.length === 0 || form.form_intro.length === 0 || form.form_name.length === 0 || !colours_regex.test(form.colours.trim())) {
+        req.flash('param_error', true);
+        res.redirect('/signup');
+        return;
+      }
+
       if (!test_email(form.creator_email) || !test_email(form.sender_email) || !test_email(form.form_destination)) {
         req.flash('email_error', true);
         res.redirect('/signup');
@@ -57,6 +64,7 @@ module.exports = function (app, db, redis, prefix) {
       if (!phone_regex.test(form.phone.trim()) || !country_code_regex.test(form.country_code.trim())) {
         req.flash('phone_error', true);
         res.redirect('/signup');
+        return;
       }
 
       async.series([
