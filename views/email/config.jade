@@ -2,33 +2,44 @@ extends base
 
 
 block title
-  | - The form is ready!
+  | YouForm - The form is ready!
 
 
 block mailtitle
-  | This is the final step!
+  | Everything went fine. This is the final step, we promise!
+
+
+block mailpretitle
+  h2(style='font-size: 24px; line-height: 24px; font-weight: lighter; color: #999999; text-align: left;')
+    | The end
 
 
 block mailcontent
   ol
-    li
+    li(style='padding-bottom: 20px;')
       | Make a form with some fields (eg: name, surname, email, message). Be sure to add 
-      span(style='font-family: Andale Mono, Courier, monospace; color: #666;') name 
-      | attribute to fields you want to track.
+      span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') name
+      |  attribute to fields you want to track.
+    li(style='padding-bottom: 20px;')
+      | Add as your form 
+      span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') action
+      |  attribute this value:
       br
-      br
-    li
-      | Add 
-      span(style='font-family: Andale Mono, Courier, monospace; color: #666;') http://www.youform.me/api/form/#{form._id} 
-      | as your form 
-      em(style='font-style: italic; color: #aaa;') action 
-      | attribute and 
-      span(style='font-family: Andale Mono, Courier, monospace; color: #666;') POST 
-      | as 
-      em(style='font-style: italic; color: #aaa;') method 
-      | attribute.
-      br
-      br
-      br
+      p(style='margin: 0;')
+        span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') http://www.youform.me/api/form/#{form._id}
+      | and 
+      span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') POST
+      |  as 
+      span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') method
+      |  attribute.
 
-      a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}', style='color: #ffffff; font-family: Helvetica, sans-serif; text-decoration: none;') Statistics
+  p
+    | If you want to edit any information about this form or you want to see the monthly usage, please visit your  
+    b
+      a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}', style='') dashboard
+
+
+block mailfooter
+
+  | If you are experiencing troubles with something, please let us know at 
+  a(href='mailto:support@youform.me', style='text-decoration: none;') support at youform.me
