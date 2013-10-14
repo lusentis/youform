@@ -2,14 +2,14 @@ extends layout
 
 block content
 
-  .page.page-accent
+  .page
     .text-spacer
     .container
       .pure-g
         .pure-u-1
           .text-center
             a(href='/')
-              img.small-brand(src='/img/youform.svg')
+              img.small-brand(src='/img/youform-gray.svg')
     .text-spacer
 
   .separator.separator-accent
@@ -20,8 +20,9 @@ block content
     .container
       .pure-g
         .pure-u-1
-          h1.inline Dashboard!&nbsp;&nbsp;
-          h2.inline This is the dashboard of the form #{form.form_name}
+          .text-center
+            h1.inline Dashboard!&nbsp;&nbsp;
+            h2.inline This is the dashboard of the form #{form.form_name}
     .spacer
 
   .separator

@@ -168,8 +168,11 @@ p.small.note a:hover {
   height: 2px;
   background: #e6e6e6;
 }
-.separator.separator-accent {
+.separator.separator-accent-dark {
   background: #c6171c;
+}
+.separator.separator-accent {
+  background: #eb5055;
 }
 .page {
   width: 100%;

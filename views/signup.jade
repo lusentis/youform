@@ -4,14 +4,14 @@ block content
 
   - var form_url = (action === 'edit') ? '/api/edit/'+form._id : '/api/new-form';
 
-  .page.page-accent
+  .page
     .text-spacer
     .container
       .pure-g
         .pure-u-1
           .text-center
             a(href='/')
-              img.small-brand(src='/img/youform.svg')
+              img.small-brand(src='/img/youform-gray.svg')
     .text-spacer
 
   .separator.separator-accent
@@ -22,12 +22,13 @@ block content
     .container
       .pure-g
         .pure-u-1
-          if action === 'edit'
-            h1.inline Edit&nbsp;&nbsp;
-            h2.inline Editing an existing form is so simple. Just update the form below and the job is done.
-          else
-            h1.inline Start here!&nbsp;&nbsp;
-            h2.inline Creating a new form is so simple. Just fill the form below and the job is done.
+          .text-center
+            if action === 'edit'
+              h1.inline Edit&nbsp;&nbsp;
+              h2.inline Editing an existing form is so simple. Just update the form below and the job is done.
+            else
+              h1.inline Start here!&nbsp;&nbsp;
+              h2.inline Creating a new form is so simple. Just fill the form below and the job is done.
     .spacer
 
   .separator
