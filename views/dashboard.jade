@@ -113,7 +113,7 @@ block content
           .spacer
 
           .graph
-            canvas#dashgraph(width='960', height='450')
+            canvas#dashgraph(width='960', height='350')
 
     .spacer(style='height: 100px;')
                   
@@ -136,7 +136,7 @@ block scripts
           datasetFill : false,
           pointDot : false,
           scaleOverride : true,
-          scaleSteps : 15,
+          scaleSteps : 12,
           scaleStepWidth : 15 // ### Needed = parseInt((maxValue / 10), 10) + (parseInt((maxValue / 10), 10) % 5)
         }
     var lineChartData = {
