@@ -50,7 +50,7 @@ module.exports = function (app, db, redis, prefix) {
       , phone: req.body.phone.trim().replace(/[\-]/g, '')
       };
 
-      if (form.form_subject.length === 0 || form.form_intro.length === 0 || form.form_name.length === 0 || colours_regex.test(form.colours.trim())) {
+      if (form.form_subject.length === 0 || form.form_intro.length === 0 || form.form_name.length === 0 || !colours_regex.test(form.colours.trim())) {
         req.flash('param_error', true);
         res.redirect('/signup');
         return;
