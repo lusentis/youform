@@ -6,6 +6,7 @@ module.exports = function () {
   var async = require('async')
     , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
     , coolog = require('coolog')
+    , moment = require('moment')
     , querystring = require('querystring')
     , https = require('https')
     ;
@@ -122,7 +123,8 @@ module.exports = function () {
     async.waterfall([
         function (next) {
           // render email template
-          res.render('email/email', { form: form, user_form: post_data }, function (err, body) {
+          var date = moment().format('D MMMM YYYY');
+          res.render('email/email', { form: form, user_form: post_data, date: date }, function (err, body) {
             if (err) {
               next(err);
             } else {
