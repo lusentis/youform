@@ -88,13 +88,13 @@ block content
                     .pure-control-group
                       label(for='colours') Pick a color
                       input(type='hidden', name='colours', value='')
-                      span.radio-palette.radio-palette-0(data-palette='palette-0')
-                      span.radio-palette.radio-palette-1(data-palette='palette-1')
-                      span.radio-palette.radio-palette-2(data-palette='palette-2')
-                      span.radio-palette.radio-palette-3(data-palette='palette-3')
-                      span.radio-palette.radio-palette-4(data-palette='palette-4')
-                      span.radio-palette.radio-palette-5(data-palette='palette-5')
-                      span.radio-palette.radio-palette-6(data-palette='palette-6')
+                      span.radio-palette.radio-palette-0(data-palette='666666')
+                      span.radio-palette.radio-palette-1(data-palette='846c5b')
+                      span.radio-palette.radio-palette-2(data-palette='019875')
+                      span.radio-palette.radio-palette-3(data-palette='14A6B5')
+                      span.radio-palette.radio-palette-4(data-palette='A948AD')
+                      span.radio-palette.radio-palette-5(data-palette='FF4E3E')
+                      span.radio-palette.radio-palette-6(data-palette='FFBA00')
 
 
                 .pure-u-1
@@ -117,8 +117,8 @@ block scripts
   script
 
     window.onload = function () {
-      var col = (/^palette-[0-6]$/.test('#{form.colours}')) ? '#{form.colours}' : 'palette-0';
-      var el = document.querySelector('.radio-palette.radio-' + col);
+      var col = (/^palette-[0-6]$/.test('#{form.colours}')) ? '#{form.colours}' : '666666';
+      var el = document.querySelector('.radio-palette[data-palette="' + col + '"]');
       document.querySelector('input[name="colours"]').value = col;
       el.classList.add('active');
     };
