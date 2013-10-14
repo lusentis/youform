@@ -310,10 +310,11 @@ module.exports = function (app, db, redis, prefix) {
           },
           function (next) {
             if (data.form_destination.trim() !== form.form_destination) {
-              db.atomic('youform', 'forms', api_key, {'action': 'change_email', email: data.form_destination}, function (err) {
+              db.atomic('youform', 'forms', api_key, {'action': 'change_email', email: data.form_destination}, function (err, data) {
                 if (err) {
                   next(err);
                 } else {
+                  form = data;
                   comm_utils.send_confirm_email(form, res, function (err) {
                     if (err) {
                       req.flash('send_email_error', true);
@@ -370,7 +371,7 @@ module.exports = function (app, db, redis, prefix) {
             } else {
               if (form.token === token) {
                 if (email === form.form_destination_not_confirmed && form.email_confirmed === false) {
-                  next(null, form);
+                  next(null, form, (form.confirmed && !form.email_confirmed));
                 } else {
                   res.redirect('/');
                 }
@@ -382,12 +383,12 @@ module.exports = function (app, db, redis, prefix) {
             }
           });
         },
-        function (form, next) {
+        function (form, replace, next) {
           db.atomic('youform', 'forms', api_key, {'action': 'confirm_email'}, function (err, data) {
             if (err) {
               next(err);
             } else {
-              if (data.confirmed === true) {
+              if (data.confirmed === true && !replace) {
                 comm_utils.send_form_info(data, res, function (err) {
                   if (err) {
                     next(err);
