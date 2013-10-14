@@ -33,24 +33,6 @@ block content
       .pure-g
         .pure-u-1-2
           .text-left(style='padding-right: 20px;')
-            h3 Properties
-
-            .spacer
-            .separator
-            .text-spacer
-
-            dl
-              dt Action
-              dd
-                pre http://www.youform.me/api/form/#{form._id}
-
-            dl
-              dt API Key
-              dd
-                pre #{form._id}
-
-        .pure-u-1-2
-          .text-left(style='padding-left: 20px;')
             h3 Form
 
             .spacer
@@ -73,6 +55,24 @@ block content
                 pre
                   a(href='#{form.website_url', target='_blank')
                     | #{form.website_url}
+
+        .pure-u-1-2
+          .text-left(style='padding-left: 20px;')
+            h3 Properties
+
+            .spacer
+            .separator
+            .text-spacer
+
+            dl
+              dt Action
+              dd
+                pre http://www.youform.me/api/form/#{form._id}
+
+            dl
+              dt API Key
+              dd
+                pre #{form._id}
 
       .pure-g
         .pure-u-1
@@ -134,7 +134,10 @@ block scripts
           scaleFontFamily : 'Open Sans',
           datasetStrokeWidth : 2,
           datasetFill : false,
-          pointDot : false
+          pointDot : false,
+          scaleOverride : true,
+          scaleSteps : 15,
+          scaleStepWidth : 15 // ### Needed = parseInt((maxValue / 10), 10) + (parseInt((maxValue / 10), 10) % 5)
         }
     var lineChartData = {
           labels : ['January','February','March','April','May','June','July'],
@@ -145,7 +148,7 @@ block scripts
             },
             {
               strokeColor : '#FFFFFF',
-              data : [28,48,40,19,96,27,100]
+              data : [28,48,40,19,96,27,150]
             }
           ] 
         }
