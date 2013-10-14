@@ -118,7 +118,7 @@ block scripts
   script
 
     window.onload = function () {
-      var col = (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test('#{form.colours}')) ? '#{form.colours}' : '666666';
+      var col = (/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test('#{form.colours}')) ? '#{form.colours}' : '666666';
       var el = document.querySelector('.radio-palette[data-palette="' + col + '"]');
       document.querySelector('input[name="colours"]').value = col;
       el.classList.add('active');
