@@ -7,6 +7,7 @@ module.exports = function (app, db, redis, prefix) {
   var async = require('async')
     , coolog = require('coolog')
     , moment = require('moment')
+    , inflection = require('inflection')
     , uuid = require('node-uuid')
     , comm_utils = require('../utils/comm_utils.js')()
     , error_utils = require('../utils/error_utils.js')()
@@ -189,7 +190,12 @@ module.exports = function (app, db, redis, prefix) {
           });
         },
         function (form) {
-          comm_utils.send_form(form, req.body, res, function (err) {
+          var user_form = {};
+          Object.keys(req.body).forEach(function (key) {
+            user_form[inflection.humanize(req.body[key])] = req.body[key];
+          });
+
+          comm_utils.send_form(form, user_form, res, function (err) {
             if (err) {
               logger.error('Postmark error', err);
               logger.info('Redirect to', form.website_error_page);
