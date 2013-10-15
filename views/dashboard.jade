@@ -127,6 +127,15 @@ block scripts
 
   script(src='/js/vendor/Chart.min.js')
   script.
+
+    var graph = JSON.parse('#{graph}');
+    var emails = [];
+    var spam = [];
+    graph.forEach(function (item) {
+      spam.push(item[3]);
+      emails.push(item[2]);
+    });
+
     var lineChartOptions = {
           scaleLineColor : '#AF1418',
           scaleGridLineColor : 'rgba(198, 23, 28, 0.4)',
@@ -140,15 +149,15 @@ block scripts
           scaleStepWidth : 15 // ### Needed = parseInt((maxValue / 10), 10) - (parseInt((maxValue / 10), 10) % 5)
         }
       , lineChartData = {
-          labels : ['January','February','March','April','May','June','July'],
+          labels : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
           datasets : [
             {
               strokeColor : '#FFCE4B',
-              data : [65,59,90,81,56,55,40]
+              data : spam
             },
             {
               strokeColor : '#FFFFFF',
-              data : [28,48,40,19,96,27,150]
+              data : emails
             }
           ] 
         }

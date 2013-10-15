@@ -158,17 +158,17 @@ module.exports = function (app, db, prefix) {
           } else if (!form.confirmed) {
             res.redirect('/success/' + form._id + '?token=' + form.token);
           } else {
-            log_utils.get_dashboard(api_key, function (err, dashboard) {
+            log_utils.get_dashboard(api_key, function (err, graph) {
               if (err) {
                 next(err);
               } else {
-                logger.info('dashboard', dashboard);
-                next(null, form, dashboard);
+                logger.info('graph', graph);
+                next(null, form, graph);
               }
             });
           }
         },
-        function (form, dashboard) {
+        function (form, graph) {
           var not_found = !form;
           if (form) {
             not_found = form.token !== token;
@@ -181,7 +181,7 @@ module.exports = function (app, db, prefix) {
           res.render('dashboard', {
             not_found: not_found
           , form: form
-          , dashboard: dashboard
+          , graph: JSON.stringify(graph)
           , form_saved: form_saved
           , form_save_error: form_save_error
           });
