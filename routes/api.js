@@ -103,7 +103,6 @@ module.exports = function (app, db, redis, prefix) {
             // send sms
             comm_utils.send_sms(form, function () {
               res.redirect('/success/' + form._id + '?token=' + form.token);
-              //res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
             });
           }
         ], function (err) {

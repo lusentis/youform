@@ -13,9 +13,7 @@ module.exports = function (app, db, prefix) {
     ;
 
   var index = function (req, res) {
-    res.render('index', {
-      title: 'youform'
-    });
+    res.render('index');
   };
 
   var form = {
@@ -39,8 +37,7 @@ module.exports = function (app, db, prefix) {
       , country_code: ''
       };
       res.render('signup', {
-        title: 'New form'
-      , form: form
+        form: form
       , action: 'create'
       });
     },
@@ -64,10 +61,7 @@ module.exports = function (app, db, prefix) {
           } else if (form.confirmed === true) {
             res.redirect('/dashboard/' + form._id + '?token=' + form.token);
           } else {
-            res.render('signup_success', {
-              title: 'sign success'
-            , form: form
-            });
+            res.render('signup_success', {form: form});
           }
         }
       });
