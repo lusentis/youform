@@ -158,7 +158,7 @@ module.exports = function (app, db, prefix) {
           } else if (!form.confirmed) {
             res.redirect('/success/' + form._id + '?token=' + form.token);
           } else {
-            log_utils.get_dashboard(api_key, function (err, graph) {
+            log_utils.get_graph(api_key, function (err, graph) {
               if (err) {
                 next(err);
               } else {

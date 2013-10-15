@@ -129,11 +129,23 @@ block scripts
   script.
 
     var graph = JSON.parse('#{graph}');
-    var emails = [];
-    var spam = [];
+      , emails = []
+      , spam = []
+      , labels = []
+      , maxValue = 0
+      ;
+
     graph.forEach(function (item) {
+      // graph labels
+      abels.push(months[item[1] -1]);
+      // spam
       spam.push(item[3]);
+      // emails
       emails.push(item[2]);
+
+      if (maxValue < item[2]) {
+        maxValue = item[2];
+      }
     });
 
     var lineChartOptions = {
@@ -146,10 +158,10 @@ block scripts
           pointDot : false,
           scaleOverride : true,
           scaleSteps : 12,
-          scaleStepWidth : 15 // ### Needed = parseInt((maxValue / 10), 10) - (parseInt((maxValue / 10), 10) % 5)
+          scaleStepWidth : parseInt((maxValue / 10), 10) - (parseInt((maxValue / 10), 10) % 5)
         }
       , lineChartData = {
-          labels : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+          labels : labels,
           datasets : [
             {
               strokeColor : '#FFCE4B',
