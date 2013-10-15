@@ -122,21 +122,6 @@ module.exports = function (app, db, redis, prefix) {
 
       async.waterfall([
         function (next) {
-          // save connection
-          var data = {
-            user_ip: req.connection.remoteAddress
-          , api_key: api_key
-          };
-          log_utils.save_log(data, function (err, log) {
-            if (err) {
-              next(err);
-            } else {
-              logger.ok('log saved', log);
-              next(null);
-            }
-          });
-        },
-        function (next) {
           // get form
           form_utils.get_form(api_key, function (err, result) {
             if (!result) {
@@ -188,11 +173,27 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
+              next(null, spam, form);
+            }
+          });
+        },
+        function (spam, form, next) {
+          // save connection
+          var data = {
+            user_ip: req.connection.remoteAddress
+          , api_key: api_key
+          , spam: spam
+          };
+          log_utils.save_log(data, function (err, log) {
+            if (err) {
+              next(err);
+            } else {
+              logger.ok('log saved', log);
               if (spam) {
                 logger.info('Redirect to', form.website_error_page);
                 res.redirect(form.website_error_page);
               } else {
-                next(null, form);
+                next(null);
               }
             }
           });

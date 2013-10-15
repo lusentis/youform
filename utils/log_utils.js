@@ -3,7 +3,10 @@
 
 module.exports = function (db) {
   
-  var moment = require('moment');
+  var moment = require('moment')
+    , coolog = require('coolog')
+    , logger = coolog.logger('log_utils.js')
+    ;
 
   var save_log = function (log, callback) {
     db.atomic('youform', 'logs', undefined, log, function (err, body) {
@@ -12,8 +15,9 @@ module.exports = function (db) {
   };
 
   var get_logs = function (api_key, callback) {
-    db.view('youform', 'logs', {
-      key: api_key
+    var year = moment().year();
+    db.view('youform', 'graph', {
+      key: [year]
     , include_docs: true
     }, function (err, body) {
       callback(err, body);
@@ -21,28 +25,35 @@ module.exports = function (db) {
   };
 
   var get_dashboard = function (api_key, callback) {
+    var graph = {}
+      , month
+      , year = moment().year()
+      ;
     get_logs(api_key, function (err, result) {
       if (err) {
         callback(err, null);
       } else {
-        var counter = {};
-        var logs = [];
+        //var year = moment().year() - 1;
+        for (month = 1; month <= 12; ++month) {
+          graph[year + '-' + month] = [year, month, 0, 0];
+        }
+        //year ++;
+        //for (month = 1; month <= 12; ++month) {
+        //  graph[year + '-' + month] = [year, month, 0];
+        //}
+
         result.rows.forEach(function (row) {
-          var date = moment(row.doc.date);
-          if (!Object.has(counter[date.year()], date.month() + 1)) {
-            counter[date.year()] = {};
-            counter[date.year()][date.month() + 1] = 0;
+          if (!row.doc.spam) {
+            graph[row.key + '-' + row.value][2] += 1;
+          } else {
+            graph[row.key + '-' + row.value][3] += 1;
           }
-          counter[date.year()][date.month() + 1] += 1;
-          logs.push({
-            date: row.doc.date
-          , user_ip: row.doc.user_ip
-          });
         });
+
+        logger.debug(graph);
+
         callback(null, {
-          rows: logs
-        , total_rows: logs.length
-        , counter: counter
+          counter: Object.values(graph)
         });
       }
     });
