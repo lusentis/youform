@@ -20,7 +20,7 @@ module.exports = function (db) {
     async.parallel([
         function (cb) {
           db.view('youform', 'graph', {
-            key: [year]
+            key: [api_key, year]
           , include_docs: true
           }, function (err, body) {
             cb(err, body.rows);
@@ -29,7 +29,7 @@ module.exports = function (db) {
         function (cb) {
           if (month !== 12) {
             db.view('youform', 'graph', {
-              key: [(year - 1)]
+              key: [api_key, (year - 1)]
             , include_docs: true
             }, function (err, body) {
               cb(err, body.rows);
@@ -67,7 +67,7 @@ module.exports = function (db) {
         }
         // parse logs
         result.forEach(function (row) {
-          if (Object.has(graph, (row.key + '-' + row.value))) {
+          if (Object.has(graph, (row.key[1] + '-' + row.value))) {
             if (!row.doc.spam) {
               graph[row.key[1] + '-' + row.value][2] += 1;
             } else {

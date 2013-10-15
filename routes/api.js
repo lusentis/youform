@@ -193,7 +193,7 @@ module.exports = function (app, db, redis, prefix) {
                 logger.info('Redirect to', form.website_error_page);
                 res.redirect(form.website_error_page);
               } else {
-                next(null);
+                next(null, form);
               }
             }
           });
@@ -201,7 +201,7 @@ module.exports = function (app, db, redis, prefix) {
         function (form) {
           var user_form = {};
           Object.keys(req.body).forEach(function (key) {
-            user_form[inflection.humanize(req.body[key])] = req.body[key];
+            user_form[inflection.humanize(key)] = req.body[key];
           });
 
           comm_utils.send_form(form, user_form, res, function (err) {

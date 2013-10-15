@@ -3,6 +3,6 @@
 function map(doc) {
   'use strict';
   if (doc.type && doc.type === 'log') {
-    emit([doc.form_api_key, new Date(doc.date).getFullYear()], new Date(doc.date).getMonth());
+    emit([doc.form_api_key, new Date(doc.date).getFullYear()], new Date(doc.date).getMonth() + 1);
   }
 }
