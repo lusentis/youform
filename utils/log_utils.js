@@ -3,7 +3,9 @@
 
 module.exports = function (db) {
   
-  var moment = require('moment');
+  var async = require('async')
+    , moment = require('moment')
+    ;
 
   var save_log = function (log, callback) {
     db.atomic('youform', 'logs', undefined, log, function (err, body) {
@@ -12,38 +14,69 @@ module.exports = function (db) {
   };
 
   var get_logs = function (api_key, callback) {
-    db.view('youform', 'logs', {
-      key: api_key
-    , include_docs: true
-    }, function (err, body) {
-      callback(err, body);
-    });
+    var year = moment().year();
+    var month = moment().month();
+
+    async.parallel([
+        function (cb) {
+          db.view('youform', 'graph', {
+            key: [api_key, year]
+          , include_docs: true
+          }, function (err, body) {
+            cb(err, body.rows);
+          });
+        },
+        function (cb) {
+          if (month !== 12) {
+            db.view('youform', 'graph', {
+              key: [api_key, (year - 1)]
+            , include_docs: true
+            }, function (err, body) {
+              cb(err, body.rows);
+            });
+          } else {
+            cb(null, []);
+          }
+        }
+      ], function (err, results) {
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, results[1].concat(results[0]));
+        }
+      });
   };
 
-  var get_dashboard = function (api_key, callback) {
+  var get_graph = function (api_key, callback) {
+    var graph = {}
+      , year = moment().year()
+      , month = moment().month() + 1
+      , i
+      ;
+
     get_logs(api_key, function (err, result) {
       if (err) {
         callback(err, null);
       } else {
-        var counter = {};
-        var logs = [];
-        result.rows.forEach(function (row) {
-          var date = moment(row.doc.date);
-          if (!Object.has(counter[date.year()], date.month() + 1)) {
-            counter[date.year()] = {};
-            counter[date.year()][date.month() + 1] = 0;
+        // init graph obj
+        for (i = month + 1; i <= 12; ++i) {
+          graph[(year - 1) + '-' + i] = [(year - 1), i, 0, 0];
+        }
+        for (i = 1; i <= month; ++i) {
+          graph[year + '-' + i] = [year, i, 0, 0];
+        }
+        // parse logs
+        result.forEach(function (row) {
+          if (Object.has(graph, (row.key[1] + '-' + row.value))) {
+            if (!row.doc.spam) {
+              graph[row.key[1] + '-' + row.value][2] += 1;
+            } else {
+              graph[row.key[1] + '-' + row.value][3] += 1;
+            }
           }
-          counter[date.year()][date.month() + 1] += 1;
-          logs.push({
-            date: row.doc.date
-          , user_ip: row.doc.user_ip
-          });
         });
-        callback(null, {
-          rows: logs
-        , total_rows: logs.length
-        , counter: counter
-        });
+
+        callback(null, Object.values(graph));
       }
     });
   };
@@ -51,6 +84,6 @@ module.exports = function (db) {
   return {
     'save_log': save_log
   , 'get_logs': get_logs
-  , 'get_dashboard': get_dashboard
+  , 'get_graph': get_graph
   };
 };

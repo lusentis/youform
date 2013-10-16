@@ -137,7 +137,7 @@ module.exports = function () {
           postmark.send({
             'From': process.env.POSTMARK_FROM
           , 'To': form.form_destination
-          , 'ReplyTo': form.sender_email
+          , 'ReplyTo': Object.has(form, 'replyto') ? form.replyTo : ''
           , 'Subject': form.form_subject
           , 'HtmlBody': html_body
           }, function (err) {

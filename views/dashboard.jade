@@ -53,7 +53,7 @@ block content
               dt Website
               dd
                 pre
-                  a(href='#{form.website_url', target='_blank')
+                  a(href='#{form.website_url}', target='_blank')
                     | #{form.website_url}
 
         .pure-u-1-2
@@ -127,6 +127,30 @@ block scripts
 
   script(src='/js/vendor/Chart.min.js')
   script.
+
+    var graph = JSON.parse('#{graph}')
+      , emails = []
+      , spam = []
+      , labels = []
+      , maxValue = 0
+      ;
+
+    graph.forEach(function (item) {
+      // graph labels
+      labels.push(months[item[1] -1]);
+      // spam
+      spam.push(item[3]);
+      // emails
+      emails.push(item[2]);
+
+      if (maxValue < item[2]) {
+        maxValue = item[2];
+      }
+      if (maxValue < item[3]) {
+        maxValue = item[3];
+      }
+    });
+
     var lineChartOptions = {
           scaleLineColor : '#AF1418',
           scaleGridLineColor : 'rgba(198, 23, 28, 0.4)',
@@ -136,19 +160,19 @@ block scripts
           datasetFill : false,
           pointDot : false,
           scaleOverride : true,
-          scaleSteps : 12,
-          scaleStepWidth : 15 // ### Needed = parseInt((maxValue / 10), 10) - (parseInt((maxValue / 10), 10) % 5)
+          scaleSteps : 10,
+          scaleStepWidth : Math.ceil(maxValue / 9)
         }
       , lineChartData = {
-          labels : ['January','February','March','April','May','June','July'],
+          labels : labels,
           datasets : [
             {
               strokeColor : '#FFCE4B',
-              data : [65,59,90,81,56,55,40]
+              data : spam
             },
             {
               strokeColor : '#FFFFFF',
-              data : [28,48,40,19,96,27,150]
+              data : emails
             }
           ] 
         }

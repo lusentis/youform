@@ -43,8 +43,6 @@ module.exports = function (app, db, redis, prefix) {
       , form_intro: req.body['f-intro']
       , form_destination: req.body['email-dest']
       , creator_email: req.body['email-crt']
-      , sender_name: req.body['snd-name']
-      , sender_email: req.body['snd-email']
       , colours: req.body.colours
       , country_code: req.body['country-code'].trim().replace(/\+/g, '')
       , phone: req.body.phone.trim().replace(/[\-]/g, '')
@@ -56,7 +54,7 @@ module.exports = function (app, db, redis, prefix) {
         return;
       }
 
-      if (!test_email(form.creator_email) || !test_email(form.sender_email) || !test_email(form.form_destination)) {
+      if (!test_email(form.creator_email) || !test_email(form.form_destination)) {
         req.flash('email_error', true);
         res.redirect('/signup');
         return;
@@ -103,7 +101,6 @@ module.exports = function (app, db, redis, prefix) {
             // send sms
             comm_utils.send_sms(form, function () {
               res.redirect('/success/' + form._id + '?token=' + form.token);
-              //res.redirect('/confirm/sms/' + form._id + '?token=' + form.token);
             });
           }
         ], function (err) {
@@ -121,21 +118,6 @@ module.exports = function (app, db, redis, prefix) {
       }
 
       async.waterfall([
-        function (next) {
-          // save connection
-          var data = {
-            user_ip: req.connection.remoteAddress
-          , api_key: api_key
-          };
-          log_utils.save_log(data, function (err, log) {
-            if (err) {
-              next(err);
-            } else {
-              logger.ok('log saved', log);
-              next(null);
-            }
-          });
-        },
         function (next) {
           // get form
           form_utils.get_form(api_key, function (err, result) {
@@ -188,6 +170,22 @@ module.exports = function (app, db, redis, prefix) {
             if (err) {
               next(err);
             } else {
+              next(null, spam, form);
+            }
+          });
+        },
+        function (spam, form, next) {
+          // save connection
+          var data = {
+            user_ip: req.connection.remoteAddress
+          , api_key: api_key
+          , spam: spam
+          };
+          log_utils.save_log(data, function (err, log) {
+            if (err) {
+              next(err);
+            } else {
+              logger.ok('log saved', log);
               if (spam) {
                 logger.info('Redirect to', form.website_error_page);
                 res.redirect(form.website_error_page);
@@ -200,8 +198,13 @@ module.exports = function (app, db, redis, prefix) {
         function (form) {
           var user_form = {};
           Object.keys(req.body).forEach(function (key) {
-            user_form[inflection.humanize(req.body[key])] = req.body[key];
+            user_form[inflection.humanize(key)] = req.body[key];
           });
+
+          // replyTo
+          if (email_regex.test(req.body['yf-replyto'].trim())) {
+            form.replyTo = req.body['yf-replyto'].trim();
+          }
 
           comm_utils.send_form(form, user_form, res, function (err) {
             if (err) {
@@ -281,8 +284,6 @@ module.exports = function (app, db, redis, prefix) {
       , form_intro: req.body['f-intro']
       , form_destination: req.body['email-dest']
       , creator_email: req.body['email-crt']
-      , sender_name: req.body['snd-name']
-      , sender_email: req.body['snd-email']
       , colours: req.body.colours
       , country_code: req.body['country-code'].trim().replace(/\+/g, '')
       , phone: req.body.phone.trim().replace(/[\-]/g, '')
@@ -294,7 +295,7 @@ module.exports = function (app, db, redis, prefix) {
         return;
       }
 
-      if (!test_email(data.creator_email) || !test_email(data.sender_email) || !test_email(data.form_destination)) {
+      if (!test_email(data.creator_email) || !test_email(data.form_destination)) {
         logger.error('emails format error');
         req.flash('email_error', true);
         res.redirect('/edit/' + api_key + '?token=' + token);

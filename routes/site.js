@@ -13,9 +13,7 @@ module.exports = function (app, db, prefix) {
     ;
 
   var index = function (req, res) {
-    res.render('index', {
-      title: 'youform'
-    });
+    res.render('index');
   };
 
   var form = {
@@ -32,15 +30,12 @@ module.exports = function (app, db, prefix) {
       , form_intro: ''
       , form_destination: ''
       , creator_email: ''
-      , sender_name: ''
-      , sender_email: ''
       , colours: ''
       , phone: ''
       , country_code: ''
       };
       res.render('signup', {
-        title: 'New form'
-      , form: form
+        form: form
       , action: 'create'
       });
     },
@@ -64,10 +59,7 @@ module.exports = function (app, db, prefix) {
           } else if (form.confirmed === true) {
             res.redirect('/dashboard/' + form._id + '?token=' + form.token);
           } else {
-            res.render('success', {
-              title: 'sign success'
-            , form: form
-            });
+            res.render('success', {form: form});
           }
         }
       });
@@ -158,17 +150,17 @@ module.exports = function (app, db, prefix) {
           } else if (!form.confirmed) {
             res.redirect('/success/' + form._id + '?token=' + form.token);
           } else {
-            log_utils.get_dashboard(api_key, function (err, dashboard) {
+            log_utils.get_graph(api_key, function (err, graph) {
               if (err) {
                 next(err);
               } else {
-                logger.info('dashboard', dashboard);
-                next(null, form, dashboard);
+                logger.info('graph', graph);
+                next(null, form, graph);
               }
             });
           }
         },
-        function (form, dashboard) {
+        function (form, graph) {
           var not_found = !form;
           if (form) {
             not_found = form.token !== token;
@@ -181,7 +173,7 @@ module.exports = function (app, db, prefix) {
           res.render('dashboard', {
             not_found: not_found
           , form: form
-          , dashboard: dashboard
+          , graph: JSON.stringify(graph)
           , form_saved: form_saved
           , form_save_error: form_save_error
           });

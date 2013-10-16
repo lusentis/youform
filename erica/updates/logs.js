@@ -13,6 +13,7 @@ function(doc, req) {
     , date: new Date()
     , form_api_key: data.api_key
     , user_ip: data.user_ip
+    , spam: data.spam
     };
   }
 
