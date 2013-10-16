@@ -98,13 +98,13 @@ block content
                     label(for='email-dest') Destination address
                     input.pure-input-1(type='email', name='email-dest', placeholder='eisenberg@plasticpanda.com', value='#{form.form_destination}', required)
                   .pure-control-group
-                    label(for='snd-email') Reply-To field name 
+                    label(for='replyto-field') Reply-To field name 
                       em (optional)
                       br
                       span(style='text-transform: none; font-weight: normal;') The content of the form field with this name will be used as the 
                         em reply-to 
                         | address
-                    input.pure-input-1(type='email', name='snd-email', placeholder='Field name (e.g. customer-email)', value='#{form.sender_email}', required)
+                    input.pure-input-1(type='text', name='replyto-field', placeholder='Field name (e.g. customer-email)', value='#{form.replyto_field}')
                   .pure-control-group
                     label(for='f-subject') E-mail Subject
                     input.pure-input-1(type='text', name='f-subject', placeholder='Pollos', value='#{form.form_subject}', required)
