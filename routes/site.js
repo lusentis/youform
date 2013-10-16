@@ -64,7 +64,7 @@ module.exports = function (app, db, prefix) {
           } else if (form.confirmed === true) {
             res.redirect('/dashboard/' + form._id + '?token=' + form.token);
           } else {
-            res.render('signup_success', {
+            res.render('success', {
               title: 'sign success'
             , form: form
             });

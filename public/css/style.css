@@ -208,14 +208,14 @@ p.small.note a:hover {
   background-position: center top;
   background-image: url("../img/shadow.jpg");
   background-color: #fff;
-  padding: 100px 0 50px;
+  padding: 50px 0;
 }
 .page.page-letters {
   background-repeat: no-repeat;
   background-position: center bottom;
   background-image: url("../img/letters.jpg");
   background-color: #fff;
-  padding: 150px 0 200px;
+  padding: 150px 0 100px;
 }
 .page .page-vertical {
   display: table;
@@ -266,18 +266,6 @@ img.small-brand {
 }
 .confirm-box {
   height: 90px;
-}
-#detail {
-  height: auto;
-  max-height: 0;
-  -webkit-transition: max-height 0.4s ease;
-  -moz-transition: max-height 0.4s ease;
-  -o-transition: max-height 0.4s ease;
-  -ms-transition: max-height 0.4s ease;
-  transition: max-height 0.4s ease;
-}
-#detail.open {
-  max-height: 1000px;
 }
 #detail .text-center {
   padding: 30px 10px;
