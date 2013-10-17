@@ -1,7 +1,7 @@
 /*jshint node:true, indent:2, white:true, laxcomma:true, undef:true, strict:true, unused:true, eqnull:true, camelcase: false, trailing: true */
 'use strict';
 
-module.exports = function (redis) {
+module.exports = function (redis_client) {
 
   // npm modules
   var async = require('async')
@@ -14,15 +14,13 @@ module.exports = function (redis) {
 
   var logger = coolog.logger('utils.js');
 
-  var rl_client = redis.createClient();
-
   var akismet_client = akismet.client({
     key  : process.env.AKISMET_API_KEY,
     blog : 'http:/www.youform.me'
   });
 
   var rateLimitMiddleware = rate.middleware({
-    handler: new rate.Redis.RedisRateHandler({ client: rl_client })
+    handler: new rate.Redis.RedisRateHandler({ client: redis_client })
   , interval: 5
   , limit: 2
   , onLimitReached: function (req, res) {
