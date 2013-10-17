@@ -30,8 +30,6 @@ module.exports = function (app, db, prefix) {
       , form_intro: ''
       , form_destination: ''
       , creator_email: ''
-      , sender_name: ''
-      , sender_email: ''
       , colours: ''
       , phone: ''
       , country_code: ''

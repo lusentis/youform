@@ -43,8 +43,6 @@ module.exports = function (app, db, redis, prefix) {
       , form_intro: req.body['f-intro']
       , form_destination: req.body['email-dest']
       , creator_email: req.body['email-crt']
-      , sender_name: req.body['snd-name']
-      , sender_email: req.body['snd-email']
       , colours: req.body.colours
       , country_code: req.body['country-code'].trim().replace(/\+/g, '')
       , phone: req.body.phone.trim().replace(/[\-]/g, '')
@@ -56,7 +54,7 @@ module.exports = function (app, db, redis, prefix) {
         return;
       }
 
-      if (!test_email(form.creator_email) || !test_email(form.sender_email) || !test_email(form.form_destination)) {
+      if (!test_email(form.creator_email) || !test_email(form.form_destination)) {
         req.flash('email_error', true);
         res.redirect('/signup');
         return;
@@ -203,6 +201,11 @@ module.exports = function (app, db, redis, prefix) {
             user_form[inflection.humanize(key)] = req.body[key];
           });
 
+          // replyTo
+          if (email_regex.test(req.body['yf-replyto'].trim())) {
+            form.replyTo = req.body['yf-replyto'].trim();
+          }
+
           comm_utils.send_form(form, user_form, res, function (err) {
             if (err) {
               logger.error('Postmark error', err);
@@ -281,8 +284,6 @@ module.exports = function (app, db, redis, prefix) {
       , form_intro: req.body['f-intro']
       , form_destination: req.body['email-dest']
       , creator_email: req.body['email-crt']
-      , sender_name: req.body['snd-name']
-      , sender_email: req.body['snd-email']
       , colours: req.body.colours
       , country_code: req.body['country-code'].trim().replace(/\+/g, '')
       , phone: req.body.phone.trim().replace(/[\-]/g, '')
@@ -294,7 +295,7 @@ module.exports = function (app, db, redis, prefix) {
         return;
       }
 
-      if (!test_email(data.creator_email) || !test_email(data.sender_email) || !test_email(data.form_destination)) {
+      if (!test_email(data.creator_email) || !test_email(data.form_destination)) {
         logger.error('emails format error');
         req.flash('email_error', true);
         res.redirect('/edit/' + api_key + '?token=' + token);

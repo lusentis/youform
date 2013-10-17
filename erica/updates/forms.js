@@ -27,8 +27,6 @@ function(doc, req) {
       , form_destination: data.form_destination.trim()
       , form_destination_not_confirmed: data.form_destination.trim()
       , creator_email: data.creator_email.trim()
-      , sender_name: data.sender_name
-      , sender_email: data.sender_email.trim()
       , colours: data.colours.trim()
       , phone: data.phone.trim()
       , country_code: data.country_code.trim()
@@ -42,8 +40,6 @@ function(doc, req) {
       doc.form_subject = data.form_subject;
       doc.form_intro = data.form_intro;
       doc.creator_email = data.creator_email.trim();
-      doc.sender_name = data.sender_name;
-      doc.sender_email = data.sender_email.trim();
       doc.colours = data.colours.trim();
       doc.phone = data.phone.trim();
       doc.country_code = data.country_code.trim();
