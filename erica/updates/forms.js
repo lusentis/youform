@@ -30,6 +30,7 @@ function(doc, req) {
       , colours: data.colours.trim()
       , phone: data.phone.trim()
       , country_code: data.country_code.trim()
+      , replyto_field: data.replyto_field.trim()
       };
     } else {
       // update
@@ -43,6 +44,7 @@ function(doc, req) {
       doc.colours = data.colours.trim();
       doc.phone = data.phone.trim();
       doc.country_code = data.country_code.trim();
+      doc.replyto_field = data.replyto_field.trim();
     }
   } else if (data.action === 'delete') {
     doc.deleted = true;

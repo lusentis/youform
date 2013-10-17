@@ -33,6 +33,7 @@ module.exports = function (app, db, prefix) {
       , colours: ''
       , phone: ''
       , country_code: ''
+      , replyto_field: ''
       };
       res.render('signup', {
         form: form
