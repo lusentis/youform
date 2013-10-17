@@ -1,7 +1,8 @@
 /* jshint node:true, indent:2, white:true, laxcomma:true, undef:true, strict:true, unused:true, eqnull:true, camelcase: false, trailing: true */
 'use strict';
 
-var express = require('express')
+var bytes = require('bytes')
+  , express = require('express')
   , http = require('http')
   , path = require('path')
   , flash = require('connect-flash')
@@ -14,6 +15,8 @@ var express = require('express')
   ;
 
 require('sugar');
+
+var MAX_SIZE = '4mb';
 
 var app = express()
   , redis_client
@@ -52,6 +55,67 @@ app.set('view engine', 'jade');
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(cookieParser);
+// limit request size
+app.use(function (max_bytes) {
+  max_bytes = bytes(max_bytes);
+  return function limit(req, res, next) {
+    var received = 0
+      , len = req.headers['content-length'] ? parseInt(req.headers['content-length'], 10) : null;
+
+    // self-awareness
+    if (req._limit) return next();
+    req._limit = true;
+
+    // limit by content-length
+    if (len && len > max_bytes) {
+      logger.info({
+        error: true
+      , description: 'request is too large'
+      , max_bytes: bytes(max_bytes)
+      , length: bytes(len)
+      });
+      res.json(413, {error: true, description: 'request is too large'});
+      return;
+    }
+
+    // limit
+    listen();
+    next();
+
+    function listen() {
+      req.on('data', function (chunk) {
+        received += Buffer.isBuffer(chunk) ? chunk.length : Buffer.byteLength(chunk);
+
+        if (received > max_bytes) {
+          req.destroy();
+        }
+      });
+    }
+  };
+}(MAX_SIZE));
+// multipart
+app.use(function (req, res, next) {
+  if (req.method.toLowerCase() === 'post') {
+    var form = new require('multiparty').Form();
+    form.parse(req, function (err, fields, files) {
+      if (err) {
+        throw err;
+      } else {
+        // attach files
+        var attachments = {};
+        Object.keys(files).forEach(function (name) {
+          if (/^yf-attach-[0-2]$/.test(name)) {
+            attachments[name] = files[name];
+          }
+        });
+        req.files = attachments;
+        next();
+      }
+    });
+  } else {
+    next();
+  }
+});
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.session({
@@ -65,6 +129,7 @@ app.use(express.cookieParser('your secret here'));
 app.use(app.router);
 app.use(require('stylus').middleware(__dirname + '/public'));
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 // development only
 if ('development' == app.get('env')) {
