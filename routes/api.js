@@ -46,7 +46,7 @@ module.exports = function (app, db, redis, prefix) {
       , colours: req.body.colours
       , country_code: req.body['country-code'].trim().replace(/\+/g, '')
       , phone: req.body.phone.trim().replace(/[\-]/g, '')
-      , replyto_field: req.body.replyto_field.trim()
+      , replyto_field: req.body['replyto-field'].trim()
       };
 
       if (form.form_subject.length === 0 || form.form_intro.length === 0 || form.form_name.length === 0 || !colours_regex.test(form.colours.trim())) {
@@ -288,7 +288,7 @@ module.exports = function (app, db, redis, prefix) {
       , colours: req.body.colours
       , country_code: req.body['country-code'].trim().replace(/\+/g, '')
       , phone: req.body.phone.trim().replace(/[\-]/g, '')
-      , replyto_field: req.body.replyto_field
+      , replyto_field: req.body['replyto-field']
       };
 
 

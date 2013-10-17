@@ -76,12 +76,18 @@ block content
                       span(style='text-transform: none; font-weight: normal;') Every request not coming from this URL or any subpage will be discarded
                     input.pure-input-1(type='url', name='w-url', placeholder='http://plasticpanda.com', value='#{form.website_url}', required)
                   .pure-control-group
-                    label(for='w-error') Success page URL 
+                    label(for='w-success-page') Success page URL 
                       em (optional)
                       br
                       span(style='text-transform: none; font-weight: normal;') This page will be displayed after submitting a new message
                     input.pure-input-1(type='url', name='w-success-page', placeholder='http://plasticpanda.com/thankyou', value='#{form.website_success_page}')
-                  
+                  .pure-control-group
+                    label(for='w-error-page') Error page URL 
+                      em (optional)
+                      br
+                      span(style='text-transform: none; font-weight: normal;') This page will be displayed after submitting a new message
+                    input.pure-input-1(type='url', name='w-error-page', placeholder='http://plasticpanda.com/error', value='#{form.website_error_page}')
+
               .separator(style='margin: 40px 0 30px;')
 
               .pure-g

@@ -5,6 +5,7 @@ var bytes = require('bytes')
   , express = require('express')
   , http = require('http')
   , path = require('path')
+  //, multiparty = require('multiparty')
   , flash = require('connect-flash')
   , nano = require('nano')(process.env.DATABASE_URL || 'http://localhost:5984/youform')
   , redis = require('redis')
@@ -94,9 +95,9 @@ app.use(function (max_bytes) {
   };
 }(MAX_SIZE));
 // multipart
-app.use(function (req, res, next) {
-  if (req.method.toLowerCase() === 'post') {
-    var form = new require('multiparty').Form();
+/*app.use(function (req, res, next) {
+  if (req.method.toLowerCase() === 'post' && req.headers['content-type'] === 'multipart/form-data') {
+    var form = new multiparty.Form();
     form.parse(req, function (err, fields, files) {
       if (err) {
         throw err;
@@ -115,7 +116,7 @@ app.use(function (req, res, next) {
   } else {
     next();
   }
-});
+});*/
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.session({
