@@ -33,32 +33,28 @@ block content
       .pure-g
         .pure-u-1-2
           .text-left(style='padding-right: 20px;')
-            h1 Form
+            h1 #{form.form_name}
 
             .spacer
             .separator
             .text-spacer
 
             dl
-              dt Form name
+              dt Website base URL
               dd
-                pre #{form.form_name}
+                a(href='#{form.website_url}', target='_blank') #{form.website_url}
+
+            dl
+              dt Destination E-mail Address
+              dd #{form.form_destination}
 
             dl
               dt Created on
-              dd
-                pre #{form.created_at}
-
-            dl
-              dt Website
-              dd
-                pre
-                  a(href='#{form.website_url}', target='_blank')
-                    | #{form.website_url}
+              dd #{form.created_at}
 
         .pure-u-1-2
           .text-left(style='padding-left: 20px;')
-            h1 Properties
+            h1 Form Attributes
 
             .spacer
             .separator
@@ -67,12 +63,14 @@ block content
             dl
               dt Action
               dd
-                pre http://www.youform.me/api/form/#{form._id}
+                small
+                  pre https://www.youform.me/api/form/#{form._id}
 
             dl
-              dt API Key
+              dt Method
               dd
-                pre #{form._id}
+                small
+                  pre POST
 
       .pure-g
         .pure-u-1
