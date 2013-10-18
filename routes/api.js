@@ -6,7 +6,6 @@ module.exports = function (app, db, redis_client, prefix) {
 
   var async = require('async')
     , coolog = require('coolog')
-    , express = require('express')
     , mime = require('mime')
     , moment = require('moment')
     , inflection = require('inflection')
@@ -111,7 +110,9 @@ module.exports = function (app, db, redis_client, prefix) {
         });
     },
     get: function (req, res) {
-      logger.debug('here');
+
+      logger.debug('get');
+
       var api_key = req.param('api_key', null);
 
       if (!api_key) {
@@ -198,23 +199,23 @@ module.exports = function (app, db, redis_client, prefix) {
           });
         },
         function (form) {
-          var user_form = {};
-
+          var user_form = {}
+            , files = {}
+            ;
+          
           // parse form data
-
           Object.keys(req.body).forEach(function (key) {
             user_form[inflection.humanize(key)] = req.body[key];
           });
 
-          var files = {};
-          logger.debug(req.files);
-          if (req.files) {
+          if (req.files !== undefined) {
             Object.keys(req.files).forEach(function (key) {
               // check MIME type
-              if (/(doc|docx|pdf|jpg|jpeg|png|gif)/.test(mime.extension(req.files[key].type))) {
+              user_form = Object.reject(user_form, key);
+              if (/(doc|docx|pdf|jpg|jpeg|png|gif)/.test(mime.extension(mime.lookup(req.files[key].path)))) {
                 files[key] = req.files[key];
               }
-            });  
+            });
           }
 
           comm_utils.send_form(form, user_form, files, res, function (err) {
@@ -619,7 +620,7 @@ module.exports = function (app, db, redis_client, prefix) {
   app.get(prefix + '/confirm/send-sms/:api_key', send_confirm_sms);
   app.get(prefix + '/confirm/send-email/:api_key', send_confirm_email);
   app.post(prefix + '/new-form', form.create);
-  app.post(prefix + '/form/:api_key', express.multipart(), form.get);
+  app.post(prefix + '/form/:api_key', utils.rateLimit(), form.get);
   app.post(prefix + '/edit/:api_key', form.edit);
   app.post(prefix + '/delete/:api_key', form.del);
 

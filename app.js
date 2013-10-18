@@ -5,7 +5,7 @@ var bytes = require('bytes')
   , express = require('express')
   , http = require('http')
   , path = require('path')
-  //, multiparty = require('multiparty')
+  , parted = require('parted')
   , flash = require('connect-flash')
   , nano = require('nano')(process.env.DATABASE_URL || 'http://localhost:5984/youform')
   , redis = require('redis')
@@ -97,6 +97,23 @@ app.use(function (max_bytes) {
 
 app.use(express.json());
 app.use(express.urlencoded());
+// multipart
+app.use(function (req, res, next) {
+  if (/^\/api\/form\/*/.test(req.url)) {
+    parted({
+      // custom file path
+      path: __dirname + '/uploads',
+      // memory usage limit per request
+      limit: 30 * 1024,
+      // disk usage limit per request
+      diskLimit: 30 * 1024 * 1024,
+      // enable streaming for json/qs
+      stream: true
+    })(req, res, next);
+  } else {
+    process.nextTick(next);
+  }
+});
 app.use(express.session());
 app.use(flash());
 app.use(express.methodOverride());

@@ -6,7 +6,7 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "3.4.1",
+    "express": "~3.4.1",
     "jade": "*",
     "stylus": "*",
     "async": "*",
@@ -27,8 +27,8 @@
     "slug": "~0.3.3",
     "inflection": "~1.2.6",
     "bytes": "~0.2.1",
-    "multiparty": "~2.2.0",
-    "mime": "~1.2.11"
+    "mime": "~1.2.11",
+    "parted": "https://registry.npmjs.org/parted/-/parted-0.1.1.tgz"
   },
   "engines": {
     "node": "0.10.x",

@@ -123,21 +123,15 @@ module.exports = function () {
   };
 
   var send_form = function (form, post_data, files, res, callback) {
+    logger.debug('send form');
     async.waterfall([
         function (next) {
-          // render email template
-          var date = moment().format('D MMMM YYYY');
-          res.render('email/email', { form: form, user_form: post_data, date: date }, function (err, body) {
-            if (err) {
-              next(err);
-            } else {
-              next(null, body);
-            }
-          });
-        },
-        function (html_body, next) {
-          logger.debug('parse attach');
           var attachments = [];
+
+          if (Object.size(files) === 0) {
+            next(null, attachments);
+            return;
+          }
           async.each(Object.keys(files),
             function (key, cb) {
               var file = files[key];
@@ -145,11 +139,10 @@ module.exports = function () {
                 if (err) {
                   cb(err);
                 } else {
-                  logger.debug(file.name);
                   attachments.push({
                     'Content': data.toString('base64')
                   , 'Name': file.name
-                  , 'ContentType': file.type
+                  , 'ContentType': mime.lookup(file.path)
                   });
                   cb(null);
                 }
@@ -160,9 +153,24 @@ module.exports = function () {
                 next(err);
               } else {
                 // end
-                next(null, html_body, attachments);
+                logger.debug('end attach');
+                next(null, attachments.to(1));
               }
             });
+        },
+        function (attachments, next) {
+          // render email template
+          var date = moment().format('D MMMM YYYY');
+          logger.debug('here');
+          return;
+
+          res.render('email/email', { form: form, user_form: post_data, date: date }, function (err, body) {
+            if (err) {
+              next(err);
+            } else {
+              next(null, body, attachments);
+            }
+          });
         },
         function (html_body, attachments) {
           // send email
