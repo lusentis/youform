@@ -27,7 +27,8 @@
     "slug": "~0.3.3",
     "inflection": "~1.2.6",
     "bytes": "~0.2.1",
-    "multiparty": "~2.2.0"
+    "multiparty": "~2.2.0",
+    "mime": "~1.2.11"
   },
   "engines": {
 	"node": "0.10.x",
