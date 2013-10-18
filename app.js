@@ -41,8 +41,7 @@ if (process.env.REDISTOGO_URL) {
   });
 
 } else {
-  redis_client = redis.createClient();
-  sessionStore = new RedisStore();
+  throw new Error('Missing Redis URL: REDISTOGO_URL');
 }
 
 redis_client = jsonify(redis_client);
@@ -98,11 +97,7 @@ app.use(function (max_bytes) {
 
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(express.session({
-    key: 'express.sid'
-  , store: sessionStore
-  }
-));
+app.use(express.session();
 app.use(flash());
 app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
