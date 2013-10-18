@@ -123,7 +123,6 @@ module.exports = function () {
   };
 
   var send_form = function (form, post_data, files, res, callback) {
-    logger.debug('send form');
     async.waterfall([
         function (next) {
           var attachments = [];
@@ -161,8 +160,6 @@ module.exports = function () {
         function (attachments, next) {
           // render email template
           var date = moment().format('D MMMM YYYY');
-          logger.debug('here');
-          return;
 
           res.render('email/email', { form: form, user_form: post_data, date: date }, function (err, body) {
             if (err) {

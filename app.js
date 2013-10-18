@@ -95,11 +95,10 @@ app.use(function (max_bytes) {
   };
 }(MAX_SIZE));
 
-app.use(express.json());
-app.use(express.urlencoded());
 // multipart
 app.use(function (req, res, next) {
-  if (/^\/api\/form\/*/.test(req.url)) {
+  var type = req.headers['content-type'].split(';')[0].trim().toLowerCase();
+  if (/^\/api\/form\/*/.test(req.url) && type === 'multipart/form-data') {
     parted({
       // custom file path
       path: __dirname + '/uploads',
@@ -114,10 +113,11 @@ app.use(function (req, res, next) {
     process.nextTick(next);
   }
 });
+app.use(express.json());
+app.use(express.urlencoded());
 app.use(express.session());
 app.use(flash());
 app.use(express.methodOverride());
-app.use(express.cookieParser('your secret here'));
 app.use(app.router);
 app.use(require('stylus').middleware(__dirname + '/public'));
 app.use(express.static(path.join(__dirname, 'public')));
