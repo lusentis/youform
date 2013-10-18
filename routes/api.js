@@ -619,7 +619,7 @@ module.exports = function (app, db, redis_client, prefix) {
   app.get(prefix + '/confirm/send-sms/:api_key', send_confirm_sms);
   app.get(prefix + '/confirm/send-email/:api_key', send_confirm_email);
   app.post(prefix + '/new-form', form.create);
-  app.post(prefix + '/form/:api_key', form.get);
+  app.post(prefix + '/form/:api_key', express.multipart(), form.get);
   app.post(prefix + '/edit/:api_key', form.edit);
   app.post(prefix + '/delete/:api_key', form.del);
 
