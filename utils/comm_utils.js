@@ -4,11 +4,13 @@
 module.exports = function () {
   
   var async = require('async')
-    , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
     , coolog = require('coolog')
-    , moment = require('moment')
-    , querystring = require('querystring')
+    , fs = require('fs')
     , https = require('https')
+    , mime = require('mime')
+    , moment = require('moment')
+    , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
+    , querystring = require('querystring')
     , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
     ;
 
@@ -120,7 +122,7 @@ module.exports = function () {
       });
   };
 
-  var send_form = function (form, post_data, res, callback) {
+  var send_form = function (form, post_data, files, res, callback) {
     async.waterfall([
         function (next) {
           // render email template
@@ -133,7 +135,36 @@ module.exports = function () {
             }
           });
         },
-        function (html_body) {
+        function (html_body, next) {
+          logger.debug('parse attach');
+          var attachments = [];
+          async.each(Object.keys(files),
+            function (key, cb) {
+              var file = files[key];
+              fs.readFile(file.path, function (err, data) {
+                if (err) {
+                  cb(err);
+                } else {
+                  logger.debug(file.name);
+                  attachments.push({
+                    'Content': data.toString('base64')
+                  , 'Name': file.name
+                  , 'ContentType': file.type
+                  });
+                  cb(null);
+                }
+              });
+            },
+            function (err) {
+              if (err) {
+                next(err);
+              } else {
+                // end
+                next(null, html_body, attachments);
+              }
+            });
+        },
+        function (html_body, attachments) {
           // send email
           var replyto = email_regex.test(post_data[form.replyto_field]) ? post_data[form.replyto_field] : '';
           postmark.send({
@@ -142,6 +173,7 @@ module.exports = function () {
           , 'ReplyTo': replyto
           , 'Subject': form.form_subject
           , 'HtmlBody': html_body
+          , 'Attachments': attachments
           }, function (err) {
             if (err) {
               logger.error('Postmark error', err);

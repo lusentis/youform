@@ -6,6 +6,8 @@ module.exports = function (app, db, redis, prefix) {
 
   var async = require('async')
     , coolog = require('coolog')
+    , express = require('express')
+    , mime = require('mime')
     , moment = require('moment')
     , inflection = require('inflection')
     , uuid = require('node-uuid')
@@ -111,6 +113,7 @@ module.exports = function (app, db, redis, prefix) {
         });
     },
     get: function (req, res) {
+      logger.debug('here');
       var api_key = req.param('api_key', null);
 
       if (!api_key) {
@@ -198,16 +201,25 @@ module.exports = function (app, db, redis, prefix) {
         },
         function (form) {
           var user_form = {};
+
+          // parse form data
+
           Object.keys(req.body).forEach(function (key) {
             user_form[inflection.humanize(key)] = req.body[key];
           });
 
-          // replyTo
-          if (email_regex.test(req.body['yf-replyto'].trim())) {
-            form.replyTo = req.body['yf-replyto'].trim();
+          var files = {};
+          logger.debug(req.files);
+          if (req.files) {
+            Object.keys(req.files).forEach(function (key) {
+              // check MIME type
+              if (/(doc|docx|pdf|jpg|jpeg|png|gif)/.test(mime.extension(req.files[key].type))) {
+                files[key] = req.files[key];
+              }
+            });  
           }
 
-          comm_utils.send_form(form, user_form, res, function (err) {
+          comm_utils.send_form(form, user_form, files, res, function (err) {
             if (err) {
               logger.error('Postmark error', err);
               logger.info('Redirect to 500 page');
@@ -609,7 +621,7 @@ module.exports = function (app, db, redis, prefix) {
   app.get(prefix + '/confirm/send-sms/:api_key', send_confirm_sms);
   app.get(prefix + '/confirm/send-email/:api_key', send_confirm_email);
   app.post(prefix + '/new-form', form.create);
-  app.post(prefix + '/form/:api_key', utils.rateLimit(), form.get);
+  app.post(prefix + '/form/:api_key', form.get);
   app.post(prefix + '/edit/:api_key', form.edit);
   app.post(prefix + '/delete/:api_key', form.del);
 

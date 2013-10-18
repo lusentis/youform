@@ -17,7 +17,7 @@ var bytes = require('bytes')
 
 require('sugar');
 
-var MAX_SIZE = '4mb';
+var MAX_SIZE = '2mb';
 
 var app = express()
   , redis_client
