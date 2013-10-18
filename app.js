@@ -97,7 +97,7 @@ app.use(function (max_bytes) {
 
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(express.session();
+app.use(express.session());
 app.use(flash());
 app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
