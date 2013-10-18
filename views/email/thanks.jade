@@ -2,11 +2,7 @@ extends base
 
 
 block title
-  | YouForm - Successful registration!
-
-
-block mailtitle
-  | You've successful register a contact form!
+  | YouForm
 
 
 block mailpretitle
@@ -14,21 +10,29 @@ block mailpretitle
     | Hooray!
 
 
+block mailtitle
+  | Yor form «#{form.form_name}» has been created!
+
+
 block mailcontent
 
-  p You will receive an e-mail at 
-    b #{form.form_destination} 
-    | and a text on the phone number 
-    b #{form.country_code} #{form.phone}
+  p You should have received a confirmation e-mail at 
+    | #{form.form_destination} 
+    | and a text message on your mobile phone 
+    | #{form.country_code} #{form.phone}.
   
-  br
-
-  p You must verify those contact information by clicking the link in the e-mail and entering the text code in your 
-    b
-      a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}', style='color: ##{form.colours};') dashboard
+  p 
+    b Before your form starts working, 
+    | you must verify the contact information that you have provided.
+    
+  p 
+    | By the way, this is the 
+      a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}', style='color: ##{form.colours};') link to your dashboard
+    | . Please keep it save as it contains your authentication data.
 
 
 block mailfooter
 
-  | If you are experiencing troubles with something, please let us know at 
-  a(href='mailto:support@youform.me', style='text-decoration: none; color: ##{form.colours};') support at youform.me
+  | If you are experiencing troubles with something, please  
+  a(href='https://www.youform.me/contact.html', style='text-decoration: none; color: ##{form.colours};') let us know
+  | .

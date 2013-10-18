@@ -2,32 +2,35 @@ extends base
 
 
 block title
-  | YouForm - Verify the e-mail address
-
-
-block mailtitle
-  | One little thing before!
+  | YouForm
 
 
 block mailpretitle
   h2(style='font-size: 24px; line-height: 24px; font-weight: lighter; color: #999999; text-align: left;')
-    | Congratulations
+    | Hooray!
+
+
+block mailtitle
+  | Hi, before we can enable the wonderful contact form in your website you should confirm this email address.
 
 
 block mailcontent
 
-  p We are setting up things for your new contact form. At this e-mail address we will send every messages written through the form 
-    b #{form.form_name}
-  br    
-  p Click here to confirm your email address and activate it.
-  
+  p 
+    | We're asking your permission to send any message written through the contact form 
+    b «#{form.form_name}» 
+    | to this e-mail address (#{form.form_destination}).
+    
+  br
+      
+  p Click the following link to give your approval and start receiving contact requests:
   p(style='word-break: break-all;')
     a(href='http://www.youform.me/confirm/email/#{form._id}?token=#{form.token}&email=#{form.form_destination}', style='word-break: break-all; color: ##{form.colours};') http://www.youform.me/confirm/email/#{form._id}?token=#{form.token}&amp;email=#{form.form_destination_not_confirmed}
 
 
 block mailfooter
 
-  | Don't you know what is this mail? Find more info at 
-  a(href='http://www.youform.me', style='text-decoration: none; color: ##{form.colours};') youform.me
-  |  or write to our 
-  a(href='mailto:support@youform.me', style='text-decoration: none; color: ##{form.colours};') support
+  | You don't know what this e-mail is about? Know more at 
+  a(href='https://www.youform.me', style='text-decoration: none; color: ##{form.colours};') youform.me
+  |  or 
+  a(href='https://www.youform.me/contact.html', style='text-decoration: none; color: ##{form.colours};') contact us
