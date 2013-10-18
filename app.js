@@ -26,22 +26,22 @@ var app = express()
   , rtg
   ;
 
-if (process.env.REDIS_URL) {
+
+if (process.env.REDISTOGO_URL) {
   // @TODO: test this
-  rtg = require('url').parse(process.env.REDIS_URL);
+  rtg = require('url').parse(process.env.REDISTOGO_URL);
   redis_client = redis.createClient(rtg.port, rtg.hostname);
   redis_client.auth(rtg.auth.split(':')[1]);
 
   // redis as session store
   sessionStore = new RedisStore({
-    host: process.env.REDIS_URL.split(':')[0],
+    host: process.env.REDISTOGO_URL.split(':')[0],
     port: 6379,
-    pass: process.env.REDIS_URL
+    pass: process.env.REDISTOGO_URL
   });
 
 } else {
-  redis_client = redis.createClient();
-  sessionStore = new RedisStore();
+  throw new Error('Missing Redis URL: REDISTOGO_URL');
 }
 
 redis_client = jsonify(redis_client);
@@ -97,11 +97,7 @@ app.use(function (max_bytes) {
 
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(express.session({
-    key: 'express.sid'
-  , store: sessionStore
-  }
-));
+app.use(express.session());
 app.use(flash());
 app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
@@ -116,7 +112,7 @@ if ('development' == app.get('env')) {
 }
 
 require('./routes/site')(app, nano, '');
-require('./routes/api')(app, nano, redis, '/api');
+require('./routes/api')(app, nano, redis_client, '/api');
 
 http.createServer(app).listen(app.get('port'), function () {
   logger.ok('Express server listening on port ' + app.get('port'));

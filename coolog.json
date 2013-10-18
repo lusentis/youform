@@ -2,12 +2,7 @@
   "channels": {
     "root": {
       "level": "debug",
-      "appenders": ["file", "console"]
-    }
-  },
-  "appenders" : {
-    "file": {
-      "output_file": "out/log"
+      "appenders": ["console"]
     }
   }
 }

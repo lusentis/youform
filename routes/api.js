@@ -2,7 +2,7 @@
 'use strict';
 
 
-module.exports = function (app, db, redis, prefix) {
+module.exports = function (app, db, redis_client, prefix) {
 
   var async = require('async')
     , coolog = require('coolog')
@@ -15,7 +15,7 @@ module.exports = function (app, db, redis, prefix) {
     , error_utils = require('../utils/error_utils.js')()
     , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
-    , utils = require('../utils/utils.js')(redis)
+    , utils = require('../utils/utils.js')(redis_client)
     , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
     , colours_regex = /^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
     , country_code_regex = /^\+{0,1}[0-9]{1,4}$/
@@ -24,8 +24,6 @@ module.exports = function (app, db, redis, prefix) {
     ;
   
   var logger = coolog.logger('api.js');
-
-  var redis_client = redis.createClient();
 
   var test_email = function (email) {
     return email_regex.test(email) && email.length < 100;
