@@ -94,29 +94,7 @@ app.use(function (max_bytes) {
     }
   };
 }(MAX_SIZE));
-// multipart
-/*app.use(function (req, res, next) {
-  if (req.method.toLowerCase() === 'post' && req.headers['content-type'] === 'multipart/form-data') {
-    var form = new multiparty.Form();
-    form.parse(req, function (err, fields, files) {
-      if (err) {
-        throw err;
-      } else {
-        // attach files
-        var attachments = {};
-        Object.keys(files).forEach(function (name) {
-          if (/^yf-attach-[0-2]$/.test(name)) {
-            attachments[name] = files[name];
-          }
-        });
-        req.files = attachments;
-        next();
-      }
-    });
-  } else {
-    next();
-  }
-});*/
+
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.session({
