@@ -1,7 +1,19 @@
 extends ../layout
 
 block content
-  .content
-    if error === 'origin'
-      h2 Origin error
-      h4 We can't find what you're looking for. Sorry!
+  .page.page-fullscreen(style='background-image: url("/img/eagle.jpg");')
+    .spacer(style='height: 100px;')
+    .container
+      .pure-g
+        .pure-u-1-2
+          .text-center
+            a(href='#')
+              img.brand.footer-brand(src='/img/youform.svg')
+
+            .spacer
+
+            if error === 'origin'
+              h1 Origin error
+              h2 We can't find what you're looking for. Sorry!
+
+            .spacer(style='height: 100px;')
