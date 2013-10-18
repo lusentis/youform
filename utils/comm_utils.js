@@ -32,7 +32,7 @@ module.exports = function () {
           postmark.send({
             'From': process.env.POSTMARK_FROM
           , 'To': form.form_destination_not_confirmed
-          , 'Subject': 'YouForm: Confirm Your Email Address'
+          , 'Subject': 'YouForm.me - Email address confirmation'
           , 'HtmlBody': html_body
           }, function (err) {
             if (err) {
@@ -67,7 +67,7 @@ module.exports = function () {
           postmark.send({
             'From': process.env.POSTMARK_FROM
           , 'To': form.creator_email
-          , 'Subject': 'Signup YouForm: ' + form.form_name
+          , 'Subject': 'YouForm - Signup confirmation'
           , 'HtmlBody': html_body
           }, function (err) {
             if (err) {
@@ -102,7 +102,7 @@ module.exports = function () {
           postmark.send({
             'From': process.env.POSTMARK_FROM
           , 'To': form.creator_email
-          , 'Subject': 'Signup YouForm: ' + form.form_name
+          , 'Subject': 'YouForm - Your form details' + form.form_name
           , 'HtmlBody': html_body
           }, function (err) {
             if (err) {
@@ -159,7 +159,7 @@ module.exports = function () {
   };
 
   var send_sms = function (form, callback) {
-    var message = 'YouForm Confirmation Code: ' + form.code
+    var message = 'Hi, your confirmation code is: ' + form.code + '. Thank you!'
       , response = ''
       , data
       , post_options

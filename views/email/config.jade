@@ -11,21 +11,21 @@ block mailtitle
 
 block mailpretitle
   h2(style='font-size: 24px; line-height: 24px; font-weight: lighter; color: #999999; text-align: left;')
-    | The end
+    | What's next?
 
 
 block mailcontent
   ol
     li(style='padding-bottom: 20px;')
-      | Make a form with some fields (eg: name, surname, email, message). Be sure to add 
+      | Make a form with some fields (eg: name, surname, email address, message). Be sure to add a 
       span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') name
       |  attribute to fields you want to track.
     li(style='padding-bottom: 20px;')
-      | Add as your form 
+      | As the form's 
       span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') action
-      |  attribute this value:
+      |  attribute set this value:
       br
-      span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666; word-break: break-all;') http://www.youform.me/api/form/#{form._id}
+      span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666; word-break: break-all;') https://www.youform.me/api/form/#{form._id}
       br
       | and 
       span(style='font-family: Andale Mono, Courier, monospace; font-size: 16px; color: #666;') POST
@@ -34,12 +34,14 @@ block mailcontent
       |  attribute.
 
   p
-    | If you want to edit any information about this form or you want to see the monthly usage, please visit your  
+    | If you want to edit any information about this form or you'd like to see its monthly usage, head over to your  
     b
       a(href='http://www.youform.me/dashboard/#{form._id}?token=#{form.token}', style='color: ##{form.colours};') dashboard
+    | .
 
 
 block mailfooter
 
-  | If you are experiencing troubles with something, please let us know at 
-  a(href='mailto:support@youform.me', style='text-decoration: none; color: ##{form.colours};') support at youform.me
+  | If you are experiencing troubles with something, please  
+  a(href='https://www.youform.me/contact.html', style='text-decoration: none; color: ##{form.colours};') let us know
+  | .
