@@ -15,9 +15,10 @@ module.exports = function (app, db, redis_client, prefix) {
     , log_utils = require('../utils/log_utils.js')(db)
     , utils = require('../utils/utils.js')(redis_client)
     , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
-    , phone_regex = /^[0-9\-().\s]{10,15}$/
-    , country_code_regex = /^\+{0,1}[0-9]{1,4}$/
     , colours_regex = /^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+    , country_code_regex = /^\+{0,1}[0-9]{1,4}$/
+    , phone_regex = /^[0-9\-().\s]{10,15}$/
+    , url_regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/
     ;
   
   var logger = coolog.logger('api.js');
@@ -36,7 +37,6 @@ module.exports = function (app, db, redis_client, prefix) {
       , form_name: req.body['f-name']
       , website_url: req.body['w-url']
       , website_success_page: req.body['w-success-page']
-      , website_error_page: req.body['w-error-page']
       , form_subject: req.body['f-subject']
       , form_intro: req.body['f-intro']
       , form_destination: req.body['email-dest']
@@ -186,8 +186,8 @@ module.exports = function (app, db, redis_client, prefix) {
             } else {
               logger.ok('log saved', log);
               if (spam) {
-                logger.info('Redirect to', form.website_error_page);
-                res.redirect(form.website_error_page);
+                logger.info('Redirect to 500 page');
+                res.redirect('/500');
               } else {
                 next(null, form);
               }
@@ -208,11 +208,11 @@ module.exports = function (app, db, redis_client, prefix) {
           comm_utils.send_form(form, user_form, res, function (err) {
             if (err) {
               logger.error('Postmark error', err);
-              logger.info('Redirect to', form.website_error_page);
-              res.redirect(form.website_error_page);
+              logger.info('Redirect to 500 page');
+              res.redirect('/500');
             } else {
               logger.info('Redirect to', form.website_success_page);
-              res.redirect(form.website_success_page);
+              res.redirect(url_regex.test(form.website_success_page) ? form.website_success_page : form.website_url);
             }
           });
         },
@@ -278,7 +278,6 @@ module.exports = function (app, db, redis_client, prefix) {
         form_name: req.body['f-name']
       , website_url: req.body['w-url']
       , website_success_page: req.body['w-success-page']
-      , website_error_page: req.body['w-error-page']
       , form_subject: req.body['f-subject']
       , form_intro: req.body['f-intro']
       , form_destination: req.body['email-dest']

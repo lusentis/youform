@@ -18,12 +18,11 @@ function(doc, req) {
       , email_confirmed: false
       , phone_confirmed: false
       , created_at: new Date()
-      , form_name: data.form_name
+      , form_name: data.form_name.trim()
       , website_url: data.website_url.trim()
       , website_success_page: data.website_success_page.trim()
-      , website_error_page: data.website_error_page.trim()
-      , form_subject: data.form_subject
-      , form_intro: data.form_intro
+      , form_subject: data.form_subject.trim()
+      , form_intro: data.form_intro.trim()
       , form_destination: data.form_destination.trim()
       , form_destination_not_confirmed: data.form_destination.trim()
       , creator_email: data.creator_email.trim()
@@ -34,12 +33,11 @@ function(doc, req) {
       };
     } else {
       // update
-      doc.form_name = data.form_name;
+      doc.form_name = data.form_name.trim();
       doc.website_url = data.website_url.trim();
       doc.website_success_page = data.website_success_page.trim();
-      doc.website_error_page = data.website_error_page.trim();
-      doc.form_subject = data.form_subject;
-      doc.form_intro = data.form_intro;
+      doc.form_subject = data.form_subject.trim();
+      doc.form_intro = data.form_intro.trim();
       doc.creator_email = data.creator_email.trim();
       doc.colours = data.colours.trim();
       doc.phone = data.phone.trim();

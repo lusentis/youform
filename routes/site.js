@@ -25,7 +25,6 @@ module.exports = function (app, db, prefix) {
       , form_name: ''
       , website_url: ''
       , website_success_page: ''
-      , website_error_page: ''
       , form_subject: ''
       , form_intro: ''
       , form_destination: ''
@@ -237,6 +236,10 @@ module.exports = function (app, db, prefix) {
     }
   };
 
+  var server_error = function (req, res) {
+    res.render('errors/500');
+  };
+
   // routes
   app.get(prefix + '/', index);
   app.get(prefix + '/success/:api_key', form.success);
@@ -249,4 +252,5 @@ module.exports = function (app, db, prefix) {
   // errors
   app.get(prefix + '/error', error_page);
   app.get(prefix + '/404', form_not_found);
+  app.get(prefix + '/500', server_error);
 };
