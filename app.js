@@ -17,8 +17,6 @@ var bytes = require('bytes')
 
 require('sugar');
 
-var MAX_SIZE = '2mb';
-
 var app = express()
   , redis_client
   , cookieParser = express.cookieParser(process.env.SITE_SECRET)
@@ -57,43 +55,7 @@ app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(cookieParser);
 // limit request size
-/*app.use(function (max_bytes) {
-  max_bytes = bytes(max_bytes);
-  return function limit(req, res, next) {
-    var received = 0
-      , len = req.headers['content-length'] ? parseInt(req.headers['content-length'], 10) : null;
-
-    // self-awareness
-    if (req._limit) return next();
-    req._limit = true;
-
-    // limit by content-length
-    if (len && len > max_bytes) {
-      logger.info({
-        error: true
-      , description: 'request is too large'
-      , max_bytes: bytes(max_bytes)
-      , length: bytes(len)
-      });
-      res.json(413, {error: true, description: 'request is too large'});
-      return;
-    }
-
-    // limit
-    listen();
-    next();
-
-    function listen() {
-      req.on('data', function (chunk) {
-        received += Buffer.isBuffer(chunk) ? chunk.length : Buffer.byteLength(chunk);
-
-        if (received > max_bytes) {
-          req.destroy();
-        }
-      });
-    }
-  };
-}(MAX_SIZE));*/
+app.use(express.limit('2mb'));
 
 // multipart
 app.use(function (req, res, next) {
