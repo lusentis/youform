@@ -40,7 +40,7 @@ module.exports = function (app, db, prefix) {
       });
     },
     success: function (req, res) {
-      var api_key = req.param('api_key', null)
+      var api_key = req.params.api_key
         , token = req.query.token
         ;
 
@@ -65,7 +65,7 @@ module.exports = function (app, db, prefix) {
       });
     },
     del: function (req, res) {
-      var api_key = req.param('api_key', null)
+      var api_key = req.params.api_key
         , token = req.query.token
         ;
 
@@ -92,7 +92,7 @@ module.exports = function (app, db, prefix) {
       }
     },
     edit: function (req, res) {
-      var api_key = req.param('api_key', null)
+      var api_key = req.params.api_key
         , token = req.query.token
         ;
 
@@ -120,7 +120,7 @@ module.exports = function (app, db, prefix) {
 
 
   var dashboard = function (req, res) {
-    var api_key = req.param('api_key', null)
+    var api_key = req.params.api_key
       , token = req.query.token
       ;
 
@@ -187,7 +187,7 @@ module.exports = function (app, db, prefix) {
   };
 
   var confirmed_email = function (req, res) {
-    var api_key = req.param('api_key', null)
+    var api_key = req.params.api_key
       , token = req.query.token
       ;
 

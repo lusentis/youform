@@ -1,25 +1,26 @@
 /* jshint node:true, indent:2, white:true, laxcomma:true, undef:true, strict:true, unused:true, eqnull:true, camelcase: false, trailing: true */
 'use strict';
 
-var bytes = require('bytes')
-  , express = require('express')
+var connect = require('connect')
+  , coolog = require('coolog')
+  , flash = require('connect-flash')
   , http = require('http')
+  , jsonify = require('redis-jsonify')
+  , nano = require('nano')(process.env.DATABASE_URL || 'http://localhost:5984/youform')
   , path = require('path')
   , parted = require('parted')
-  , flash = require('connect-flash')
-  , nano = require('nano')(process.env.DATABASE_URL || 'http://localhost:5984/youform')
+  , urlrouter = require('urlrouter')
   , redis = require('redis')
-  , jsonify = require('redis-jsonify')
-  , RedisStore = require('connect-redis')(express)
-  , coolog = require('coolog')
+  , RedisStore = require('connect-redis')(connect)
   , logger = coolog.logger('app.js')
+  , response_middleware = require('./connect-rich-response.js')
   ;
 
 require('sugar');
 
-var app = express()
+var app = connect()
   , redis_client
-  , cookieParser = express.cookieParser(process.env.SITE_SECRET)
+  , cookieParser = connect.cookieParser(process.env.SITE_SECRET)
   , sessionStore
   , rtg
   ;
@@ -48,14 +49,13 @@ redis_client.on('error', function (err) {
 });
 
 // all environments
-app.set('port', process.env.PORT || 3000);
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
-app.use(express.favicon());
-app.use(express.logger('dev'));
+var port = process.env.PORT || 3000;
+app.use(connect.favicon());
+app.use(response_middleware({ root: __dirname + '/views', debug: true }));
+app.use(connect.logger('dev'));
 app.use(cookieParser);
 // limit request size
-app.use(express.limit('2mb'));
+//app.use(connect.limit('2mb'));
 
 // multipart
 app.use(function (req, res, next) {
@@ -79,24 +79,25 @@ app.use(function (req, res, next) {
     process.nextTick(next);
   }
 });
-app.use(express.json());
-app.use(express.urlencoded());
-app.use(express.session());
+app.use(connect.json());
+app.use(connect.urlencoded());
+app.use(connect.query());
+app.use(connect.session());
 app.use(flash());
-app.use(express.methodOverride());
-app.use(app.router);
+app.use(connect.methodOverride());
 app.use(require('stylus').middleware(__dirname + '/public'));
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(connect.static(path.join(__dirname, 'public')));
 
 // development only
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+if (process.env.DEV === true) {
+  app.use(connect.errorHandler());
 }
 
-require('./routes/site')(app, nano, '');
-require('./routes/api')(app, nano, redis_client, '/api');
+app.use(urlrouter(function (app) {
+  require('./routes/site')(app, nano, '');
+  require('./routes/api')(app, nano, redis_client, '/api');
+}));
 
-http.createServer(app).listen(app.get('port'), function () {
-  logger.ok('Express server listening on port ' + app.get('port'));
+http.createServer(app).listen(port, function () {
+  logger.ok('Express server listening on port ' + port);
 });

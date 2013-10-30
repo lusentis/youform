@@ -113,7 +113,7 @@ module.exports = function (app, db, redis_client, prefix) {
 
       logger.debug('get');
 
-      var api_key = req.param('api_key', null);
+      var api_key = req.params.api_key;
 
       if (!api_key) {
         error_utils.params_error({api_key: api_key}, req, res);
@@ -138,7 +138,7 @@ module.exports = function (app, db, redis_client, prefix) {
                 , form_id: api_key
                 , description: 'not found'
                 });
-                res.json(403, {
+                res.status(403).json({
                   error: true
                 , description: 'not found.'
                 });
@@ -149,7 +149,7 @@ module.exports = function (app, db, redis_client, prefix) {
                 , form_id: api_key
                 , description: 'not found'
                 });
-                res.json(403, {
+                res.status(403).json({
                   error: true
                 , description: 'not found'
                 });
@@ -236,7 +236,7 @@ module.exports = function (app, db, redis_client, prefix) {
       });
     },
     del: function (req, res) {
-      var api_key = req.param('api_key', null)
+      var api_key = req.params.api_key
         , token = req.body.token
         ;
       
@@ -282,7 +282,7 @@ module.exports = function (app, db, redis_client, prefix) {
         });
     },
     edit: function (req, res) {
-      var api_key = req.param('api_key', null)
+      var api_key = req.params.api_key
         , token = req.body.token
         , form
         ;
@@ -379,7 +379,7 @@ module.exports = function (app, db, redis_client, prefix) {
     }
   };
   var confirm_email = function (req, res) {
-    var api_key = req.param('api_key', null)
+    var api_key = req.params.api_key
       , email = req.query.email
       , token = req.query.token
       ;
@@ -438,7 +438,7 @@ module.exports = function (app, db, redis_client, prefix) {
   };
 
   var confirm_sms = function (req, res) {
-    var api_key = req.param('api_key', null)
+    var api_key = req.params.api_key
       , token = req.body.token
       , code = req.body.code
       ;
@@ -510,7 +510,7 @@ module.exports = function (app, db, redis_client, prefix) {
   };
 
   var send_confirm_email = function (req, res) {
-    var api_key = req.param('api_key', null)
+    var api_key = req.params.api_key
       , token = req.query.token
       ;
 
@@ -553,7 +553,7 @@ module.exports = function (app, db, redis_client, prefix) {
   };
 
   var send_confirm_sms = function (req, res) {
-    var api_key = req.param('api_key', null)
+    var api_key = req.params.api_key
       , token = req.query.token
       ;
 
