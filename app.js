@@ -57,7 +57,7 @@ app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(cookieParser);
 // limit request size
-app.use(function (max_bytes) {
+/*app.use(function (max_bytes) {
   max_bytes = bytes(max_bytes);
   return function limit(req, res, next) {
     var received = 0
@@ -93,7 +93,7 @@ app.use(function (max_bytes) {
       });
     }
   };
-}(MAX_SIZE));
+}(MAX_SIZE));*/
 
 // multipart
 app.use(function (req, res, next) {
