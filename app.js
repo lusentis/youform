@@ -97,7 +97,11 @@ app.use(function (max_bytes) {
 
 // multipart
 app.use(function (req, res, next) {
-  var type = req.headers['content-type'].split(';')[0].trim().toLowerCase();
+  var type = '';
+  if (req.headers['content-type'] !== undefined) {
+    type = req.headers['content-type'].split(';')[0].trim().toLowerCase();
+  }
+
   if (/^\/api\/form\/*/.test(req.url) && type === 'multipart/form-data') {
     parted({
       // custom file path
