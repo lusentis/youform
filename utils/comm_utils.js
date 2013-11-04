@@ -34,7 +34,7 @@ module.exports = function () {
           postmark.send({
             'From': process.env.POSTMARK_FROM
           , 'To': form.form_destination_not_confirmed
-          , 'Subject': 'YouForm.me - Email address confirmation'
+          , 'Subject': 'YouForm - Email address confirmation'
           , 'HtmlBody': html_body
           }, function (err) {
             if (err) {
@@ -69,7 +69,7 @@ module.exports = function () {
           postmark.send({
             'From': process.env.POSTMARK_FROM
           , 'To': form.creator_email
-          , 'Subject': 'YouForm - Signup confirmation'
+          , 'Subject': 'YouForm - Details for ' + form.form_name
           , 'HtmlBody': html_body
           }, function (err) {
             if (err) {
@@ -104,7 +104,7 @@ module.exports = function () {
           postmark.send({
             'From': process.env.POSTMARK_FROM
           , 'To': form.creator_email
-          , 'Subject': 'YouForm - Your form details' + form.form_name
+          , 'Subject': 'YouForm - Welcome!'
           , 'HtmlBody': html_body
           }, function (err) {
             if (err) {
