@@ -24,7 +24,7 @@ block mailcontent
         td(style='width: 30%; text-align: left; vertical-align: top; color: #AAAAAA; border-bottom: 2px solid #EEEEEE; padding-top: 5px; padding-bottom: 5px; font-size: 12px;') #{key}
         td(style='width: 70%; text-align: left; vertical-align: top; color: #666666; border-bottom: 2px solid #EEEEEE; padding-top: 5px; padding-bottom: 5px;')
           if typeof field === 'string'
-            #{field.replace(/\n/gm, '<br />')}
+            !{field.replace(/\n/gm, '<br />')}
           else
             #{field}
  
