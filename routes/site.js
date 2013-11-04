@@ -4,13 +4,13 @@
 module.exports = function (app, db, prefix) {
 
   var async = require('async')
-    , coolog = require('coolog')
     , moment = require('moment')
-    , logger = coolog.logger('site.js')
     , error_utils = require('../utils/error_utils.js')()
     , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
     ;
+
+  var logger = require('coolog').logger('site.js');
 
   var index = function (req, res) {
     res.render('index');
@@ -44,7 +44,7 @@ module.exports = function (app, db, prefix) {
         , token = req.query.token
         ;
 
-      if (!api_key || !token) {
+      if (!!api_key === false || !!token === false) {
         error_utils.params_error({api_key: api_key, token: token}, req, res);
         return;
       }
@@ -52,15 +52,14 @@ module.exports = function (app, db, prefix) {
       form_utils.get_form(api_key, function (err, form) {
         if (err) {
           throw err;
+        }
+        if (!!form == false || form.token !== token) {
+          error_utils.params_error({api_key: api_key, token: token}, req, res);
+          return;
+        } else if (form.confirmed === true) {
+          res.redirect('/dashboard/' + form._id + '?token=' + form.token);
         } else {
-          if (!form || form.token !== token) {
-            error_utils.params_error({api_key: api_key, token: token}, req, res);
-            return;
-          } else if (form.confirmed === true) {
-            res.redirect('/dashboard/' + form._id + '?token=' + form.token);
-          } else {
-            res.render('success', {form: form});
-          }
+          res.render('success', {form: form});
         }
       });
     },
@@ -69,7 +68,7 @@ module.exports = function (app, db, prefix) {
         , token = req.query.token
         ;
 
-      if (!api_key || !token) {
+      if (!!api_key === false || !!token === false) {
         error_utils.params_error({api_key: api_key, token: token}, req, res);
         return;
       }
@@ -77,11 +76,10 @@ module.exports = function (app, db, prefix) {
       form_utils.get_form(api_key, function (err, form) {
         if (err) {
           throw err;
-        } else {
-          var not_found = (!form || form.token !== token);
-          logger.info('form not found', not_found);
-          res.render('delete', {not_found: not_found, form: form});
         }
+        var not_found = (!form || form.token !== token);
+        logger.info('form not found', not_found);
+        res.render('delete', {not_found: not_found, form: form});
       });
     },
     deleted: function (req, res) {
@@ -96,7 +94,7 @@ module.exports = function (app, db, prefix) {
         , token = req.query.token
         ;
 
-      if (!api_key || !token) {
+      if (!!api_key === false|| !!token === false) {
         error_utils.params_error({api_key: api_key, token: token}, req, res);
         return;
       }
@@ -104,16 +102,15 @@ module.exports = function (app, db, prefix) {
       form_utils.get_form(api_key, function (err, form) {
         if (err) {
           throw err;
-        } else {
-          if (!form || form.token !== token) {
-            error_utils.params_error({api_key: api_key, token: token}, req, res);
-            return;
-          }
-          res.render('signup', {
-            form: form
-          , action: 'edit'
-          });
         }
+        if (!!form === false || form.token !== token) {
+          error_utils.params_error({api_key: api_key, token: token}, req, res);
+          return;
+        }
+        res.render('signup', {
+          form: form
+        , action: 'edit'
+        });
       });
     }
   };
@@ -125,7 +122,7 @@ module.exports = function (app, db, prefix) {
       , form = null
       ;
 
-    if (!api_key || !token) {
+    if (!!api_key === false || !!token === false) {
       error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
@@ -135,18 +132,18 @@ module.exports = function (app, db, prefix) {
           form_utils.get_form(api_key, function (err, data) {
             if (err) {
               next(err);
+              return;
+            }
+            if (!data) {
+              next(null, null);
             } else {
-              if (!data) {
-                next(null, null);
-              } else {
-                form = data;
-                next(null);
-              }
+              form = data;
+              next(null);
             }
           });
         },
         function (next) {
-          if (!form) {
+          if (!!form === false) {
             req.flash('form_not_found', true);
             res.redirect('/404');
           } else if (!form.confirmed) {
@@ -172,7 +169,7 @@ module.exports = function (app, db, prefix) {
           });
         },
         function (graph, plan) {
-          var not_found = !form;
+          var not_found = (!!form === false);
           if (form) {
             not_found = form.token !== token;
           } else {
@@ -203,7 +200,7 @@ module.exports = function (app, db, prefix) {
       , token = req.query.token
       ;
 
-    if (!api_key || !token) {
+    if (!!api_key === false || !!token === false) {
       error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
@@ -211,17 +208,16 @@ module.exports = function (app, db, prefix) {
     form_utils.get_form(api_key, function (err, form) {
       if (err) {
         throw err;
-      } else {
-        if (form.token === token) {
-          if (form.email_confirmed === true) {
-            res.render('confirmed_email', {form: form});
-          } else {
-            res.redirect('/');
-          }
+      }
+      if (form.token === token) {
+        if (form.email_confirmed === true) {
+          res.render('confirmed_email', {form: form});
         } else {
-          error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
-          return;
+          res.redirect('/');
         }
+      } else {
+        error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
+        return;
       }
     });
   };

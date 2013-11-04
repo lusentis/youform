@@ -3,9 +3,7 @@
 
 module.exports = function () {
   
-  var coolog = require('coolog')
-    , logger = coolog.logger('error_utils.js')
-    ;
+  var logger = require('coolog').logger('error_utils.js');
 
   var params_error = function (params, req, res, message) {
     var err = {

@@ -6,7 +6,6 @@ module.exports = function () {
 
   var cluster = require('cluster')
     , connect = require('connect')
-    , coolog = require('coolog')
     , domain = require('domain')
     , flash = require('connect-flash')
     , http = require('http')
@@ -18,13 +17,14 @@ module.exports = function () {
     , urlrouter = require('urlrouter')
     ;
 
+  var logger = require('coolog').logger('worker.js');
+
   var RedisStore = require('connect-redis')(connect);
 
   if (!cluster.isWorker) {
     throw new Error('Please run me as a worker process.');
   }
 
-  var logger = coolog.logger('worker.js');
 
   var redis_client
     , cookieParser = connect.cookieParser(process.env.SITE_SECRET)

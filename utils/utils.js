@@ -7,12 +7,11 @@ module.exports = function (redis_client) {
   var async = require('async')
     , akismet = require('akismet-api')
     , rate = require('express-rate')
-    , coolog = require('coolog')
     , dns = require('dns')
     , spam_list = require('../spam_list.json')
     ;
 
-  var logger = coolog.logger('utils.js');
+  var logger = require('coolog').logger('utils.js');
 
   var akismet_client = akismet.client({
     key  : process.env.AKISMET_API_KEY,
@@ -59,6 +58,7 @@ module.exports = function (redis_client) {
           }, function (err, spam) {
             if (err) {
               ret(err);
+              return;
             }
             if (spam) {
               logger.error({
@@ -95,11 +95,11 @@ module.exports = function (redis_client) {
       function (err, results) {
         if (err) {
           callback(err);
-        } else {
-          var spam = (results[0] || results[1]);
-          logger.info('Spam', spam);
-          callback(null, spam);
+          return;
         }
+        var spam = (results[0] || results[1]);
+        logger.info('spam', spam);
+        callback(null, spam);
       });
   };
 

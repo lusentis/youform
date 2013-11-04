@@ -5,7 +5,6 @@
 module.exports = function (app, db, redis_client, prefix) {
 
   var async = require('async')
-    , coolog = require('coolog')
     , mime = require('mime')
     , moment = require('moment')
     , inflection = require('inflection')
@@ -15,17 +14,13 @@ module.exports = function (app, db, redis_client, prefix) {
     , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
     , utils = require('../utils/utils.js')(redis_client)
-    , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
-    , colours_regex = /^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
-    , country_code_regex = /^\+{0,1}[0-9]{1,4}$/
-    , phone_regex = /^[0-9\-().\s]{10,15}$/
-    , url_regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/
+    , regex = require('./regex.js')
     ;
   
-  var logger = coolog.logger('api.js');
+  var logger = require('coolog').logger('api.js');
 
   var test_email = function (email) {
-    return email_regex.test(email) && email.length < 100;
+    return regex.email.test(email) && email.length < 100;
   };
 
   var form = {
@@ -48,7 +43,7 @@ module.exports = function (app, db, redis_client, prefix) {
       , replyto_field: req.body['replyto-field'].trim()
       };
 
-      if (form.form_subject.length === 0 || form.form_intro.length === 0 || form.form_name.length === 0 || !colours_regex.test(form.colours.trim())) {
+      if (form.form_subject.length === 0 || form.form_intro.length === 0 || form.form_name.length === 0 || !regex.colours.test(form.colours.trim())) {
         req.flash('param_error', true);
         res.redirect('/signup');
         return;
@@ -59,7 +54,7 @@ module.exports = function (app, db, redis_client, prefix) {
         res.redirect('/signup');
         return;
       }
-      if (!phone_regex.test(form.phone.trim()) || !country_code_regex.test(form.country_code.trim())) {
+      if (!regex.phone.test(form.phone.trim()) || !regex.country_code.test(form.country_code.trim())) {
         req.flash('phone_error', true);
         res.redirect('/signup');
         return;
@@ -115,7 +110,7 @@ module.exports = function (app, db, redis_client, prefix) {
 
       var api_key = req.params.api_key;
 
-      if (!api_key) {
+      if (!!api_key === false) {
         error_utils.params_error({api_key: api_key}, req, res);
         return;
       }
@@ -208,7 +203,7 @@ module.exports = function (app, db, redis_client, prefix) {
             user_form[inflection.humanize(key)] = req.body[key];
           });
 
-          if (req.files !== undefined) {
+          if (!!req.files === false) {
             Object.keys(req.files).forEach(function (key) {
               // check MIME type
               user_form = Object.reject(user_form, key);
@@ -225,7 +220,7 @@ module.exports = function (app, db, redis_client, prefix) {
               res.redirect('/500');
             } else {
               logger.info('Redirect to', form.website_success_page);
-              res.redirect(url_regex.test(form.website_success_page) ? form.website_success_page : form.website_url);
+              res.redirect(regex.url.test(form.website_success_page) ? form.website_success_page : form.website_url);
             }
           });
         },
@@ -240,7 +235,7 @@ module.exports = function (app, db, redis_client, prefix) {
         , token = req.body.token
         ;
       
-      if (!api_key || !token) {
+      if (!!api_key === false || !!token === false) {
         error_utils.params_error({api_key: api_key, token: token}, req, res);
         return;
       }
@@ -302,7 +297,7 @@ module.exports = function (app, db, redis_client, prefix) {
       };
 
 
-      if (!api_key || !token) {
+      if (!!api_key === false || !!token === false) {
         error_utils.params_error({api_key: api_key, token: token}, req, res);
         return;
       }
@@ -314,7 +309,7 @@ module.exports = function (app, db, redis_client, prefix) {
         return;
       }
 
-      if (!phone_regex.test(data.phone.trim()) || !country_code_regex.test(data.country_code.trim())) {
+      if (!regex.phone.test(data.phone.trim()) || !regex.country_code.test(data.country_code.trim())) {
         req.flash('phone_error', true);
         res.redirect('/edit/' + api_key + '?token=' + token);
         return;
@@ -384,7 +379,7 @@ module.exports = function (app, db, redis_client, prefix) {
       , token = req.query.token
       ;
 
-    if (!api_key || !email_regex.test(email) || !token) {
+    if (!!api_key === false || !regex.email.test(email) || !!token === false) {
       error_utils.params_error({api_key: api_key, token: token, email: email}, req, res);
       return;
     }
@@ -443,7 +438,7 @@ module.exports = function (app, db, redis_client, prefix) {
       , code = req.body.code
       ;
 
-    if (!api_key || !token || !code) {
+    if (!!api_key === false || !!token === false || !!code === false) {
       error_utils.params_error({api_key: api_key, token: token, code: code}, req, res);
       return;
     }
@@ -514,7 +509,7 @@ module.exports = function (app, db, redis_client, prefix) {
       , token = req.query.token
       ;
 
-    if (!api_key || !token) {
+    if (!!api_key === false || !!token === false) {
       error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
@@ -525,7 +520,7 @@ module.exports = function (app, db, redis_client, prefix) {
             if (err) {
               next(err);
             } else {
-              if (!form) {
+              if (!!form == false) {
                 error_utils.form_not_found(api_key, req, res);
                 return;
               }
@@ -557,7 +552,7 @@ module.exports = function (app, db, redis_client, prefix) {
       , token = req.query.token
       ;
 
-    if (!api_key || !token) {
+    if (!!api_key === false || !!token === false) {
       error_utils.params_error({api_key: api_key, token: token}, req, res);
       return;
     }
@@ -568,7 +563,7 @@ module.exports = function (app, db, redis_client, prefix) {
             if (err) {
               next(err);
             } else {
-              if (!form) {
+              if (!!form === false) {
                 error_utils.form_not_found(api_key, req, res);
                 return;
               }
@@ -586,7 +581,7 @@ module.exports = function (app, db, redis_client, prefix) {
               next(err);
             } else {
               var now = moment();
-              if (!time || now.diff(time, 'seconds') > 300) {
+              if (!!time === false || now.diff(time, 'seconds') > 300) {
                 redis_client.set(api_key, now);
                 logger.ok('saved', {
                   sms_date: now.format('YYYY-MM-DD')

@@ -2,14 +2,14 @@
 'use strict';
 
 var cluster = require('cluster')
-  , coolog = require('coolog')
   , worker = require('./worker.js')
   ;
 
 require('sugar');
 
+var logger = require('coolog').logger('app.js');
+
 var numCPUs = (process.NODE_ENV === 'production') ? require('os').cpus().length : 1;
-var logger = coolog.logger('app.js');
 
 if (cluster.isMaster) {
   (numCPUs).times(function () {

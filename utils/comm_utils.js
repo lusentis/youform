@@ -4,17 +4,16 @@
 module.exports = function () {
   
   var async = require('async')
-    , coolog = require('coolog')
     , fs = require('fs')
     , https = require('https')
     , mime = require('mime')
     , moment = require('moment')
     , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
     , querystring = require('querystring')
-    , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
+    , regex = require('../routes/regex.js')
     ;
 
-  var logger = coolog.logger('comm_utils.js');
+  var logger = require('coolog').logger('comm_utils.js');
 
   var send_confirm_email = function (form, res, callback) {
     async.waterfall([
@@ -24,9 +23,9 @@ module.exports = function () {
           res.render('email/confirm', {form: form}, function (err, body) {
             if (err) {
               next(err);
-            } else {
-              next(null, body);
+              return;
             }
+            next(null, body);
           });
         },
         function (html_body) {
@@ -40,9 +39,9 @@ module.exports = function () {
             if (err) {
               logger.error('Postmark error', err);
               callback(err);
-            } else {
-              callback(null);
+              return;
             }
+            callback(null);
           });
         }
       ], function (err) {
@@ -59,9 +58,9 @@ module.exports = function () {
           res.render('email/config', { form: form }, function (err, body) {
             if (err) {
               next(err);
-            } else {
-              next(null, body);
+              return;
             }
+            next(null, body);
           });
         },
         function (html_body) {
@@ -75,9 +74,9 @@ module.exports = function () {
             if (err) {
               logger.error('Postmark error', err);
               callback(err);
-            } else {
-              callback(null);
+              return;
             }
+            callback(null);
           });
         }
       ], function (err) {
@@ -94,9 +93,9 @@ module.exports = function () {
           res.render('email/thanks', { form: form }, function (err, body) {
             if (err) {
               next(err);
-            } else {
-              next(null, body);
+              return;
             }
+            next(null, body);
           });
         },
         function (html_body) {
@@ -110,9 +109,9 @@ module.exports = function () {
             if (err) {
               logger.error('Postmark error', err);
               callback(err);
-            } else {
-              callback(null);
+              return;
             }
+            callback(null);
           });
         }
       ], function (err) {
@@ -137,24 +136,24 @@ module.exports = function () {
               fs.readFile(file.path, function (err, data) {
                 if (err) {
                   cb(err);
-                } else {
-                  attachments.push({
-                    'Content': data.toString('base64')
-                  , 'Name': file.name
-                  , 'ContentType': mime.lookup(file.path)
-                  });
-                  cb(null);
+                  return;
                 }
+                attachments.push({
+                  'Content': data.toString('base64')
+                , 'Name': file.name
+                , 'ContentType': mime.lookup(file.path)
+                });
+                cb(null);
               });
             },
             function (err) {
               if (err) {
                 next(err);
-              } else {
-                // end
-                logger.debug('end attach');
-                next(null, attachments.to(1));
+                return;
               }
+              // end
+              logger.debug('end attach');
+              next(null, attachments.to(1));
             });
         },
         function (attachments, next) {
@@ -164,14 +163,14 @@ module.exports = function () {
           res.render('email/email', { form: form, user_form: post_data, date: date }, function (err, body) {
             if (err) {
               next(err);
-            } else {
-              next(null, body, attachments);
+              return;
             }
+            next(null, body, attachments);
           });
         },
         function (html_body, attachments) {
           // send email
-          var replyto = email_regex.test(post_data[form.replyto_field]) ? post_data[form.replyto_field] : '';
+          var replyto = regex.email.test(post_data[form.replyto_field]) ? post_data[form.replyto_field] : '';
           postmark.send({
             'From': process.env.POSTMARK_FROM
           , 'To': form.form_destination
@@ -183,9 +182,9 @@ module.exports = function () {
             if (err) {
               logger.error('Postmark error', err);
               callback(err);
-            } else {
-              callback(null);
+              return;
             }
+            callback(null);
           });
         }
       ], function (err) {

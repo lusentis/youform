@@ -3,9 +3,9 @@
 
 module.exports = function (db) {
   
-  var coolog = require('coolog')
-    , logger = coolog.logger('form_utils.js')
-    , save_form
+  var logger = require('coolog').logger('form_utils.js');
+
+  var save_form
     , get_form
     , delete_form
     ;
@@ -18,13 +18,13 @@ module.exports = function (db) {
     db.atomic('youform', 'forms', api_key, form, function (err, body) {
       if (err) {
         callback(err);
-      } else {
-        logger.ok({
-          api_key: api_key
-        , message: 'form saved'
-        });
-        callback(null, body);
+        return;
       }
+      logger.ok({
+        api_key: api_key
+      , message: 'form saved'
+      });
+      callback(null, body);
     });
   };
 
@@ -49,13 +49,12 @@ module.exports = function (db) {
     db.atomic('youform', 'forms', form._id, data, function (err) {
       if (err) {
         throw err;
-      } else {
-        logger.ok({
-          api_key: form._id
-        , message: 'form deleted'
-        });
-        callback(null, true);
       }
+      logger.ok({
+        api_key: form._id
+      , message: 'form deleted'
+      });
+      callback(null, true);
     });
   };
  
