@@ -242,14 +242,14 @@ module.exports = function (app, db, prefix) {
       ;
 
     if (param_error.length > 0 || not_found.length > 0) {
-      res.render('errors/404');
+      res.status(404).render('errors/404');
     } else {
       res.redirect('/');
     }
   };
 
   var server_error = function (req, res) {
-    res.render('errors/500');
+    res.status(500).render('errors/500');
   };
 
   // routes
