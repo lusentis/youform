@@ -122,6 +122,7 @@ module.exports = function (app, db, prefix) {
   var dashboard = function (req, res) {
     var api_key = req.params.api_key
       , token = req.query.token
+      , form = null
       ;
 
     if (!api_key || !token) {
@@ -131,19 +132,20 @@ module.exports = function (app, db, prefix) {
 
     async.waterfall([
         function (next) {
-          form_utils.get_form(api_key, function (err, form) {
+          form_utils.get_form(api_key, function (err, data) {
             if (err) {
               next(err);
             } else {
-              if (!form) {
+              if (!data) {
                 next(null, null);
               } else {
-                next(null, form);
+                form = data;
+                next(null);
               }
             }
           });
         },
-        function (form, next) {
+        function (next) {
           if (!form) {
             req.flash('form_not_found', true);
             res.redirect('/404');
@@ -153,14 +155,23 @@ module.exports = function (app, db, prefix) {
             log_utils.get_graph(api_key, function (err, graph) {
               if (err) {
                 next(err);
-              } else {
-                logger.info('graph', graph);
-                next(null, form, graph);
+                return;
               }
+              logger.info('graph', graph);
+              next(null, graph);
             });
           }
         },
-        function (form, graph) {
+        function (graph, next) {
+          log_utils.get_plan(api_key, function (err, data) {
+            if (err) {
+              next(err);
+              return;
+            }
+            next(null, graph, data);
+          });
+        },
+        function (graph, plan) {
           var not_found = !form;
           if (form) {
             not_found = form.token !== token;
@@ -176,6 +187,7 @@ module.exports = function (app, db, prefix) {
           , graph: JSON.stringify(graph)
           , form_saved: form_saved
           , form_save_error: form_save_error
+          , plan: plan
           });
         }
       ],
