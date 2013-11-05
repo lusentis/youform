@@ -6,6 +6,7 @@ var cluster = require('cluster')
   ;
 
 require('sugar');
+require('string-format');
 
 var logger = require('coolog').logger('app.js');
 

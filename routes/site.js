@@ -57,7 +57,8 @@ module.exports = function (app, db, prefix) {
           error_utils.params_error({api_key: api_key, token: token}, req, res);
           return;
         } else if (form.confirmed === true) {
-          res.redirect('/dashboard/' + form._id + '?token=' + form.token);
+          res.redirect('/dashboard/{0}?token={1}'.format(form._id, form.token));
+
         } else {
           res.render('success', {form: form});
         }
@@ -94,7 +95,7 @@ module.exports = function (app, db, prefix) {
         , token = req.query.token
         ;
 
-      if (!!api_key === false|| !!token === false) {
+      if (!!api_key === false || !!token === false) {
         error_utils.params_error({api_key: api_key, token: token}, req, res);
         return;
       }
@@ -147,7 +148,7 @@ module.exports = function (app, db, prefix) {
             req.flash('form_not_found', true);
             res.redirect('/404');
           } else if (!form.confirmed) {
-            res.redirect('/success/' + form._id + '?token=' + form.token);
+            res.redirect('/success/{0}?token={1}'.format(form._id, form.token));
           } else {
             log_utils.get_graph(api_key, function (err, graph) {
               if (err) {

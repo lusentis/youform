@@ -29,7 +29,8 @@
     "mime": "~1.2.11",
     "parted": "https://registry.npmjs.org/parted/-/parted-0.1.1.tgz",
     "connect": "~2.11.0",
-    "urlrouter": "~0.5.1"
+    "urlrouter": "~0.5.1",
+    "string-format": "~0.2.1"
   },
   "engines": {
     "node": "0.10.x",
