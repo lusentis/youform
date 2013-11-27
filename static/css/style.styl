@@ -100,7 +100,7 @@ a.fund
   max-height 600px
 
 form.pure-form
-  input[type=text], input[type=password], input[type=email], input[type=url], input[type=date], input[type=month], input[type=time], input[type=datetime], input[type=datetime-local], input[type=week], input[type=number], input[type=search], input[type=tel], input[type=color], select, textarea
+  input[type=email]
     @extend .open-sans
     font-weight 300
     font-size 16px
@@ -111,6 +111,7 @@ form.pure-form
     border-color #FFFFFF
     border-radius right 0
     box-shadow none
+    width 300px
   button
     @extend .open-sans
     font-weight 600
@@ -123,6 +124,37 @@ form.pure-form
     box-shadow none
     background #5ccd62
     color #FFFFFF
+
+  label
+    @extend .open-sans
+    display block
+    font-size 13px
+    font-weight 400
+    color rgba(#FFFFFF, 0.5)
+
+  #mce-responses
+    display inline-block
+    text-align left
+    position relative
+    top -26px
+
+    #mce-error-response
+      position absolute
+      border-radius 5px
+      font-weight 600
+      padding 10px
+      margin-left 10px
+      color #f96969
+      white-space nowrap
+
+    #mce-success-response
+      position absolute
+      border-radius 5px
+      font-weight 600
+      padding 10px
+      margin-left 10px
+      color #5ccd62
+      white-space nowrap
 
 footer
   padding 10px 0

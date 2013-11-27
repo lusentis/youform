@@ -34,9 +34,18 @@ html
         h1.white Keep me updated
         h2.white Pigeon is coming soon, but we need your help and interest!
         .big-spacer
-        form.pure-form
-          input(type='email', placeholder='e-mail address')
-          button.pure-button(type='submit') Signup
+
+        #mc_embed_signup
+          form.pure-form#mc-embedded-subscribe-form(action='http://plasticpanda.us3.list-manage1.com/subscribe/post?u=43b94e369eba781ff82b5e049&amp;id=1c574341b2', method='post', target='_blank')
+            input(type='email', placeholder='e-mail address')
+            button.pure-button(type='submit') Signup
+            
+            #mce-responses
+              .response#mce-error-response(style="display: none;") There is an error
+              .response#mce-success-response(style="display: block;") There is an error
+        
+            label We will no bother you with obsolete e-mails, we promise!
+
         .big-spacer
 
     footer.text-center
