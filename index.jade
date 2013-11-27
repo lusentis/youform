@@ -1,0 +1,65 @@
+doctype 5
+html
+  head
+    title Welcome to Pigeon
+    
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(href='http://yui.yahooapis.com/pure/0.3.0/pure-min.css', rel='stylesheet')
+    link(rel='stylesheet', href='static/css/style.css')
+    link(rel='shortcut icon', href='static/img/favicon.ico')
+
+  body
+    #website
+      .text-center
+        .big-spacer
+        img.logo(src='static/img/pigeon-logo.png')
+        .spacer
+        h1 Contact Form for the 21st Century
+        .spacer
+
+      .text-center
+        .spacer
+        a.watch(href='', onclick='return window.showModal("pitch");')
+          img(src='static/img/icon-play.png')
+          span Discover More
+        a.fund(href='', onclick='return window.showModal("indie");')
+          img(src='static/img/icon-fund.png')
+          span Fund us on IndieGogo
+        .spacer
+      
+      .text-center.preview
+        .big-spacer
+        .spacer
+        h1.white Keep me updated
+        h2.white Pigeon is coming soon, but we need your help and interest!
+        .big-spacer
+        form.pure-form
+          input(type='email', placeholder='e-mail address')
+          button.pure-button(type='submit') Signup
+        .big-spacer
+
+    footer.text-center
+      :markdown
+        Copyright © 2013-2014. **Pigeon** is a product designed from the ground up by **Plastic Panda** in the marvelous Milan, Italy.  
+        If you have any question, you can say something to [hello@plasticpanda.com](mailto:hello@plasticpanda.com)
+
+    #mask
+
+    #indie.modal
+      h1.accent.text-center Coming Soon
+      h2 Our IndieGogo campaign is not yet opened, please fill the form below to be notified when the campaign goes live
+      .spacer
+      hr
+      .text-center
+        a.close(onclick='return window.closeModal("indie");') &times;
+    
+    #pitch.modal
+      h1.accent.text-center Psssht
+      h2 We are working very hard to complete the introductory video of Pigeon App. Please come back later!
+      .spacer
+      hr
+      .text-center
+        a.close(onclick='return window.closeModal("pitch");') &times;
+
+    script(type='text/javascript', src='static/js/main.js')
