@@ -10,53 +10,22 @@ module.exports = function (db) {
     , delete_form
     ;
 
-  save_form = function (form, api_key, callback) {
-    if (api_key === null) {
-      api_key = undefined;
+  save_form = function* (form, key) {
+    if (key === null) {
+      key = undefined;
     }
     form.action = 'update';
-    db.atomic('youform', 'forms', api_key, form, function (err, body) {
-      if (err) {
-        callback(err);
-      } else {
-        logger.ok({
-          api_key: api_key
-        , message: 'form saved'
-        });
-        callback(null, body);
-      }
-    });
+    form = yield db.atomic('youform', 'forms', key, form);
+    return form;
   };
 
-  get_form = function (api_key, callback) {
-    db.get(api_key, {include_docs: true}, function (err, body) {
-      if (err && err.status_code === 404) {
-        logger.info({
-          api_key: api_key
-        , message: 'form not found'
-        });
-        body = null;
-        err = null;
-      }
-      callback(err, body);
-    });
+  get_form = function* (key) {
+    let form = yield db.get(key, { include_docs: true });
+    return form[0]; 
   };
 
-  delete_form = function (form, callback) {
-    var data = {
-      action: 'delete'
-    };
-    db.atomic('youform', 'forms', form._id, data, function (err) {
-      if (err) {
-        throw err;
-      } else {
-        logger.ok({
-          api_key: form._id
-        , message: 'form deleted'
-        });
-        callback(null, true);
-      }
-    });
+  delete_form = function* (form) {
+    yield db.atomic('youform', 'forms', form._id, { action: 'delete' });
   };
  
   return {

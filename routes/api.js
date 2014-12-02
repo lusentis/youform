@@ -1,243 +1,191 @@
-/* jshint node:true, indent:2, white:true, laxcomma:true, undef:true, strict:true, unused:true, eqnull:true, camelcase: false, trailing: true */
+
 'use strict';
 
 
-module.exports = function (app, db, redis_client, prefix) {
+module.exports = function (db, redis_client) {
 
-  var async = require('async')
-    , coolog = require('coolog')
+  let coolog = require('coolog')
     , mime = require('mime')
     , moment = require('moment')
     , inflection = require('inflection')
     , uuid = require('node-uuid')
+    , path = require('path')
     , comm_utils = require('../utils/comm_utils.js')()
     , error_utils = require('../utils/error_utils.js')()
     , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
     , utils = require('../utils/utils.js')(redis_client)
-    , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
-    , colours_regex = /^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
-    , country_code_regex = /^\+{0,1}[0-9]{1,4}$/
-    , phone_regex = /^[0-9\-().\s]{10,15}$/
-    , url_regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/
+    , Form = require('./Form.js')
+    , regex = require('./regex')
     ;
   
-  var logger = coolog.logger('api.js');
+  let logger = coolog.logger(path.basename(__filename));
 
-  var test_email = function (email) {
-    return email_regex.test(email) && email.length < 100;
+  let test_email = function (email) {
+    return regex.email.test(email) && email.length < 100;
   };
 
-  var form = {
-    create: function (req, res) {
+  let _form = {
+    create: function* () {
 
-      var form = {
-        _id: uuid.v4()
-      , token: uuid.v4()
-      , code: uuid.v4().replace(/-/).substring(0, 6).toUpperCase()
-      , form_name: req.body['f-name']
-      , website_url: req.body['w-url']
-      , website_success_page: req.body['w-success-page']
-      , form_subject: req.body['f-subject']
-      , form_intro: req.body['f-intro']
-      , form_destination: req.body['email-dest']
-      , creator_email: req.body['email-crt']
-      , colours: req.body.colours
-      , country_code: req.body['country-code'].trim().replace(/\+/g, '')
-      , phone: req.body.phone.trim().replace(/[\-]/g, '')
-      , replyto_field: req.body['replyto-field'].trim()
-      };
+      let body = this.request.body;
+      let data = new Form();
+      data._id = uuid.v4();
+      data.token = uuid.v4();
+      data.code = uuid.v4().replace(/-/).substring(0, 6).toUpperCase();
+      data.form_name = body['f-name'];
+      data.website_url = body['w-url'].toLowerCase();
+      data.website_success_page = body['w-success-page'].toLowerCase();
+      data.form_subject = body['f-subject'];
+      data.form_intro = body['f-intro'];
+      data.form_destination = body['email-dest'];
+      data.creator_email = body['email-crt'].toLowerCase();
+      data.colours = body.colours.trim();
+      data.country_code = body['country-code'].trim().replace(/\+/g, '');
+      data.phone = body.phone.trim().replace(/[\-]/g, '');
+      data.replyto_field = body['replyto-field'].trim();      
 
-      if (form.form_subject.length === 0 || form.form_intro.length === 0 || form.form_name.length === 0 || !colours_regex.test(form.colours.trim())) {
-        req.flash('param_error', true);
-        res.redirect('/signup');
+      if (data.form_subject.isBlank() || data.form_intro.isBlank() || data.form_name.isBlank() || !regex.colours.test(data.colours)) {
+        this.flash.param_error =  true;
+        this.redirect('/signup');
         return;
       }
 
-      if (!test_email(form.creator_email) || !test_email(form.form_destination)) {
-        req.flash('email_error', true);
-        res.redirect('/signup');
+      if (!test_email(data.creator_email) || !test_email(data.form_destination)) {
+        this.flash('email_error', true);
+        this.redirect('/signup');
         return;
       }
-      if (!phone_regex.test(form.phone.trim()) || !country_code_regex.test(form.country_code.trim())) {
-        req.flash('phone_error', true);
-        res.redirect('/signup');
+      if (!regex.phone.test(data.phone) || !regex.country_code.test(data.country_code)) {
+        this.flash.phone_error = true;
+        this.redirect('/signup');
         return;
       }
 
-      async.series([
-          function (next) {
-            form_utils.save_form(form, null, function (err, data) {
-              if (err) {
-                next(err);
-              } else {
-                logger.ok('saved form', data);
-                form = data;
-                next(null);
-              }
-            });
-          },
-          function (next) {
-            comm_utils.send_thanks(form, res, function (err) {
-              if (err) {
-                next(err);
-              } else {
-                next(null);
-              }
-            });
-          },
-          function (next) {
-            comm_utils.send_confirm_email(form, res, function (err) {
-              if (err) {
-                next(err);
-              } else {
-                logger.ok('email sent', form.form_destination_not_confirmed);
-                req.flash('waiting_confirm', true);
-                next(null);
-              }
-            });
-          },
-          function () {
-            // send sms
-            comm_utils.send_sms(form, function () {
-              res.redirect('/success/' + form._id + '?token=' + form.token);
-            });
-          }
-        ], function (err) {
-          if (err) {
-            throw err;
-          }
-        });
+      let form_saved = null;
+      try {
+        form_saved  = yield form_utils.save_form(data, null);
+      } catch (err) {
+        logger.error('Error saving form', err);
+      }
+      if (form_saved) {
+        // send email
+        try {
+          let email_response = yield comm_utils.send_thanks(data);
+          logger.info('Email sent', email_response);
+        } catch (err) {
+          logger.error('Error sending thanks email', err);
+        }
+        // send SMS
+        try {
+          let sms_response = yield comm_utils.send_sms(data);
+          logger.info('SMS sent', sms_response);
+        } catch (err) {
+          logger.error('Error sending sms', err);
+        }
+      }
+      
+      this.redirect('/success/' + form_saved._id + '?token=' + form_saved.token);
     },
-    get: function (req, res) {
+    get: function* () {
 
-      logger.debug('get');
-
-      var api_key = req.param('api_key', null);
+      var api_key = this.params.api_key;
 
       if (!api_key) {
-        error_utils.params_error({api_key: api_key}, req, res);
+        error_utils.params_error({api_key: api_key}, this);
         return;
       }
 
-      async.waterfall([
-        function (next) {
-          // get form
-          form_utils.get_form(api_key, function (err, result) {
-            if (!result) {
-              error_utils.form_not_found(api_key, req, res);
-              return;
-            }
-            // check origin url
-            if (utils.check_origin(req, result)) {
-              logger.debug('results', result);
-              if (result.deleted === true) {
-                // deleted
-                logger.error({
-                  error: true
-                , form_id: api_key
-                , description: 'not found'
-                });
-                res.json(403, {
-                  error: true
-                , description: 'not found.'
-                });
-              } else if (!result.confirmed) {
-                // deleted
-                logger.error({
-                  error: true
-                , form_id: api_key
-                , description: 'not found'
-                });
-                res.json(403, {
-                  error: true
-                , description: 'not found'
-                });
-              } else {
-                next(null, result);
-                
-              }
-            } else {
-              logger.error({
-                error: true
-              , form_id: api_key
-              , description: 'origin error'
-              });
-              req.flash('origin_error', true);
-              res.redirect('/error');
-            }
-          });
-        },
-        function (form, next) {
-          utils.spam_filter(req, res, function (err, spam) {
-            if (err) {
-              next(err);
-            } else {
-              next(null, spam, form);
-            }
-          });
-        },
-        function (spam, form, next) {
-          // save connection
-          var data = {
-            user_ip: req.connection.remoteAddress
-          , api_key: api_key
-          , spam: spam
-          };
-          log_utils.save_log(data, function (err, log) {
-            if (err) {
-              next(err);
-            } else {
-              logger.ok('log saved', log);
-              if (spam) {
-                logger.info('Redirect to 500 page');
-                res.redirect('/500');
-              } else {
-                next(null, form);
-              }
-            }
-          });
-        },
-        function (form) {
-          var user_form = {}
-            , files = {}
-            ;
-          
-          // parse form data
-          Object.keys(req.body).forEach(function (key) {
-            user_form[inflection.humanize(key)] = req.body[key];
-          });
+      let form_data =  yield form_utils.get_form(api_key);
+      
+      if (!form_data) {
+        // todo: handle not found
+        // error_utils.form_not_found(api_key, req, res);
+        return;
+      }
 
-          if (req.files !== undefined) {
-            Object.keys(req.files).forEach(function (key) {
-              // check MIME type
-              user_form = Object.reject(user_form, key);
-              if (/(doc|docx|pdf|jpg|jpeg|png|gif)/.test(mime.extension(mime.lookup(req.files[key].path)))) {
-                files[key] = req.files[key];
-              }
-            });
-          }
+      if (!utils.check_origin(this.request, form_data)) {
+        logger.error({
+          error: true
+        , form_id: api_key
+        , description: 'origin error'
+        });
+        this.flash('origin_error', true);
+        this.redirect('/error');
+        return;
+      }
 
-          comm_utils.send_form(form, user_form, files, res, function (err) {
-            if (err) {
-              logger.error('Postmark error', err);
-              logger.info('Redirect to 500 page');
-              res.redirect('/500');
-            } else {
-              logger.info('Redirect to', form.website_success_page);
-              res.redirect(url_regex.test(form.website_success_page) ? form.website_success_page : form.website_url);
-            }
-          });
-        },
-      ], function (err) {
-        if (err) {
-          throw err;
-        }
+      if (form_data.deleted) {
+        this.status = 403;
+        this.body = {
+          error: true
+        , description: 'not found.'
+        };
+        return;
+      }
+      if (!form_data.confirmed) {
+        // deleted
+        logger.error({
+          error: true
+        , form_id: api_key
+        , description: 'not found'
+        });
+        this.status = 403;
+        this.body = {
+          error: true
+        , description: 'not found'
+        };
+        return;
+      }
+
+      let spam = yield utils.spam_filter(req, res);
+      
+      // save connection
+      let data = {
+        user_ip: this.request.connection.remoteAddress
+      , api_key: api_key
+      , spam: spam
+      };
+
+      yield log_utils.save_log(data);
+      
+      if (spam) {
+        logger.info('Redirect to 500 page');
+        this.redirect('/500');
+      }
+
+      let user_form = {}
+        , files = {}
+        ;
+      
+      // parse form data
+      Object.keys(this.request.body).forEach(function (key) {
+        user_form[inflection.humanize(key)] = req.body[key];
       });
+
+      if (this.request.files !== undefined) {
+        Object.keys(this.request.files).forEach(function(key) {
+          // check MIME type
+          user_form = Object.reject(user_form, key);
+          if (/(doc|docx|pdf|jpg|jpeg|png|gif)/.test(mime.extension(mime.lookup(req.files[key].path)))) {
+            files[key] = this.request.files[key];
+          }
+        });
+      }
+      try {
+        yield comm_utils.send_form(form_data, user_form, files, res);
+        logger.info('Redirect to', form_data.website_success_page);
+        let url = regex.url.test(form_data.website_success_page) ? form_data.website_success_page : form_data.website_url;
+        res.redirect(url);
+      } catch (err) {
+        logger.error('Postmark error', err);
+        logger.info('Redirect to 500 page');
+        this.redirect('/500');
+      }
     },
-    del: function (req, res) {
-      var api_key = req.param('api_key', null)
-        , token = req.body.token
+    del: function* () {
+      var api_key = this.param.api_key
+        , token = this.body.token
         ;
       
       if (!api_key || !token) {
@@ -245,41 +193,22 @@ module.exports = function (app, db, redis_client, prefix) {
         return;
       }
 
-      async.waterfall([
-          function (next) {
-            db.get(api_key, { include_docs: true }, function (err, form) {
-              if (err) {
-                // form not found
-                if (err.status_code === 404) {
-                  error_utils.form_not_found(api_key, req, res);
-                  return;
-                }
-                next(err);
-              } else {
-                // check token
-                if (form.token !== token) {
-                  error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
-                  return;
-                }
-                next(null, form);
-              }
-            });
-          },
-          function (form, next) {
-            form_utils.delete_form(form, function (err) {
-              if (err) {
-                next(err);
-              } else {
-                req.flash('form_deleted', true);
-                res.redirect('/deleted');
-              }
-            });
-          }
-        ], function (err) {
-          if (err) {
-            throw err;
-          }
-        });
+      let form_data = null;
+      try {
+        form_data = yield db.get(api_key, { include_docs: true });
+      } catch (err) {
+        error_utils.form_not_found(api_key, req, res);
+        return;
+      }
+
+      if (form_data.token !== token) {
+        error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
+        return;
+      }
+
+     yield form_utils.delete_form(form_data);
+     this.flash.form_deleted =  true;
+     this.redirect('/deleted');
     },
     edit: function (req, res) {
       var api_key = req.param('api_key', null)
@@ -288,17 +217,17 @@ module.exports = function (app, db, redis_client, prefix) {
         ;
 
       var data = {
-        form_name: req.body['f-name']
-      , website_url: req.body['w-url']
-      , website_success_page: req.body['w-success-page']
-      , form_subject: req.body['f-subject']
-      , form_intro: req.body['f-intro']
-      , form_destination: req.body['email-dest']
-      , creator_email: req.body['email-crt']
-      , colours: req.body.colours
-      , country_code: req.body['country-code'].trim().replace(/\+/g, '')
-      , phone: req.body.phone.trim().replace(/[\-]/g, '')
-      , replyto_field: req.body['replyto-field']
+        form_name: req.body['f-name'],
+        website_url: req.body['w-url'],
+        website_success_page: req.body['w-success-page'],
+        form_subject: req.body['f-subject'],
+        form_intro: req.body['f-intro'],
+        form_destination: req.body['email-dest'],
+        creator_email: req.body['email-crt'],
+        colours: req.body.colours,
+        country_code: req.body['country-code'].trim().replace(/\+/g, ''),
+        phone: req.body.phone.trim().replace(/[\-]/g, ''),
+        replyto_field: req.body['replyto-field']
       };
 
 
@@ -314,7 +243,7 @@ module.exports = function (app, db, redis_client, prefix) {
         return;
       }
 
-      if (!phone_regex.test(data.phone.trim()) || !country_code_regex.test(data.country_code.trim())) {
+      if (!regex.phone.test(data.phone.trim()) || !regex.country_code.test(data.country_code.trim())) {
         req.flash('phone_error', true);
         res.redirect('/edit/' + api_key + '?token=' + token);
         return;
@@ -378,13 +307,13 @@ module.exports = function (app, db, redis_client, prefix) {
         });
     }
   };
-  var confirm_email = function (req, res) {
+  var _confirm_email = function (req, res) {
     var api_key = req.param('api_key', null)
       , email = req.query.email
       , token = req.query.token
       ;
 
-    if (!api_key || !email_regex.test(email) || !token) {
+    if (!api_key || !regex.email.test(email) || !token) {
       error_utils.params_error({api_key: api_key, token: token, email: email}, req, res);
       return;
     }
@@ -437,7 +366,7 @@ module.exports = function (app, db, redis_client, prefix) {
       });
   };
 
-  var confirm_sms = function (req, res) {
+  var _confirm_sms = function (req, res) {
     var api_key = req.param('api_key', null)
       , token = req.body.token
       , code = req.body.code
@@ -509,7 +438,7 @@ module.exports = function (app, db, redis_client, prefix) {
       });
   };
 
-  var send_confirm_email = function (req, res) {
+  var _send_confirm_email = function (req, res) {
     var api_key = req.param('api_key', null)
       , token = req.query.token
       ;
@@ -552,7 +481,7 @@ module.exports = function (app, db, redis_client, prefix) {
       });
   };
 
-  var send_confirm_sms = function (req, res) {
+  var _send_confirm_sms = function (req, res) {
     var api_key = req.param('api_key', null)
       , token = req.query.token
       ;
@@ -616,13 +545,12 @@ module.exports = function (app, db, redis_client, prefix) {
   };
 
   // routes
-  app.post(prefix + '/confirm/sms/:api_key', confirm_sms);
-  app.get(prefix + '/confirm/send-sms/:api_key', send_confirm_sms);
-  app.get(prefix + '/confirm/send-email/:api_key', send_confirm_email);
-  app.post(prefix + '/new-form', form.create);
-  app.post(prefix + '/form/:api_key', utils.rateLimit(), form.get);
-  app.post(prefix + '/edit/:api_key', form.edit);
-  app.post(prefix + '/delete/:api_key', form.del);
 
-  app.get('/confirm/email/:api_key', confirm_email);
+  return {
+    form: _form,
+    confirm_sms: _confirm_sms,
+    send_confirm_sms: _send_confirm_sms,
+    send_confirm_email: _send_confirm_email,
+    confirm_email: _confirm_email
+  };
 };

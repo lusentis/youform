@@ -1,0 +1,8 @@
+pids/**
+logs/**
+.git/**
+
+public/**
+views/**
+
+newrelic_agent.log

@@ -4,8 +4,7 @@
 module.exports = function (redis_client) {
 
   // npm modules
-  var async = require('async')
-    , akismet = require('akismet-api')
+  var akismet = require('akismet-api')
     , rate = require('express-rate')
     , coolog = require('coolog')
     , dns = require('dns')

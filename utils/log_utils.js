@@ -3,8 +3,7 @@
 
 module.exports = function (db) {
   
-  var async = require('async')
-    , moment = require('moment')
+  var moment = require('moment')
     ;
 
   var save_log = function (log, callback) {

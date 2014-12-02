@@ -3,126 +3,66 @@
 
 module.exports = function () {
   
-  var async = require('async')
-    , coolog = require('coolog')
+  var coolog = require('coolog')
     , fs = require('fs')
-    , https = require('https')
     , mime = require('mime')
     , moment = require('moment')
+    , thunkify = require('thunkify')
     , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
     , querystring = require('querystring')
+    , thenJade = require('then-jade')
+    , request = require('co-request')
     , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
     ;
 
-  var logger = coolog.logger('comm_utils.js');
+  let sendEmail = thunkify(postmark.send);
+  let logger = coolog.logger('comm_utils.js');
 
-  var send_confirm_email = function (form, res, callback) {
-    async.waterfall([
-        function (next) {
-          // render email template
-          logger.info(form);
-          res.render('email/confirm', {form: form}, function (err, body) {
-            if (err) {
-              next(err);
-            } else {
-              next(null, body);
-            }
-          });
-        },
-        function (html_body) {
-          // send email
-          postmark.send({
-            'From': process.env.POSTMARK_FROM
-          , 'To': form.form_destination_not_confirmed
-          , 'Subject': 'YouForm - Email address confirmation'
-          , 'HtmlBody': html_body
-          }, function (err) {
-            if (err) {
-              logger.error('Postmark error', err);
-              callback(err);
-            } else {
-              callback(null);
-            }
-          });
-        }
-      ], function (err) {
-        if (err) {
-          throw err;
-        }
+  let send_confirm_email = function* (form) {
+    let html_body = yield thenJade.renderFile('./views/email/confirm.jade', {form: form});
+    try {
+      let result = yield sendEmail({
+        'From': process.env.POSTMARK_FROM
+      , 'To': form.form_destination_not_confirmed
+      , 'Subject': 'YouForm - Email address confirmation'
+      , 'HtmlBody': html_body
       });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  var send_form_info = function (form, res, callback) {
-    async.waterfall([
-        function (next) {
-          // render email template
-          res.render('email/config', { form: form }, function (err, body) {
-            if (err) {
-              next(err);
-            } else {
-              next(null, body);
-            }
-          });
-        },
-        function (html_body) {
-          // send email
-          postmark.send({
-            'From': process.env.POSTMARK_FROM
-          , 'To': form.creator_email
-          , 'Subject': 'YouForm - Details for ' + form.form_name
-          , 'HtmlBody': html_body
-          }, function (err) {
-            if (err) {
-              logger.error('Postmark error', err);
-              callback(err);
-            } else {
-              callback(null);
-            }
-          });
-        }
-      ], function (err) {
-        if (err) {
-          throw err;
-        }
-      });
+  var send_form_info = function* (form) {
+   let html_body = yield thenJade.renderFile('./views/email/config.jade', {form: form});
+   try {
+    let result = yield sendEmail({
+       'From': process.env.POSTMARK_FROM
+     , 'To': form.creator_email
+     , 'Subject': 'YouForm - Details for ' + form.form_name
+     , 'HtmlBody': html_body
+     });
+    } catch (err) {
+      throw err;
+    }
   };
 
-  var send_thanks = function (form, res, callback) {
-    async.waterfall([
-        function (next) {
-          // render email template
-          res.render('email/thanks', { form: form }, function (err, body) {
-            if (err) {
-              next(err);
-            } else {
-              next(null, body);
-            }
-          });
-        },
-        function (html_body) {
-          // send email
-          postmark.send({
-            'From': process.env.POSTMARK_FROM
-          , 'To': form.creator_email
-          , 'Subject': 'YouForm - Welcome!'
-          , 'HtmlBody': html_body
-          }, function (err) {
-            if (err) {
-              logger.error('Postmark error', err);
-              callback(err);
-            } else {
-              callback(null);
-            }
-          });
-        }
-      ], function (err) {
-        if (err) {
-          throw err;
-        }
+  var _send_thanks = function* (form) {
+    let result = null;
+    let html_body = yield thenJade.renderFile('./views/email/thanks.jade', { form: form });
+    try {
+      result = yield sendEmail({
+        'From': process.env.POSTMARK_FROM
+      , 'To': form.creator_email
+      , 'Subject': 'YouForm - Welcome!'
+      , 'HtmlBody': html_body
       });
+    } catch (err) {
+      throw err;
+    }
+    return result;
   };
 
-  var send_form = function (form, post_data, files, res, callback) {
+  var send_form = function* (form, post_data, files) {
     async.waterfall([
         function (next) {
           var attachments = [];
@@ -195,47 +135,42 @@ module.exports = function () {
       });
   };
 
-  var send_sms = function (form, callback) {
-    var message = 'Hi, your confirmation code is: ' + form.code + '. Thank you!'
-      , response = ''
-      , data
-      , post_options
-      ;
-    data = querystring.stringify({
+  let send_sms = function* (form) {
+
+    let hq_response = null;
+    let data = querystring.stringify({
       'username': process.env.HQ_USERNAME
     , 'password': process.env.HQ_PASSWORD
     , 'to': form.country_code + '' + form.phone
     , 'from': process.env.HQ_SENDER
-    , 'message': message
+    , 'message': 'Hi, your confirmation code is: ' + form.code + '. Thank you!'
     });
-    post_options = {
-      host: 'ssl.hqsms.com',
-      port: '443',
-      path: '/sms.do',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': data.length
-      }
-    };
-    var hq_request = https.request(post_options, function (res) {
-      res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-        response += chunk;
+
+    try {
+      hq_response = yield request({
+        uri: 'https://ssl.hqsms.com/sms.do',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': data.length
+        },
+        body: data
       });
-      res.on('end', function () {
-        logger.ok('HQSMS response', response);
-        callback(response.has('ERROR'));
-      });
-    });
-    hq_request.write(data);
-    hq_request.end();
+    } catch (err) {
+      throw err;
+    }
+
+    if (hq_response.body.has('ERROR')) {
+      throw new Error(hq_response.body.has('ERROR'));
+    }
+
+    return hq_response;
   };
 
   return {
     'send_form': send_form
   , 'send_form_info': send_form_info
-  , 'send_thanks': send_thanks
+  , 'send_thanks': _send_thanks
   , 'send_confirm_email': send_confirm_email
   , 'send_sms': send_sms
   };

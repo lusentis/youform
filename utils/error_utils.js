@@ -7,7 +7,7 @@ module.exports = function () {
     , logger = coolog.logger('error_utils.js')
     ;
 
-  var params_error = function (params, req, res, message) {
+  var params_error = function (params, handler, message) {
     var err = {
       error: true
     , message: message || 'params error'
@@ -22,19 +22,23 @@ module.exports = function () {
     if (params.email) {
       err.email = params.email;
     }
+    
     logger.error(err);
-    req.flash('param_error', true);
-    res.redirect('/404');
+
+    if (handler) {
+      handler.redirect('/404');
+    }
   };
 
-  var form_not_found = function (api_key, req, res) {
+  var form_not_found = function (api_key, handler) {
     logger.error({
       error: true
     , form_id: api_key
     , description: 'Form not found'
     });
-    req.flash('form_not_found', true);
-    res.redirect('/404');
+    if (handler) {
+      handler.redirect('/404');
+    }
   };
  
   return {
