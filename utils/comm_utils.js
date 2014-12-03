@@ -8,8 +8,6 @@ module.exports = function () {
       fs = require('fs'),
       mime = require('mime'),
       moment = require('moment'),
-      querystring = require('querystring'),
-      request = require('co-request'),
       path = require('path');
   // locals dependencies
   let regex = require('../libs/regex');

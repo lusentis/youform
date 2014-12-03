@@ -10,6 +10,7 @@ module.exports = function (port) {
       koa = require('koa'),
       gzip = require('koa-gzip'),
       AWS = require('aws-sdk'),
+      helmet = require('koa-helmet'),
       logger = require('koa-logger'),
       router = require('koa-router'),
       session = require('koa-generic-session'),
@@ -99,7 +100,8 @@ module.exports = function (port) {
   app.post(path.join(api_prefix, '/delete/:api_key'), bodyParser, api_routes.form.del);
   app.get(path.join('/confirm/email/:api_key'), api_routes.confirm_email);
 
-
+  // add security
+  app.use(helmet.defaults());
   // compress responses
   app.use(gzip());
 
