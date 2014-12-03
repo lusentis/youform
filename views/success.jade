@@ -50,7 +50,7 @@ block content
             h2 confirm 
               strong phone number
             if form.phone_confirmed === false
-              form.pure-form(action='/api/confirm/sms/#{form._id}', method='post')
+              form.pure-form(action='/api/confirm/sms/#{form.id}', method='post')
                 input(type='hidden', name='token', value='#{form.token}')
                 input(type='text', name='code', placeholder='verification code')
                 button.pure-button.pure-button-form.pure-button-form-success(type='submit', style='padding: 7px 15px;') Ok
@@ -67,7 +67,7 @@ block content
             if form.email_confirmed === false
               p.small Have not received the e-mail yet?&nbsp;&nbsp;
                 br
-                a(href='/api/confirm/send-email/#{form._id}?token=#{form.token}') Resend
+                a(href='/api/confirm/send-email/#{form.id}?token=#{form.token}') Resend
 
               //-p.small #{form.form_destination} Wrong e-mail?
 
@@ -77,7 +77,7 @@ block content
             if form.phone_confirmed === false
               p.small Have not received the text yet?&nbsp;&nbsp;
                 br
-                a(href='/api/confirm/send-sms/#{form._id}?token=#{form.token}') Resend
+                a(href='/api/confirm/send-sms/#{form.id}?token=#{form.token}') Resend
 
               //-p.small #{form.country_code} #{form.phone} Wrong number?
 

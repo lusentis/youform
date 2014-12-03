@@ -2,7 +2,7 @@ extends layout
 
 block content
 
-  - var form_url = (action === 'edit') ? '/api/edit/'+form._id : '/api/new-form';
+  - var form_url = (action === 'edit') ? '/api/edit/'+form.id : '/api/new-form';
 
   .page.page-accent
     .text-spacer
@@ -40,7 +40,7 @@ block content
         .pure-u-1
           form.pure-form.pure-form-stacked(role='form', action=form_url, method='post')
             if action === 'edit'
-              input(type='hidden', name='api_key', value='#{form._id}')
+              input(type='hidden', name='api_key', value='#{form.id}')
               input(type='hidden', name='token', value='#{form.token}')
             fieldset
               .pure-g

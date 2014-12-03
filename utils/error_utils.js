@@ -3,12 +3,12 @@
 
 module.exports = function () {
   
-  var coolog = require('coolog')
+  let coolog = require('coolog')
     , logger = coolog.logger('error_utils.js')
     ;
 
-  var params_error = function (params, handler, message) {
-    var err = {
+  let params = function (params, handler, message) {
+    let err = {
       error: true
     , message: message || 'params error'
     , api_key: params.api_key
@@ -30,7 +30,7 @@ module.exports = function () {
     }
   };
 
-  var form_not_found = function (api_key, handler) {
+  let not_found = function (api_key, handler) {
     logger.error({
       error: true
     , form_id: api_key
@@ -42,8 +42,8 @@ module.exports = function () {
   };
  
   return {
-    'params_error': params_error
-  , 'form_not_found': form_not_found
+    'params': params
+  , 'not_found': not_found
   };
 };
 

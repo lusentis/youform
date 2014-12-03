@@ -5,7 +5,6 @@ module.exports = function (redis_client) {
 
   // npm modules
   var akismet = require('akismet-api')
-    , rate = require('express-rate')
     , coolog = require('coolog')
     , dns = require('dns')
     , spam_list = require('../spam_list.json')
@@ -18,23 +17,6 @@ module.exports = function (redis_client) {
     blog : 'http:/www.youform.me'
   });
 
-  var rateLimitMiddleware = rate.middleware({
-    handler: new rate.Redis.RedisRateHandler({ client: redis_client })
-  , interval: 5
-  , limit: 2
-  , onLimitReached: function (req, res) {
-      res.json({
-        error: true
-      , description: 'rate limit exceeded'
-      });
-    }
-  });
-
-  var rateLimit = function () {
-    return function (req, res, next) {
-      return rateLimitMiddleware(req, res, next);
-    };
-  };
 
   var check_origin = function (req, form) {
     var origin =  req.headers.referer || req.headers.origin;
@@ -103,8 +85,7 @@ module.exports = function (redis_client) {
   };
 
   return {
-    'rateLimit': rateLimit
-  , 'check_origin': check_origin
-  , 'spam_filter': spam_filter
+    'check_origin': check_origin,
+    'spam_filter': spam_filter
   };
 };

@@ -6,3 +6,4 @@ public/**
 views/**
 
 newrelic_agent.log
+dump.rdb

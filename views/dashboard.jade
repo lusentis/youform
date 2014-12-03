@@ -64,7 +64,7 @@ block content
               dt Action
               dd
                 small
-                  pre https://www.youform.me/api/form/#{form._id}
+                  pre https://www.youform.me/api/form/#{form.id}
 
             dl
               dt Method
@@ -81,9 +81,9 @@ block content
           .text-center
 
 
-            a.pure-link(href='/edit/#{form._id}?token=#{form.token}') 
+            a.pure-link(href='/edit/#{form.id}?token=#{form.token}') 
               | Edit form
-            a.pure-link.pure-link-accent(href='/delete/#{form._id}?token=#{form.token}')
+            a.pure-link.pure-link-accent(href='/delete/#{form.id}?token=#{form.token}')
               | Delete Form
 
 

@@ -11,7 +11,8 @@ module.exports = function (db) {
   let Form = require('./Form.js'),
       error_utils = require('../utils/error_utils.js')(),
       form_utils = require('../utils/form_utils.js')(db),
-      log_utils = require('../utils/log_utils.js')(db);
+      log_utils = require('../utils/log_utils.js')(db),
+      formDB = require('../db/form')(db);
 
   let logger = coolog.logger(path.basename(__filename));
 
@@ -30,10 +31,10 @@ module.exports = function (db) {
           form_data = null;
 
       try {
-        form_data = yield form_utils.get_form(api_key);
+        form_data = yield formDB.get(api_key);
         
         if (form_data.token !== token) {
-          error_utils.params_error({api_key: api_key, token: token}, this);
+          error_utils.params({api_key: api_key, token: token}, this);
           return;
         }
 
@@ -42,9 +43,9 @@ module.exports = function (db) {
           return;
         }
 
-        this.redirect('/dashboard/' + form_data._id + '?token=' + form_data.token);
+        this.redirect('/dashboard/' + form_data.id + '?token=' + form_data.token);
       } catch (err) {
-        error_utils.params_error({api_key: api_key, token: token}, this);
+        error_utils.params({api_key: api_key, token: token}, this);
       }
     },
     del: function*() {
@@ -55,13 +56,13 @@ module.exports = function (db) {
         let form_data = yield form_utils.get_form(api_key);
 
         if (form_data.token !== token) {
-          error_utils.params_error({api_key: api_key, token: token}, this);
+          error_utils.params({api_key: api_key, token: token}, this);
           return;
         }
 
         this.body = yield this.render('delete', { form: form_data });
       } catch (err) {
-        error_utils.params_error({api_key: api_key, token: token}, this);
+        error_utils.params({api_key: api_key, token: token}, this);
       }
     },
     deleted: function*() {
@@ -72,16 +73,17 @@ module.exports = function (db) {
           token = this.query.token;
 
       try {
-        let form_data = yield form_utils.get_form(api_key);
+        let form_data = yield formDB.get(api_key);
 
         if (form_data.token !== token) {
-          error_utils.params_error({api_key: api_key, token: token}, this);
+          error_utils.params({api_key: api_key, token: token}, this);
           return;
         }
 
         this.body = yield this.render('signup', { form: form_data, action: 'edit' });
       } catch (err) {
-        error_utils.params_error({api_key: api_key, token: token}, this);
+        logger.error(err);
+        error_utils.params({api_key: api_key, token: token}, this);
         return;
       }
     }
@@ -93,14 +95,14 @@ module.exports = function (db) {
         token = this.query.token;
 
     try {
-      let form_data = yield form_utils.get_form(api_key);
+      let form_data = yield formDB.get(api_key);
 
       if (form_data.token !== token) {
-        error_utils.params_error({api_key: api_key, token: token}, this);
+        error_utils.params({api_key: api_key, token: token}, this);
         return;
       }
 
-      let graph = yield log_utils.get_graph(api_key);
+      //let graph = yield log_utils.get_graph(api_key);
       
       // let form_saved = this.flash.form_saved.length > 0;
       // let form_save_error = this.flash.form_save_error.length > 0;
@@ -108,18 +110,19 @@ module.exports = function (db) {
 
       this.body = yield this.render('dashboard', {
         form: form_data,
-        graph: JSON.stringify(graph),
+        graph: JSON.stringify({}), // graph
         form_saved: true,//form_saved
         form_save_error: false// form_save_error
       });
 
       if (!form_data.confirmed) {
-        this.redirect('/success/' + form_data._id + '?token=' + form_data.token);
+        this.redirect('/success/' + form_data.id + '?token=' + form_data.token);
         return;
       }
 
     } catch (err) {
-      error_utils.params_error({api_key: api_key, token: token}, this);
+      throw err;
+      error_utils.params({api_key: api_key, token: token}, this);
       return;
     }
   };
@@ -129,9 +132,9 @@ module.exports = function (db) {
         token = this.query.token;
 
     try {
-      let form_data = yield form_utils.get_form(api_key);
+      let form_data = yield formDB.get(api_key);
       if (form_data.token !== token) {
-        error_utils.params_error({api_key: api_key, token: token}, this, 'token error');
+        error_utils.params({api_key: api_key, token: token}, this, 'token error');
         return;
       }
       if (!form_data.email_confirmed) {
@@ -141,8 +144,8 @@ module.exports = function (db) {
       this.body = yield this.render('confirmed_email', {form: form_data});
 
     } catch (err) {
-      error_utils.params_error({api_key: api_key, token: token}, this);
-      return;
+      logger.error(err);
+      error_utils.params({api_key: api_key, token: token}, this);
     }
   };
 

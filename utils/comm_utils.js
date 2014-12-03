@@ -3,64 +3,19 @@
 
 module.exports = function () {
   
-  var coolog = require('coolog')
-    , fs = require('fs')
-    , mime = require('mime')
-    , moment = require('moment')
-    , thunkify = require('thunkify')
-    , postmark = require('postmark')(process.env.POSTMARK_API_KEY)
-    , querystring = require('querystring')
-    , thenJade = require('then-jade')
-    , request = require('co-request')
-    , email_regex = /^(?:[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9\-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
-    ;
+  // npm dependencies
+  let coolog = require('coolog'),
+      fs = require('fs'),
+      mime = require('mime'),
+      moment = require('moment'),
+      querystring = require('querystring'),
+      request = require('co-request'),
+      path = require('path');
+  // locals dependencies
+  let regex = require('../routes/regex');
 
-  let sendEmail = thunkify(postmark.send);
-  let logger = coolog.logger('comm_utils.js');
+  let logger = coolog.logger(path.basename(__filename));
 
-  let send_confirm_email = function* (form) {
-    let html_body = yield thenJade.renderFile('./views/email/confirm.jade', {form: form});
-    try {
-      let result = yield sendEmail({
-        'From': process.env.POSTMARK_FROM
-      , 'To': form.form_destination_not_confirmed
-      , 'Subject': 'YouForm - Email address confirmation'
-      , 'HtmlBody': html_body
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  var send_form_info = function* (form) {
-   let html_body = yield thenJade.renderFile('./views/email/config.jade', {form: form});
-   try {
-    let result = yield sendEmail({
-       'From': process.env.POSTMARK_FROM
-     , 'To': form.creator_email
-     , 'Subject': 'YouForm - Details for ' + form.form_name
-     , 'HtmlBody': html_body
-     });
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  var _send_thanks = function* (form) {
-    let result = null;
-    let html_body = yield thenJade.renderFile('./views/email/thanks.jade', { form: form });
-    try {
-      result = yield sendEmail({
-        'From': process.env.POSTMARK_FROM
-      , 'To': form.creator_email
-      , 'Subject': 'YouForm - Welcome!'
-      , 'HtmlBody': html_body
-      });
-    } catch (err) {
-      throw err;
-    }
-    return result;
-  };
 
   var send_form = function* (form, post_data, files) {
     async.waterfall([
@@ -111,7 +66,7 @@ module.exports = function () {
         },
         function (html_body, attachments) {
           // send email
-          var replyto = email_regex.test(post_data[form.replyto_field]) ? post_data[form.replyto_field] : '';
+          var replyto = regex.email.test(post_data[form.replyto_field]) ? post_data[form.replyto_field] : '';
           postmark.send({
             'From': process.env.POSTMARK_FROM
           , 'To': form.form_destination
@@ -138,13 +93,15 @@ module.exports = function () {
   let send_sms = function* (form) {
 
     let hq_response = null;
-    let data = querystring.stringify({
-      'username': process.env.HQ_USERNAME
-    , 'password': process.env.HQ_PASSWORD
-    , 'to': form.country_code + '' + form.phone
-    , 'from': process.env.HQ_SENDER
-    , 'message': 'Hi, your confirmation code is: ' + form.code + '. Thank you!'
-    });
+    let obj = {
+      'username': process.env.HQ_USERNAME,
+      'password': process.env.HQ_PASSWORD,
+      'to': form.country_code + '' + form.phone,
+      'from': process.env.HQ_SENDER,
+      'message': 'Hi, your confirmation code is: ' + form.code + '. Thank you!'
+    };
+
+    let data = querystring.stringify(obj);
 
     try {
       hq_response = yield request({
@@ -168,10 +125,7 @@ module.exports = function () {
   };
 
   return {
-    'send_form': send_form
-  , 'send_form_info': send_form_info
-  , 'send_thanks': _send_thanks
-  , 'send_confirm_email': send_confirm_email
-  , 'send_sms': send_sms
+    'send_form': send_form,
+    'send_sms': send_sms
   };
 };

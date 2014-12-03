@@ -6,7 +6,6 @@ module.exports = function (db) {
   var coolog = require('coolog')
     , logger = coolog.logger('form_utils.js')
     , save_form
-    , get_form
     , delete_form
     ;
 
@@ -19,18 +18,12 @@ module.exports = function (db) {
     return form;
   };
 
-  get_form = function* (key) {
-    let form = yield db.get(key, { include_docs: true });
-    return form[0]; 
-  };
-
   delete_form = function* (form) {
     yield db.atomic('youform', 'forms', form._id, { action: 'delete' });
   };
  
   return {
     'save_form': save_form
-  , 'get_form': get_form
   , 'delete_form': delete_form
   };
 };

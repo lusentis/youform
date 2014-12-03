@@ -21,3 +21,5 @@ node_modules/
 uploads/*
 
 newrelic_agent.log
+
+.DS_Store

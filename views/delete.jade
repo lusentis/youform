@@ -4,8 +4,8 @@ block content
   .content
     h2 Delete form
     h4 Are you sure that you want to permanently delete the form?
-    form(action='/api/delete/#{form._id}', method='post')
-      input(type='hidden', name='api_key', value='#{form._id}')
+    form(action='/api/delete/#{form.id}', method='post')
+      input(type='hidden', name='api_key', value='#{form.id}')
       input(type='hidden', name='token', value='#{form.token}')
 
       button.pure-button.pure-button-danger(type='submit') Delete form

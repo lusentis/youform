@@ -9,8 +9,8 @@ module.exports = function (port) {
   let bodyParser = require('koa-body')({multipart: true}),
       koa = require('koa'),
       gzip = require('koa-gzip'),
+      AWS = require('aws-sdk'),
       logger = require('koa-logger'),
-      _nano = require('nano')(process.env.DATABASE_URL),
       router = require('koa-router'),
       session = require('koa-generic-session'),
       RedisStore = require('koa-redis'),
@@ -19,8 +19,13 @@ module.exports = function (port) {
       statics = require('koa-static'),
       path = require('path'),
       views = require('koa-render');
-  
-  let nano = require('co-nano-db')(_nano);
+
+  let utils = require('./libs/utils')();
+
+  // config AWS
+  AWS.config.region = 'eu-west-1';
+  let DynamoDB = new AWS.DynamoDB();
+  let db = utils.wrap(DynamoDB);
 
   // config coolog
   require('coolog').addChannel({ 
@@ -59,12 +64,12 @@ module.exports = function (port) {
   // router
 
   app.use(router(app));
-  app.use(require('koa-router-newrelic')(app));
+  //app.use(require('koa-router-newrelic')(app));
  
   // ## Website routes
 
-  let website_routes = require('./routes/site')(nano);
-  let api_routes = require('./routes/api')(nano);
+  let website_routes = require('./routes/site')(db);
+  let api_routes = require('./routes/api')(db);
   let error_routes = require('./routes/error')();
   let middleware = require('./middleware')();
 
@@ -87,7 +92,7 @@ module.exports = function (port) {
   let api_prefix = '/api';
   app.post(path.join(api_prefix, '/confirm/sms/:api_key'), bodyParser, api_routes.confirm_sms);
   app.get(path.join(api_prefix, '/confirm/send-sms/:api_key'), api_routes.send_confirm_sms);
-  app.get(path.join(api_prefix, '/confirm/send-email/:api_key'), api_routes.send_confirm_email);
+  app.get(path.join(api_prefix, '/confirm/send-email/:api_key'), middleware.api_key, api_routes.send_confirm_email);
   app.post(path.join(api_prefix, '/new-form'), bodyParser, api_routes.form.create);
   app.post(path.join(api_prefix, '/form/:api_key'), bodyParser, api_routes.form.get); //utils.rateLimit()
   app.post(path.join(api_prefix, '/edit/:api_key'), bodyParser, api_routes.form.edit);

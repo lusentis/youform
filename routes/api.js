@@ -1,12 +1,11 @@
-
 'use strict';
 
 
 module.exports = function (db, redis_client) {
 
+  // npm dependencies
   let coolog = require('coolog')
     , mime = require('mime')
-    , moment = require('moment')
     , inflection = require('inflection')
     , uuid = require('node-uuid')
     , path = require('path')
@@ -18,6 +17,11 @@ module.exports = function (db, redis_client) {
     , Form = require('./Form.js')
     , regex = require('./regex')
     ;
+
+  // locals dependencies
+  let formDB = require('../db/form')(db),
+      ses = require('../libs/ses')(),
+      sms = require('../libs/sms')();
   
   let logger = coolog.logger(path.basename(__filename));
 
@@ -30,7 +34,7 @@ module.exports = function (db, redis_client) {
 
       let body = this.request.body;
       let data = new Form();
-      data._id = uuid.v4();
+      data.id = uuid.v4();
       data.token = uuid.v4();
       data.code = uuid.v4().replace(/-/).substring(0, 6).toUpperCase();
       data.form_name = body['f-name'];
@@ -39,6 +43,7 @@ module.exports = function (db, redis_client) {
       data.form_subject = body['f-subject'];
       data.form_intro = body['f-intro'];
       data.form_destination = body['email-dest'];
+      data.form_destination_not_confirmed = body['email-dest'];
       data.creator_email = body['email-crt'].toLowerCase();
       data.colours = body.colours.trim();
       data.country_code = body['country-code'].trim().replace(/\+/g, '');
@@ -64,35 +69,45 @@ module.exports = function (db, redis_client) {
 
       let form_saved = null;
       try {
-        form_saved  = yield form_utils.save_form(data, null);
+        yield formDB.save(data.id, data);
+        form_saved = yield formDB.get(data.id);
+        logger.info('form saved', form_saved);
       } catch (err) {
         logger.error('Error saving form', err);
       }
       if (form_saved) {
-        // send email
+        // send thanks email
         try {
-          let email_response = yield comm_utils.send_thanks(data);
+          let email_response = yield ses.thanks(data);
+          logger.info('Email sent', email_response);
+        } catch (err) {
+          logger.error('Error sending thanks email', err);
+        }
+        // send confirm email
+        try {
+          let email_response = yield ses.confirm(data);
           logger.info('Email sent', email_response);
         } catch (err) {
           logger.error('Error sending thanks email', err);
         }
         // send SMS
         try {
-          let sms_response = yield comm_utils.send_sms(data);
-          logger.info('SMS sent', sms_response);
+
+          //yield comm_utils.send_sms(data);
+          logger.info('SMS sent');
         } catch (err) {
           logger.error('Error sending sms', err);
         }
       }
       
-      this.redirect('/success/' + form_saved._id + '?token=' + form_saved.token);
+      this.redirect('/success/' + form_saved.id + '?token=' + form_saved.token);
     },
     get: function* () {
 
       var api_key = this.params.api_key;
 
       if (!api_key) {
-        error_utils.params_error({api_key: api_key}, this);
+        error_utils.params({api_key: api_key}, this);
         return;
       }
 
@@ -100,7 +115,7 @@ module.exports = function (db, redis_client) {
       
       if (!form_data) {
         // todo: handle not found
-        // error_utils.form_not_found(api_key, req, res);
+        // error_utils.not_found(api_key, req, res);
         return;
       }
 
@@ -185,11 +200,11 @@ module.exports = function (db, redis_client) {
     },
     del: function* () {
       var api_key = this.param.api_key
-        , token = this.body.token
+        , token = this.request.body.token
         ;
       
       if (!api_key || !token) {
-        error_utils.params_error({api_key: api_key, token: token}, req, res);
+        error_utils.params({api_key: api_key, token: token}, req, res);
         return;
       }
 
@@ -197,12 +212,12 @@ module.exports = function (db, redis_client) {
       try {
         form_data = yield db.get(api_key, { include_docs: true });
       } catch (err) {
-        error_utils.form_not_found(api_key, req, res);
+        error_utils.not_found(api_key, req, res);
         return;
       }
 
       if (form_data.token !== token) {
-        error_utils.params_error({api_key: api_key, token: token}, req, res, 'token error');
+        error_utils.params({api_key: api_key, token: token}, req, res, 'token error');
         return;
       }
 
@@ -210,347 +225,185 @@ module.exports = function (db, redis_client) {
      this.flash.form_deleted =  true;
      this.redirect('/deleted');
     },
-    edit: function (req, res) {
-      var api_key = req.param('api_key', null)
-        , token = req.body.token
-        , form
-        ;
+    edit: function* () {
+      let api_key = this.params.api_key,
+          body = this.request.body,
+          token = body.token;
 
-      var data = {
-        form_name: req.body['f-name'],
-        website_url: req.body['w-url'],
-        website_success_page: req.body['w-success-page'],
-        form_subject: req.body['f-subject'],
-        form_intro: req.body['f-intro'],
-        form_destination: req.body['email-dest'],
-        creator_email: req.body['email-crt'],
-        colours: req.body.colours,
-        country_code: req.body['country-code'].trim().replace(/\+/g, ''),
-        phone: req.body.phone.trim().replace(/[\-]/g, ''),
-        replyto_field: req.body['replyto-field']
+      let email = body['email-dest'];
+      let data = {
+        form_name: body['f-name'],
+        website_url: body['w-url'],
+        website_success_page: body['w-success-page'],
+        form_subject: body['f-subject'],
+        form_intro: body['f-intro'],
+        form_destination: body['email-dest'],
+        creator_email: body['email-crt'],
+        colours: body.colours,
+        country_code: body['country-code'].trim().replace(/\+/g, ''),
+        phone: body.phone.trim().replace(/[\-]/g, ''),
+        replyto_field: body['replyto-field']
       };
 
-
-      if (!api_key || !token) {
-        error_utils.params_error({api_key: api_key, token: token}, req, res);
-        return;
-      }
-
       if (!test_email(data.creator_email) || !test_email(data.form_destination)) {
-        logger.error('emails format error');
-        req.flash('email_error', true);
-        res.redirect('/edit/' + api_key + '?token=' + token);
+        this.redirect('/edit/' + api_key + '?token=' + token);
         return;
       }
 
       if (!regex.phone.test(data.phone.trim()) || !regex.country_code.test(data.country_code.trim())) {
-        req.flash('phone_error', true);
-        res.redirect('/edit/' + api_key + '?token=' + token);
+        this.redirect('/edit/' + api_key + '?token=' + token);
         return;
       }
 
-      async.waterfall([
-          function (next) {
-            form_utils.get_form(api_key, function (err, result) {
-              if (err) {
-                next(err);
-              } else {
-                form = result;
-                if (token === form.token) {
-                  next(null);
-                } else {
-                  res.redirect('/');
-                }
-              }
-            });
-          },
-          function (next) {
-            if (data.form_destination.trim() !== form.form_destination) {
-              db.atomic('youform', 'forms', api_key, {'action': 'change_email', email: data.form_destination}, function (err, data) {
-                if (err) {
-                  next(err);
-                } else {
-                  form = data;
-                  comm_utils.send_confirm_email(form, res, function (err) {
-                    if (err) {
-                      req.flash('send_email_error', true);
-                      res.redirect('/edit/' + api_key + '?token=' + token);
-                    } else {
-                      logger.ok('email sent', form.form_destination_not_confirmed);
-                      req.flash('waiting_confirm', true);
-                      next(null, form);
-                    }
-                  });
-                }
-              });
-            } else {
-              next(null);
-            }
-          },
-          function (next) {
-            // save
-            form_utils.save_form(data, api_key, function (err, result) {
-              if (err) {
-                next(err);
-              } else {
-                form = result;
-                logger.ok('Form updated', form);
-                req.flash('form_saved', true);
-                res.redirect('/dashboard/' + form._id + '?token=' + form.token);
-              }
-            });
-          }
-        ], function (err) {
-          if (err) {
-            throw err;
-          }
-        });
+      try {
+        let form_data = yield formDB.get(api_key);
+
+        if (form_data.token !== token) {
+          // do something
+        }
+
+        let change_email = (email.trim() !== form_data.form_destination);
+        if (change_email) {
+          form_data.confirmed = false;
+          form_data.email_confirmed = false;
+          form_data.form_destination_not_confirmed = email;
+        }
+
+        yield formDB.save(form_data.id, data);
+
+        if (change_email) {
+          let new_form = yield formDB.get(form_data.id);
+          yield ses.confirm(new_form);
+        }
+
+        this.redirect('/dashboard/' + form_data.id + '?token=' + form_data.token);
+      } catch (err) {
+        logger.error(err);
+        this.redirect('/edit/' + api_key + '?token=' + token);
+      }
     }
   };
-  var _confirm_email = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , email = req.query.email
-      , token = req.query.token
-      ;
+  let _confirm_email = function* () {
+    let api_key = this.params.api_key,
+        email = this.query.email,
+        token = this.query.token;
 
-    if (!api_key || !regex.email.test(email) || !token) {
-      error_utils.params_error({api_key: api_key, token: token, email: email}, req, res);
+    if (!regex.email.test(email)) {
+      error_utils.params({api_key: api_key, token: token, email: email}, this);
       return;
     }
 
-    async.waterfall([
-        function (next) {
-          // get form
-          form_utils.get_form(api_key, function (err, form) {
-            if (err) {
-              next(err);
-            } else {
-              if (form.token === token) {
-                if (email === form.form_destination_not_confirmed && form.email_confirmed === false) {
-                  next(null, form, (form.confirmed && !form.email_confirmed));
-                } else {
-                  res.redirect('/');
-                }
-              } else {
-                logger.info('Token/email error');
-                req.flash('confirm_error', true);
-                res.redirect('/');
-              }
-            }
-          });
-        },
-        function (form, replace, next) {
-          db.atomic('youform', 'forms', api_key, {'action': 'confirm_email'}, function (err, data) {
-            if (err) {
-              next(err);
-            } else {
-              if (data.confirmed === true && !replace) {
-                comm_utils.send_form_info(data, res, function (err) {
-                  if (err) {
-                    next(err);
-                  } else {
-                    logger.ok('info email sent', {
-                      email: form.creator_email
-                    });
-                  }
-                });
-              }
-              res.redirect('/confirm/email/confirmed/' + api_key + '?token=' + token);
-            }
-          });
+    try {
+      let form = yield formDB.get(api_key);
+
+      if (form.token !== token) {
+        // fix here
+        this.redirect('/');
+      }
+
+
+      if (email === form.form_destination_not_confirmed && form.email_confirmed === false) {
+        
+        form.form_destination = form.form_destination_not_confirmed;
+        form.form_destination_not_confirmed = null;
+        form.email_confirmed = true;
+        if (form.phone_confirmed) {
+          form.confirmed = true;
         }
-      ], function (err) {
-        if (err) {
-          throw err;
+        logger.debug(form);
+        yield formDB.save(form.id, form);
+
+        if (form.confirmed) {
+          yield sms.info(form);
         }
-      });
+        this.redirect('/confirm/email/confirmed/' + form.id + '?token=' + token);
+      }
+
+      this.redirect('/confirm/email/confirmed/' + form.id + '?token=' + token);
+    } catch (err) {
+      logger.error(err);
+      error_utils.params({api_key: api_key, token: token}, this);
+    }
   };
 
-  var _confirm_sms = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , token = req.body.token
-      , code = req.body.code
-      ;
+  var _confirm_sms = function* () {
+    var api_key = this.params.api_key,
+       token = this.request.body.token,
+        code = this.request.body.code;
 
-    if (!api_key || !token || !code) {
-      error_utils.params_error({api_key: api_key, token: token, code: code}, req, res);
+    if (!code) {
+      error_utils.params({api_key: api_key, token: token, code: code}, this);
       return;
     }
 
-    async.waterfall([
-        function (next) {
-          // get form
-          form_utils.get_form(api_key, function (err, form) {
-            if (err) {
-              next(err);
-            } else {
-              if (form.token === token) {
-                if (form.phone_confirmed === false) {
-                  next(null, form);
-                } else {
-                  res.redirect('/');
-                }
-              } else {
-                req.flash('confirm_error', true);
-                res.redirect('/');
-              }
-            }
-          });
-        },
-        function (form, next) {
-          logger.info({
-            user_code: code
-          , code: form.code
-          });
-          if (form.code === code) {
-            db.atomic('youform', 'forms', api_key, {'action': 'phone'}, function (err, data) {
-              if (err) {
-                next(err);
-              } else {
-                logger.info('updated', data);
-                next(null, data);
-              }
-            });
-          } else {
-            req.flash('code_error', true);
-            res.redirect('/success/' + api_key + '?token=' + token);
-          }
-        },
-        function (form, next) {
-          logger.ok('code confirmed');
-          if (form.confirmed === true) {
-            comm_utils.send_form_info(form, res, function (err) {
-              if (err) {
-                next(err);
-              } else {
-                logger.ok('info email sent', {
-                  email: form.creator_email
-                });
-              }
-            });
-          }
-          res.redirect('/success/' + api_key + '?token=' + token);
-        }
-      ], function (err) {
-        if (err) {
-          throw err;
-        }
-      });
-  };
+    code = code.toUpperCase();
 
-  var _send_confirm_email = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , token = req.query.token
-      ;
+    try {
+      let form = yield formDB.get(api_key);
+      if (form.token !== token || form.phone_confirmed) {
+        this.redirect('/dashboard/' + form.id + '?token=' + form.token);
+        return;
+      }
 
-    if (!api_key || !token) {
-      error_utils.params_error({api_key: api_key, token: token}, req, res);
-      return;
+      if (form.code !== code) {
+        this.redirect('/success/' + form.id + '?token=' + token);
+        return; 
+      }
+
+      
+      form.phone_confirmed = true;
+      form.confirmed = (form.email_confirmed === true && form.phone_confirmed === true);
+      yield formDB.save(form.id, form);
+
+      if (form.confirmed) {
+        yield ses.info(form);
+      }
+
+      this.redirect('/success/' + form.id + '?token=' + token);
+    } catch (err) {
+      error_utils.params({api_key: api_key, token: token}, this);
     }
-
-    async.waterfall([
-        function (next) {
-          form_utils.get_form(api_key, function (err, form) {
-            if (err) {
-              next(err);
-            } else {
-              if (!form) {
-                error_utils.form_not_found(api_key, req, res);
-                return;
-              }
-              next(null, form);
-            }
-          });
-        },
-        function (form, next) {
-          comm_utils.send_confirm_email(form, res, function (err) {
-            if (err) {
-              next(err);
-            } else {
-              logger.ok('email sent', form.form_destination_not_confirmed);
-              logger.info('redirect to dashboard');
-              req.flash('waiting_confirm', true);
-              res.redirect('/dashboard/' + form._id + '?token=' + form.token);
-            }
-          });
-        }
-      ], function (err) {
-        if (err) {
-          throw err;
-        }
-      });
   };
 
-  var _send_confirm_sms = function (req, res) {
-    var api_key = req.param('api_key', null)
-      , token = req.query.token
-      ;
 
-    if (!api_key || !token) {
-      error_utils.params_error({api_key: api_key, token: token}, req, res);
-      return;
+  var _resend_email = function* () {
+    var api_key = this.params.api_key,
+        token = this.query.token;
+
+    try {
+      let form = yield formDB.get(api_key);
+      yield ses.confirm(form);
+      this.redirect('/dashboard/' + form.id + '?token=' + form.token);
+    } catch (err) {
+      error_utils.params({api_key: api_key, token: token}, this);
     }
-
-    async.waterfall([
-        function (next) {
-          form_utils.get_form(api_key, function (err, form) {
-            if (err) {
-              next(err);
-            } else {
-              if (!form) {
-                error_utils.form_not_found(api_key, req, res);
-                return;
-              }
-              if (form.confirmed_phone === true) {
-                res.redirect('/');
-                return;
-              }
-              next(null, form);
-            }
-          });
-        },
-        function (form, next) {
-          redis_client.get(api_key, function (err, time) {
-            if (err) {
-              next(err);
-            } else {
-              var now = moment();
-              if (!time || now.diff(time, 'seconds') > 300) {
-                redis_client.set(api_key, now);
-                logger.ok('saved', {
-                  sms_date: now.format('YYYY-MM-DD')
-                });
-                next(null, form);
-              } else {
-                logger.info({
-                  message: 'waiting 5 minutes'
-                , now: now.format('YYYY-MM-DD')
-                , sms_date: moment(time).format('YYYY-MM-DD')
-                });
-                res.redirect('/dashboard/' + form._id + '?token=' + form.token);
-              }
-            }
-          });
-        },
-        function (form) {
-          comm_utils.send_sms(form, function () {
-            res.redirect('/dashboard/' + form._id + '?token=' + form.token);
-          });
-        }
-      ], function (err) {
-        if (err) {
-          throw err;
-        }
-      });
   };
 
-  // routes
+
+  var _send_confirm_sms = function* () {
+    var api_key = this.params.api_key,
+        token = this.query.token;
+
+    try {
+      let form = yield formDB.get(api_key);
+      if (form.confirmed_phone) {
+        this.redirect('/');
+        return;
+      }
+      // todo: limit sms
+      yield sms.send(form);
+      this.redirect('/dashboard/' + form.id + '?token=' + form.token);
+    } catch (err) {
+      error_utils.params({api_key: api_key, token: token}, this);
+    }
+  };
+
 
   return {
     form: _form,
     confirm_sms: _confirm_sms,
     send_confirm_sms: _send_confirm_sms,
-    send_confirm_email: _send_confirm_email,
+    send_confirm_email: _resend_email,
     confirm_email: _confirm_email
   };
 };

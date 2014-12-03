@@ -3,13 +3,11 @@
 
 module.exports = function (db) {
   
-  var moment = require('moment')
-    ;
+  var moment = require('moment');
 
-  var save_log = function (log, callback) {
-    db.atomic('youform', 'logs', undefined, log, function (err, body) {
-      callback(err, body);
-    });
+  var save_log = function* (log) {
+    let result = yield db.atomic('youform', 'logs', undefined, log);
+    return result;
   };
 
   var get_logs = function (api_key, callback) {
