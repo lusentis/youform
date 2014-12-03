@@ -199,31 +199,25 @@ module.exports = function (db, redis_client) {
       }
     },
     del: function* () {
-      var api_key = this.param.api_key
-        , token = this.request.body.token
-        ;
+      var api_key = this.params.api_key,
+          token = this.request.body.token;
       
-      if (!api_key || !token) {
-        error_utils.params({api_key: api_key, token: token}, req, res);
-        return;
-      }
 
       let form_data = null;
       try {
-        form_data = yield db.get(api_key, { include_docs: true });
+        form_data = yield formDB.get(api_key);
+        if (form_data.token !== token) {
+          error_utils.params({api_key: api_key, token: token}, this, 'token error');
+          return;
+        }
+
+       yield formDB.del(api_key);
+       this.redirect('/deleted');
       } catch (err) {
-        error_utils.not_found(api_key, req, res);
+        logger.error(err);
+        error_utils.not_found(api_key, this);
         return;
       }
-
-      if (form_data.token !== token) {
-        error_utils.params({api_key: api_key, token: token}, req, res, 'token error');
-        return;
-      }
-
-     yield form_utils.delete_form(form_data);
-     this.flash.form_deleted =  true;
-     this.redirect('/deleted');
     },
     edit: function* () {
       let api_key = this.params.api_key,

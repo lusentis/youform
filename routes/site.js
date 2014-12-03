@@ -53,7 +53,7 @@ module.exports = function (db) {
           token = this.query.token;
 
       try {
-        let form_data = yield form_utils.get_form(api_key);
+        let form_data = yield formDB.get(api_key);
 
         if (form_data.token !== token) {
           error_utils.params({api_key: api_key, token: token}, this);
@@ -121,7 +121,7 @@ module.exports = function (db) {
       }
 
     } catch (err) {
-      throw err;
+      logger.error(err);
       error_utils.params({api_key: api_key, token: token}, this);
       return;
     }

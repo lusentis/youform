@@ -24,8 +24,6 @@ module.exports = function (db) {
       }
     });
 
-    console.log(data);
-
     let result  = yield db.updateItem({
       Key: { id: { S: id } },
       AttributeUpdates: data,
@@ -57,9 +55,16 @@ module.exports = function (db) {
     return data;
   };
 
+  let _delete = function* (id) {
+    let form = yield _get(id);
+    form.deleted = true;
+    yield _save(id, form);
+  };
+
 
   return {
     save: _save,
-    get: _get
+    get: _get,
+    del: _delete
   };
 };
