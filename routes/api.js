@@ -11,11 +11,10 @@ module.exports = function (db, redis_client) {
     , path = require('path')
     , comm_utils = require('../utils/comm_utils.js')()
     , error_utils = require('../utils/error_utils.js')()
-    , form_utils = require('../utils/form_utils.js')(db)
     , log_utils = require('../utils/log_utils.js')(db)
     , utils = require('../utils/utils.js')(redis_client)
     , Form = require('./Form.js')
-    , regex = require('./regex')
+    , regex = require('../libs/regex')
     ;
 
   // locals dependencies
@@ -92,8 +91,7 @@ module.exports = function (db, redis_client) {
         }
         // send SMS
         try {
-
-          //yield comm_utils.send_sms(data);
+          yield sms.send(data);
           logger.info('SMS sent');
         } catch (err) {
           logger.error('Error sending sms', err);
@@ -111,7 +109,7 @@ module.exports = function (db, redis_client) {
         return;
       }
 
-      let form_data =  yield form_utils.get_form(api_key);
+      let form_data =  yield formDB.get(api_key);
       
       if (!form_data) {
         // todo: handle not found

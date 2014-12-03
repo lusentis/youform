@@ -10,7 +10,6 @@ module.exports = function (db) {
   // locals dependencies
   let Form = require('./Form.js'),
       error_utils = require('../utils/error_utils.js')(),
-      form_utils = require('../utils/form_utils.js')(db),
       log_utils = require('../utils/log_utils.js')(db),
       formDB = require('../db/form')(db);
 

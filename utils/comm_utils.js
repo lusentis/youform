@@ -12,7 +12,7 @@ module.exports = function () {
       request = require('co-request'),
       path = require('path');
   // locals dependencies
-  let regex = require('../routes/regex');
+  let regex = require('../libs/regex');
 
   let logger = coolog.logger(path.basename(__filename));
 
@@ -90,42 +90,7 @@ module.exports = function () {
       });
   };
 
-  let send_sms = function* (form) {
-
-    let hq_response = null;
-    let obj = {
-      'username': process.env.HQ_USERNAME,
-      'password': process.env.HQ_PASSWORD,
-      'to': form.country_code + '' + form.phone,
-      'from': process.env.HQ_SENDER,
-      'message': 'Hi, your confirmation code is: ' + form.code + '. Thank you!'
-    };
-
-    let data = querystring.stringify(obj);
-
-    try {
-      hq_response = yield request({
-        uri: 'https://ssl.hqsms.com/sms.do',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': data.length
-        },
-        body: data
-      });
-    } catch (err) {
-      throw err;
-    }
-
-    if (hq_response.body.has('ERROR')) {
-      throw new Error(hq_response.body.has('ERROR'));
-    }
-
-    return hq_response;
-  };
-
   return {
-    'send_form': send_form,
-    'send_sms': send_sms
+    'send_form': send_form
   };
 };
