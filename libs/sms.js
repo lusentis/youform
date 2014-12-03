@@ -9,11 +9,11 @@ module.exports = function () {
   let _send = function* (form) {
     let hq_response = null;
     let obj = {
-      'username': process.env.HQ_USERNAME,
-      'password': process.env.HQ_PASSWORD,
-      'to': form.country_code + '' + form.phone,
-      'from': process.env.HQ_SENDER,
-      'message': 'Hi, your confirmation code is: ' + form.code + '. Thank you!'
+      username: process.env.HQ_USERNAME,
+      password: process.env.HQ_PASSWORD,
+      to: form.country_code + '' + form.phone,
+      from: process.env.HQ_SENDER,
+      message: 'Hi, your confirmation code is: ' + form.code + '. Thank you!'
     };
 
     let data = querystring.stringify(obj);

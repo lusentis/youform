@@ -8,7 +8,7 @@ module.exports = function (db) {
       moment = require('moment'),
       path = require('path');
   // locals dependencies
-  let Form = require('./Form.js'),
+  let Form = require('../db/models/Form'),
       error_utils = require('../utils/error_utils.js')(),
       log_utils = require('../utils/log_utils.js')(db),
       formDB = require('../db/form')(db);
@@ -22,7 +22,7 @@ module.exports = function (db) {
 
   let _form = {
     signup: function* () {
-      this.body = yield this.render('signup', { action: 'create', form: new Form() });
+      this.body = yield this.render('signup', { action: 'create', form: Form.default });
     },
     success: function* () {
       let api_key = this.params.api_key,
@@ -48,7 +48,7 @@ module.exports = function (db) {
       }
     },
     del: function*() {
-      var api_key = this.params.api_key,
+      let api_key = this.params.api_key,
           token = this.query.token;
 
       try {
@@ -68,7 +68,7 @@ module.exports = function (db) {
       this.body = yield this.render('deleted');
     },
     edit: function*() {
-      var api_key = this.params.api_key,
+      let api_key = this.params.api_key,
           token = this.query.token;
 
       try {
@@ -126,8 +126,8 @@ module.exports = function (db) {
     }
   };
 
-  var confirmed_email = function* () {
-    var api_key = this.params.api_key, 
+  let confirmed_email = function* () {
+    let api_key = this.params.api_key, 
         token = this.query.token;
 
     try {

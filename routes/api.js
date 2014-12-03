@@ -13,7 +13,7 @@ module.exports = function (db, redis_client) {
     , error_utils = require('../utils/error_utils.js')()
     , log_utils = require('../utils/log_utils.js')(db)
     , utils = require('../utils/utils.js')(redis_client)
-    , Form = require('./Form.js')
+    , Form = require('../db/models/Form')
     , regex = require('../libs/regex')
     ;
 
@@ -30,9 +30,8 @@ module.exports = function (db, redis_client) {
 
   let _form = {
     create: function* () {
-
       let body = this.request.body;
-      let data = new Form();
+      let data = Form.default;
       data.id = uuid.v4();
       data.token = uuid.v4();
       data.code = uuid.v4().replace(/-/).substring(0, 6).toUpperCase();
@@ -47,7 +46,7 @@ module.exports = function (db, redis_client) {
       data.colours = body.colours.trim();
       data.country_code = body['country-code'].trim().replace(/\+/g, '');
       data.phone = body.phone.trim().replace(/[\-]/g, '');
-      data.replyto_field = body['replyto-field'].trim();      
+      data.replyto_field = body['replyto-field'].trim();
 
       if (data.form_subject.isBlank() || data.form_intro.isBlank() || data.form_name.isBlank() || !regex.colours.test(data.colours)) {
         this.flash.param_error =  true;
@@ -102,7 +101,7 @@ module.exports = function (db, redis_client) {
     },
     get: function* () {
 
-      var api_key = this.params.api_key;
+      let api_key = this.params.api_key;
 
       if (!api_key) {
         error_utils.params({api_key: api_key}, this);
@@ -197,7 +196,7 @@ module.exports = function (db, redis_client) {
       }
     },
     del: function* () {
-      var api_key = this.params.api_key,
+      let api_key = this.params.api_key,
           token = this.request.body.token;
       
 
@@ -318,8 +317,8 @@ module.exports = function (db, redis_client) {
     }
   };
 
-  var _confirm_sms = function* () {
-    var api_key = this.params.api_key,
+  let _confirm_sms = function* () {
+    let api_key = this.params.api_key,
        token = this.request.body.token,
         code = this.request.body.code;
 
@@ -358,8 +357,8 @@ module.exports = function (db, redis_client) {
   };
 
 
-  var _resend_email = function* () {
-    var api_key = this.params.api_key,
+  let _resend_email = function* () {
+    let api_key = this.params.api_key,
         token = this.query.token;
 
     try {
@@ -372,8 +371,8 @@ module.exports = function (db, redis_client) {
   };
 
 
-  var _send_confirm_sms = function* () {
-    var api_key = this.params.api_key,
+  let _send_confirm_sms = function* () {
+    let api_key = this.params.api_key,
         token = this.query.token;
 
     try {

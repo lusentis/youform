@@ -4,7 +4,7 @@ module.exports = function (db) {
 
   const TableName = 'YouformForms';
 
-  let Types = require('./models/Form'); 
+  let Types = require('./models/Form').Types;
 
   let _save = function* (id, form) {
 
