@@ -10,8 +10,8 @@ module.exports = function (db) {
   // locals dependencies
   let Form = require('../db/models/Form'),
       error_utils = require('../utils/error_utils.js')(),
-      log_utils = require('../utils/log_utils.js')(db),
-      formDB = require('../db/form')(db);
+      formDB = require('../db/form')(db),
+      logDB = require('../db/log')(db);
 
   let logger = coolog.logger(path.basename(__filename));
 
@@ -101,6 +101,16 @@ module.exports = function (db) {
         return;
       }
 
+      let uuid = require('node-uuid');
+      yield logDB.save(uuid.v4(), {
+        userId: api_key,
+        created_at: new Date().toUTCString(),
+        user_ip: '0.0.0.0',
+        spam: false
+      });
+
+      let graph = yield logDB.get(api_key);
+
       //let graph = yield log_utils.get_graph(api_key);
       
       // let form_saved = this.flash.form_saved.length > 0;
@@ -109,9 +119,9 @@ module.exports = function (db) {
 
       this.body = yield this.render('dashboard', {
         form: form_data,
-        graph: JSON.stringify({}), // graph
-        form_saved: true,//form_saved
-        form_save_error: false// form_save_error
+        graph: JSON.stringify(graph), // graph
+        form_saved: true, //form_saved
+        form_save_error: false // form_save_error
       });
 
       if (!form_data.confirmed) {
@@ -127,7 +137,7 @@ module.exports = function (db) {
   };
 
   let confirmed_email = function* () {
-    let api_key = this.params.api_key, 
+    let api_key = this.params.api_key,
         token = this.query.token;
 
     try {

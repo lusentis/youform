@@ -17,7 +17,6 @@ if (process.env.LOCAL) {
 
 if (cluster.isMaster) {
   co(function* () {
-
     // fork workers
     for (let i = 0; i < numCPUs; i++) {
       console.info('start worker '+ i);

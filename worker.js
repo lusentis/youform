@@ -25,7 +25,7 @@ module.exports = function (port) {
 
   // config AWS
   AWS.config.region = 'eu-west-1';
-  let DynamoDB = new AWS.DynamoDB();
+  let DynamoDB = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
   let db = utils.wrap(DynamoDB);
 
   // config coolog

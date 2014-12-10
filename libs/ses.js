@@ -1,23 +1,29 @@
 'use strict';
 
 module.exports = function () {
-   let AWS = require('aws-sdk'),
+  // npm dependencies
+  let AWS = require('aws-sdk'),
+      moment = require('moment'),
       thenJade = require('then-jade');
   // locals dependencies
   let utils = require('./utils')();
+  let regex = require('./regex');
 
   // load AWS SES
   let SES = new AWS.SES();
   let coSES = utils.wrap(SES);
 
 
-  let _send = function* (to, subject, body) {
+  let _send = function* (to, subject, body, replyTo) {
+    replyTo = Array.isArray(replyTo) ? replyTo : []; // default values
+
     yield coSES.sendEmail({ 
-       Source: 'Your Contact Form <noreply@youform.me>',
-       Destination: {
-        ToAddresses: to, 
+      Source: 'Your Contact Form <noreply@youform.me>',
+      Destination: {
+        ToAddresses: to,
       },
-       Message: {
+      ReplyToAddresses: replyTo,
+      Message: {
         Subject: { Data: subject },
         Body: {
           Html: { Data: body }
@@ -45,9 +51,21 @@ module.exports = function () {
   };
 
 
+  let _send_form = function* (form, data) {
+    let body = yield thenJade.renderFile('./views/email/email.jade',  { form: form, user_form: data, date: moment().format('D MMMM YYYY') });
+    // todo: check replyto address
+    let replyto = [];
+    if (regex.email.test(data[form.replyto_field])) {
+      replyto.push(data[form.replyto_field]);
+    }
+    yield _send([ form.form_destination ], form.form_subject, body, [replyto]);
+  };
+
+
   return {
     confirm: _send_confirm,
     info: _send_info,
-    thanks: _send_thanks
+    thanks: _send_thanks,
+    form: _send_form
   };
 };

@@ -9,7 +9,6 @@ module.exports = function (db, redis_client) {
     , inflection = require('inflection')
     , uuid = require('node-uuid')
     , path = require('path')
-    , comm_utils = require('../utils/comm_utils.js')()
     , error_utils = require('../utils/error_utils.js')()
     , log_utils = require('../utils/log_utils.js')(db)
     , utils = require('../utils/utils.js')(redis_client)
@@ -116,16 +115,16 @@ module.exports = function (db, redis_client) {
         return;
       }
 
-      if (!utils.check_origin(this.request, form_data)) {
-        logger.error({
-          error: true
-        , form_id: api_key
-        , description: 'origin error'
-        });
-        this.flash('origin_error', true);
-        this.redirect('/error');
-        return;
-      }
+      // if (!utils.check_origin(this.request, form_data)) {
+      //   logger.error({
+      //     error: true
+      //   , form_id: api_key
+      //   , description: 'origin error'
+      //   });
+      //   this.flash('origin_error', true);
+      //   this.redirect('/error');
+      //   return;
+      // }
 
       if (form_data.deleted) {
         this.status = 403;

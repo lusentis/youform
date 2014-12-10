@@ -126,14 +126,17 @@ block scripts
   script(src='/js/vendor/Chart.min.js')
   script.
 
-    var graph = JSON.parse('#{graph}')
+    var graph = !{graph}
       , emails = []
       , spam = []
       , labels = []
       , maxValue = 0
       ;
 
-    graph.forEach(function (item) {
+    console.log();
+
+    Object.keys(graph).forEach(function (key) {
+      var item = graph[key];
       // graph labels
       labels.push(months[item[1] -1]);
       // spam

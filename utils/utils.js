@@ -18,16 +18,6 @@ module.exports = function (redis_client) {
   });
 
 
-  var check_origin = function (req, form) {
-    var origin =  req.headers.referer || req.headers.origin;
-    logger.info('origin', {
-      referer: req.headers.referer
-    , origin: req.headers.origin
-    , website_url: form.website_url
-    });
-    return (origin && (origin.has(form.website_url) || form.website_url.has(origin)));
-  };
-
   var spam_filter = function (req, res, callback) {
     var ip = req.ip.split('.').reverse().join('.');
     async.parallel([
@@ -85,7 +75,6 @@ module.exports = function (redis_client) {
   };
 
   return {
-    'check_origin': check_origin,
     'spam_filter': spam_filter
   };
 };
