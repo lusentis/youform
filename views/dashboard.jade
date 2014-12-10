@@ -116,65 +116,11 @@ block content
     .spacer(style='height: 100px;')
                   
 block scripts
-  script.
-    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    Array.prototype.forEach.call(document.querySelectorAll('.month-name'), function (el) {      
-      var monthNumber = parseInt(el.innerHTML, 10);
-      el.innerHTML = months[monthNumber - 1] + ': ';
-    });
-
   script(src='/js/vendor/Chart.min.js')
   script.
-
-    var graph = !{graph}
-      , emails = []
-      , spam = []
-      , labels = []
-      , maxValue = 0
-      ;
-
-    console.log();
-
-    Object.keys(graph).forEach(function (key) {
-      var item = graph[key];
-      // graph labels
-      labels.push(months[item[1] -1]);
-      // spam
-      spam.push(item[3]);
-      // emails
-      emails.push(item[2]);
-
-      if (maxValue < item[2]) {
-        maxValue = item[2];
-      }
-      if (maxValue < item[3]) {
-        maxValue = item[3];
-      }
-    });
-
-    var lineChartOptions = {
-          scaleLineColor : '#AF1418',
-          scaleGridLineColor : 'rgba(198, 23, 28, 0.4)',
-          scaleFontColor : '#F2F2F2',
-          scaleFontFamily : 'Open Sans',
-          datasetStrokeWidth : 2,
-          datasetFill : false,
-          pointDot : false,
-          scaleOverride : true,
-          scaleSteps : 10,
-          scaleStepWidth : Math.ceil(maxValue / 9)
-        }
-      , lineChartData = {
-          labels : labels,
-          datasets : [
-            {
-              strokeColor : '#FFCE4B',
-              data : spam
-            },
-            {
-              strokeColor : '#FFFFFF',
-              data : emails
-            }
-          ] 
-        }
-      , myLine = new Chart(document.getElementById('dashgraph').getContext('2d')).Line(lineChartData, lineChartOptions);
+    window.onload  = function () {
+      var key = '#{form.id}';
+      var token = '#{form.token}';
+      YouformApp.loadDashoboard(key, token);
+    };
+    

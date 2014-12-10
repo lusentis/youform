@@ -108,10 +108,6 @@ module.exports = function (db) {
         user_ip: '0.0.0.0',
         spam: false
       });
-
-      let graph = yield logDB.get(api_key);
-
-      //let graph = yield log_utils.get_graph(api_key);
       
       // let form_saved = this.flash.form_saved.length > 0;
       // let form_save_error = this.flash.form_save_error.length > 0;
@@ -119,7 +115,6 @@ module.exports = function (db) {
 
       this.body = yield this.render('dashboard', {
         form: form_data,
-        graph: JSON.stringify(graph), // graph
         form_saved: true, //form_saved
         form_save_error: false // form_save_error
       });

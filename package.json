@@ -1,6 +1,11 @@
 {
-  "name": "youform",
+  "name": "YouForm",
   "version": "0.0.2",
+  "description": "Contact form API for static websites",
+  "authors": [
+    "Luca Casartelli <luca@plasticpanda.com>"
+  ],
+  "homepage": "https:/youform.me",
   "private": true,
   "scripts": {
     "start": "node --harmony app.js",

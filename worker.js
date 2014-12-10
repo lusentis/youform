@@ -98,6 +98,8 @@ module.exports = function (port) {
   app.post(path.join(api_prefix, '/form/:api_key'), bodyParser, api_routes.form.get); //utils.rateLimit()
   app.post(path.join(api_prefix, '/edit/:api_key'), bodyParser, api_routes.form.edit);
   app.post(path.join(api_prefix, '/delete/:api_key'), bodyParser, api_routes.form.del);
+  app.get(path.join(api_prefix, '/graph/:api_key'), bodyParser, api_routes.graph);
+  
   app.get(path.join('/confirm/email/:api_key'), api_routes.confirm_email);
 
   // add security

@@ -18,6 +18,7 @@ module.exports = function (db, redis_client) {
 
   // locals dependencies
   let formDB = require('../db/form')(db),
+      logDB = require('../db/log')(db),
       ses = require('../libs/ses')(),
       sms = require('../libs/sms')();
   
@@ -149,7 +150,7 @@ module.exports = function (db, redis_client) {
         return;
       }
 
-      let spam = yield utils.spam_filter(req, res);
+      let spam = yield utils.spam_filter(this);
       
       // save connection
       let data = {
@@ -187,7 +188,7 @@ module.exports = function (db, redis_client) {
         yield comm_utils.send_form(form_data, user_form, files, res);
         logger.info('Redirect to', form_data.website_success_page);
         let url = regex.url.test(form_data.website_success_page) ? form_data.website_success_page : form_data.website_url;
-        res.redirect(url);
+        this.redirect(url);
       } catch (err) {
         logger.error('Postmark error', err);
         logger.info('Redirect to 500 page');
@@ -389,11 +390,30 @@ module.exports = function (db, redis_client) {
   };
 
 
+  let _graph = function* () {
+    console.log('here');
+    let api_key = this.params.api_key,
+        token = this.query.token;
+
+    try {
+      let graph = yield logDB.get(api_key);
+      this.body = {
+        status: 'ok',
+        data: graph
+      };
+    } catch (err) {
+      logger.error(err);
+      error_utils.params({api_key: api_key, token: token}, this);
+    }
+  };
+
+
   return {
     form: _form,
     confirm_sms: _confirm_sms,
     send_confirm_sms: _send_confirm_sms,
     send_confirm_email: _resend_email,
-    confirm_email: _confirm_email
+    confirm_email: _confirm_email,
+    graph: _graph
   };
 };

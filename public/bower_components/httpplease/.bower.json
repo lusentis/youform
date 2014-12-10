@@ -1,0 +1,35 @@
+{
+  "name": "httpplease",
+  "version": "0.15.2",
+  "authors": [
+    "Matthew Dapena-Tretter <m@tthewwithanm.com>"
+  ],
+  "description": "The polite HTTP request library for node and the browser",
+  "main": "browser-builds/standalone/httpplease.js",
+  "keywords": [
+    "xhr",
+    "request",
+    "http",
+    "XMLHttpRequest",
+    "isomorphic"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/matthewwithanm/httpplease.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "0.15.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.15.2",
+    "commit": "3304c94a15f7e2eb218f119940040d084244f358"
+  },
+  "_source": "git://github.com/matthewwithanm/httpplease.js.git",
+  "_target": "~0.15.2",
+  "_originalSource": "httpplease",
+  "_direct": true
+}
