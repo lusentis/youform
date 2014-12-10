@@ -4,17 +4,16 @@
 module.exports = function (db, redis_client) {
 
   // npm dependencies
-  let coolog = require('coolog')
-    , mime = require('mime')
-    , inflection = require('inflection')
-    , uuid = require('node-uuid')
-    , path = require('path')
-    , error_utils = require('../utils/error_utils.js')()
-    , log_utils = require('../utils/log_utils.js')(db)
-    , utils = require('../utils/utils.js')(redis_client)
-    , Form = require('../db/models/Form')
-    , regex = require('../libs/regex')
-    ;
+  let coolog = require('coolog'),
+    mime = require('mime'),
+    inflection = require('inflection'),
+    uuid = require('node-uuid'),
+    path = require('path'),
+    error_utils = require('../utils/error_utils.js')(),
+    log_utils = require('../utils/log_utils.js')(db),
+    utils = require('../utils/utils.js')(redis_client),
+    Form = require('../db/models/Form'),
+    regex = require('../libs/regex');
 
   // locals dependencies
   let formDB = require('../db/form')(db),

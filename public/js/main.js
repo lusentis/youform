@@ -91,7 +91,7 @@ YouformApp.loadDashoboard = function loadDashoboard(form_id, form_token) {
   // load dashboard from http data
 
   var request = httpplease.use(httppleaseplugins.json);
-  request.get('/api/graph/' + form_id + '?token=' + form_token, function (err, res) {
+  request.get('/api/graph/' + form_id + '?token=' + form_token, function(err, res) {
       if (err) {
         throw err;
       }

@@ -5,7 +5,6 @@ module.exports = function () {
   // npm dependencies
   let coolog = require('coolog'),
       path = require('path');
-  // locals dependencies
   
   // logger
   let logger = coolog.logger(path.basename(__filename));
