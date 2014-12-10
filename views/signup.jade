@@ -138,20 +138,5 @@ block content
 
 block scripts
   script.
-    window.onload = function () {
-      var col = (/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test('#{form.colours}')) ? '#{form.colours}' : '666666';
-      var el = document.querySelector('.radio-palette[data-palette="' + col + '"]');
-      document.querySelector('input[name="colours"]').value = col;
-      el.classList.add('active');
-    };
-
-    document.querySelectorAll('.radio-palette').forEach(function (el) {
-      el.addEventListener('click', function () {
-        document.querySelector('.radio-palette.active').classList.remove('active');
-        document.querySelector('input[name="colours"]').value = el.getAttribute('data-palette');
-        el.classList.add('active');
-
-        console.log(document.querySelector('input[name="colours"]').value)
-      });
-    });
+    YouformApp.loadSignup('#{form.colours}');
     

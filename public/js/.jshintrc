@@ -1,5 +1,12 @@
 {
   "browser": true,
+  "globals": {
+    "NodeList": false,
+    "httpplease": false, 
+    "httppleaseplugins": false, 
+    "HTMLCollection": false, 
+    "Chart": false
+  },
   "indent": 2,
   "white": true,
   "laxcomma": true,
@@ -8,12 +15,5 @@
   "unused": true,
   "eqnull": true,
   "camelcase": false,
-  "trailing": true,
-  "globals": {
-    "NodeList": false,
-    "httpplease": false, 
-    "httppleaseplugins": false, 
-    "HTMLCollection": false, 
-    "Chart": false
-  }
+  "trailing": true
 }

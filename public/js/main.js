@@ -1,4 +1,7 @@
+/* globals NodeList, httpplease, httppleaseplugins, HTMLCollection, Chart, document, window */
+
 'use strict';
+
 
 (function () {
   NodeList.prototype.forEach = Array.prototype.forEach; 
@@ -8,7 +11,29 @@
 
 var YouformApp = {};
 
-YouformApp.loadDashoboard = function (form_id, form_token) {
+
+YouformApp.loadSignup = function loadSignup(formColor) {
+
+  window.onload = function () {
+    var col = (/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(formColor)) ? formColor : '666666';
+    var el = document.querySelector('.radio-palette[data-palette="' + col + '"]');
+    document.querySelector('input[name="colours"]').value = col;
+    el.classList.add('active');
+  };
+
+  document.querySelectorAll('.radio-palette').forEach(function (el) {
+    el.addEventListener('click', function () {
+      document.querySelector('.radio-palette.active').classList.remove('active');
+      document.querySelector('input[name="colours"]').value = el.getAttribute('data-palette');
+      el.classList.add('active');
+
+      console.log(document.querySelector('input[name="colours"]').value);
+    });
+  });
+};
+
+
+YouformApp.loadDashoboard = function loadDashoboard(form_id, form_token) {
 
   // Load months
 
