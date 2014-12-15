@@ -1,16 +1,15 @@
 'use strict';
 
 
-module.exports = function (db, redis_client) {
+module.exports = function (db) {
 
   // npm dependencies
   let coolog = require('coolog'),
-    //mime = require('mime'),
     inflection = require('inflection'),
     uuid = require('node-uuid'),
     path = require('path'),
     error_utils = require('../utils/error_utils.js')(),
-    utils = require('../utils/utils.js')(redis_client),
+    //utils = require('../utils/utils.js')(redis_client),
     Form = require('../db/models/Form'),
     regex = require('../libs/regex');
 
@@ -96,10 +95,17 @@ module.exports = function (db, redis_client) {
       this.redirect('/success/' + form_saved.id + '?token=' + form_saved.token);
     },
     get: function* () {
+      const JSON_TYPE = 'json';
+      const REDIRECT_TYPE = 'redirect';
 
-      let json = true; // todo: implement routing for JSON response
       let api_key = this.params.api_key;
+      let type = this.params.type;
       let form;
+
+      if (type !== JSON_TYPE && type !== REDIRECT_TYPE) {
+        // todo: do something for missing types
+        return;
+      }
 
       if (!api_key) {
         error_utils.params({api_key: api_key}, this);
@@ -159,7 +165,6 @@ module.exports = function (db, redis_client) {
       // save connection
       let data = {
         userId: api_key,
-        id: uuid.v4(),
         user_ip: this.request.socket.remoteAddress,
         spam: isSpam,
         created_at: new Date().toUTCString()
@@ -167,15 +172,18 @@ module.exports = function (db, redis_client) {
 
       console.log(data);
 
-      yield logDB.save(api_key, data);
+      yield logDB.save(uuid.v4(), data);
       
       if (isSpam) {
         logger.error('Spam message');
         
-        if (json) {
+        if (type === JSON_TYPE) {
           this.body = {status: "error"};
-        } else {
-          this.redirect('/500');  
+          return;
+        }
+        if (type === REDIRECT_TYPE) {
+          this.redirect('/500');
+          return;
         }
       }
 
@@ -202,18 +210,20 @@ module.exports = function (db, redis_client) {
         logger.info('Redirect to', form.website_success_page);
         let url = regex.url(form.website_success_page) ? form.website_success_page : form.website_url;
 
-        if (json) {
+        if (type === JSON_TYPE) {
           this.body = {
             status: 'ok'
           };
-        } else {
+        } 
+        if (type === REDIRECT_TYPE) {
           this.redirect(url);
         }
       } catch (err) {
         logger.error('SES error', err);
-        if (json) {
+        if (type === JSON_TYPE) {
           this.body = {status: 'error'};
-        } else {
+        } 
+        if (type === REDIRECT_TYPE) {
           this.redirect('/500');
         }
       }

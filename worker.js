@@ -14,7 +14,7 @@ module.exports = function (port) {
       logger = require('koa-logger'),
       router = require('koa-router'),
       //session = require('koa-generic-session'),
-      RedisStore = require('koa-redis'),
+      //RedisStore = require('koa-redis'),
       limit = require('koa-ratelimit'),
       redis = require('redis'),
       statics = require('koa-static'),
@@ -95,7 +95,7 @@ module.exports = function (port) {
   app.get(path.join(api_prefix, '/confirm/send-sms/:api_key'), api_routes.send_confirm_sms);
   app.get(path.join(api_prefix, '/confirm/send-email/:api_key'), middleware.api_key, api_routes.send_confirm_email);
   app.post(path.join(api_prefix, '/new-form'), bodyParser, api_routes.form.create);
-  app.post(path.join(api_prefix, '/form/:api_key'), bodyParser, api_routes.form.get); //utils.rateLimit()
+  app.post(path.join(api_prefix, '/form/:type/:api_key'), bodyParser, api_routes.form.get); //utils.rateLimit()
   app.post(path.join(api_prefix, '/edit/:api_key'), bodyParser, api_routes.form.edit);
   app.post(path.join(api_prefix, '/delete/:api_key'), bodyParser, api_routes.form.del);
   app.get(path.join(api_prefix, '/graph/:api_key'), bodyParser, api_routes.graph);

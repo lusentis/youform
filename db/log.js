@@ -24,7 +24,7 @@ module.exports = function (db) {
     });
 
     let result  = yield db.updateItem({
-      Key: { id: { S: 'aaa' } },
+      Key: { id: { S: id } },
       AttributeUpdates: data,
       TableName: TableName,
       ReturnConsumedCapacity: 'NONE',
