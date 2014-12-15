@@ -7,12 +7,10 @@ Official website [http://www.youform.me/](http://www.youform.me/)
 ### Environment Variables ###
 Add the following to your .env file.
 ```bash
-# COUCHDB URL
-export DATABASE_URL= ...
 
-# POSTMARK settings
-export POSTMARK_API_KEY= ...
-export POSTMARK_FROM= ...
+# AWS
+export AWS_ACCESS_KEY_ID= ...
+export AWS_SECRET_ACCESS_KEY= ...
 
 # AKISMET API KEY
 export AKISMET_API_KEY= ...
@@ -26,7 +24,7 @@ export SITE_SECRET= ...
 ```
 ## License ##
 
-Copyright (c) 2013 [PlasticPanda.com](http://www.plasticpanda.com/)
+Copyright (c) 2014 [Plastic Panda](http://www.plasticpanda.com/)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
