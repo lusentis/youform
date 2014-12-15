@@ -1,46 +1,17 @@
 /*jshint node:true, indent:2, white:true, laxcomma:true, undef:true, strict:true, unused:true, eqnull:true, camelcase: false, trailing: true */
 'use strict';
 
-module.exports = function (redis_client) {
+module.exports = function () {
 
   // npm modules
-  var akismet = require('akismet-api')
-    , coolog = require('coolog')
-    , dns = require('dns')
+  var dns = require('dns')
     , spam_list = require('../spam_list.json')
     ;
-
-  var logger = coolog.logger('utils.js');
-
-  var akismet_client = akismet.client({
-    key  : process.env.AKISMET_API_KEY,
-    blog : 'http:/www.youform.me'
-  });
-
 
   var spam_filter = function (req, res, callback) {
     var ip = req.ip.split('.').reverse().join('.');
     async.parallel([
-        function (ret) {
-          // Akismet filter
-          akismet_client.checkSpam({
-            user_ip : req.ip,
-            user_agent : req.headers['user-agent'],
-            referer : req.headers.referer
-          }, function (err, spam) {
-            if (err) {
-              ret(err);
-            }
-            if (spam) {
-              logger.error({
-                spam: true
-              , user_ip: req.ip
-              , referrer: req.headers.referer
-              });
-            }
-            ret(null, spam);
-          });
-        },
+        
         function (ret) {
           var host = function (item, next) {
             dns.resolve4(ip + '.' + item.dns, function (err, domain) {

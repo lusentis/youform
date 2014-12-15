@@ -9,7 +9,8 @@
   "private": true,
   "scripts": {
     "start": "node --harmony app.js",
-    "dev": "forever -c \"node --harmony\" --minUptime 1000 --spinSleepTime 1000 -w app.js"
+    "dev": "forever -c \"node --harmony\" --minUptime 1000 --spinSleepTime 1000 -w app.js",
+    "test": "cd test/test-server && http-server"
   },
   "dependencies": {
     "akismet-api": "^1.1.5",

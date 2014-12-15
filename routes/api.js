@@ -10,7 +10,6 @@ module.exports = function (db, redis_client) {
     uuid = require('node-uuid'),
     path = require('path'),
     error_utils = require('../utils/error_utils.js')(),
-    log_utils = require('../utils/log_utils.js')(db),
     utils = require('../utils/utils.js')(redis_client),
     Form = require('../db/models/Form'),
     regex = require('../libs/regex');
@@ -19,7 +18,8 @@ module.exports = function (db, redis_client) {
   let formDB = require('../db/form')(db),
       logDB = require('../db/log')(db),
       ses = require('../libs/ses')(),
-      sms = require('../libs/sms')();
+      sms = require('../libs/sms')(),
+      security = require('../libs/security')();
   
   let logger = coolog.logger(path.basename(__filename));
 
@@ -114,6 +114,9 @@ module.exports = function (db, redis_client) {
         // error_utils.not_found(api_key, req, res);
         return;
       }
+
+      console.log(security.origin(this.request, form.website_url));
+      return;
 
       // if (!utils.check_origin(this.request, form_data)) {
       //   logger.error({
@@ -291,7 +294,6 @@ module.exports = function (db, redis_client) {
         this.redirect('/');
       }
 
-
       if (email === form.form_destination_not_confirmed && form.email_confirmed === false) {
         
         form.form_destination = form.form_destination_not_confirmed;
@@ -300,17 +302,19 @@ module.exports = function (db, redis_client) {
         if (form.phone_confirmed) {
           form.confirmed = true;
         }
-        logger.debug(form);
         yield formDB.save(form.id, form);
 
         if (form.confirmed) {
-          yield sms.info(form);
+          logger.info('Sending email');
+          yield ses.info(form);
+
+          // todo: fix missing id
         }
         this.redirect('/confirm/email/confirmed/' + form.id + '?token=' + token);
       }
 
       this.redirect('/confirm/email/confirmed/' + form.id + '?token=' + token);
-    } catch (err) {
+    } catch(err) {
       logger.error(err);
       error_utils.params({api_key: api_key, token: token}, this);
     }
@@ -390,7 +394,6 @@ module.exports = function (db, redis_client) {
 
 
   let _graph = function* () {
-    console.log('here');
     let api_key = this.params.api_key,
         token = this.query.token;
 
