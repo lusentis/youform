@@ -104,7 +104,7 @@ block content
                       span(style='text-transform: none; font-weight: normal;') The content of the form field with this name will be used as the 
                         em reply-to 
                         | address
-                    input.pure-input-1(type='text', name='replyto-field', placeholder='Field name (e.g. customer-email)', value='#{form.replyto_field}')
+                    input.pure-input-1(type='text', name='replyto-field', placeholder='Field name (e.g. customer-email)', value='#{form.replyto_field || ""}')
                   .pure-control-group
                     label(for='f-subject') E-mail Subject
                     input.pure-input-1(type='text', name='f-subject', placeholder='Pollos', value='#{form.form_subject}', required)

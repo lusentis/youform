@@ -53,12 +53,11 @@ module.exports = function () {
 
   let _send_form = function* (form, data) {
     let body = yield thenJade.renderFile('./views/email/email.jade',  { form: form, user_form: data, date: moment().format('D MMMM YYYY') });
-    // todo: check replyto address
     let replyto = [];
-    if (regex.email.test(data[form.replyto_field])) {
+    if (regex.email(data[form.replyto_field])) {
       replyto.push(data[form.replyto_field]);
     }
-    yield _send([ form.form_destination ], form.form_subject, body, [replyto]);
+    yield _send([ form.form_destination ], form.form_subject, body, replyto);
   };
 
 

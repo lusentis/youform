@@ -44,6 +44,9 @@ module.exports = function (db) {
     });
 
     if (!form || Object.size(form) === 0) {
+      console.error('form not found', {
+        id: id
+      });
       throw new Error('Form not found');
     }
 

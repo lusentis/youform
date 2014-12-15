@@ -3,15 +3,16 @@
 
 module.exports = function () {
   
-  let coolog = require('coolog')
-    , logger = coolog.logger('error_utils.js')
-    ;
+  let coolog = require('coolog'),
+      path = require('path');
 
-  let params = function (params, handler, message) {
+  let logger = coolog.logger(path.basename(__filename));
+
+  let _params = function (params, handler, message) {
     let err = {
-      error: true
-    , message: message || 'params error'
-    , api_key: params.api_key
+      error: true,
+      message: message || 'params error',
+      form: params.api_key
     };
     if (params.token) {
       err.token = params.token;
@@ -30,11 +31,25 @@ module.exports = function () {
     }
   };
 
-  let not_found = function (api_key, handler) {
+
+  let _token_mismatch = function (api_key, token, handler) {
     logger.error({
-      error: true
-    , form_id: api_key
-    , description: 'Form not found'
+      error: true,
+      form: api_key,
+      token: token,
+      description: 'token mismatch'
+    });
+    if (handler) {
+      handler.redirect('/404');
+    }
+  };
+
+
+  let _not_found = function (api_key, handler) {
+    logger.error({
+      error: true,
+      form: api_key,
+      description: 'form not found'
     });
     if (handler) {
       handler.redirect('/404');
@@ -42,8 +57,9 @@ module.exports = function () {
   };
  
   return {
-    'params': params
-  , 'not_found': not_found
+    'params': _params,
+    'not_found': _not_found,
+    'token': _token_mismatch
   };
 };
 

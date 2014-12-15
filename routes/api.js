@@ -5,7 +5,7 @@ module.exports = function (db, redis_client) {
 
   // npm dependencies
   let coolog = require('coolog'),
-    mime = require('mime'),
+    //mime = require('mime'),
     inflection = require('inflection'),
     uuid = require('node-uuid'),
     path = require('path'),
@@ -23,9 +23,6 @@ module.exports = function (db, redis_client) {
   
   let logger = coolog.logger(path.basename(__filename));
 
-  let test_email = function (email) {
-    return regex.email.test(email) && email.length < 100;
-  };
 
   let _form = {
     create: function* () {
@@ -39,27 +36,27 @@ module.exports = function (db, redis_client) {
       data.website_success_page = body['w-success-page'].toLowerCase();
       data.form_subject = body['f-subject'];
       data.form_intro = body['f-intro'];
-      data.form_destination = body['email-dest'];
-      data.form_destination_not_confirmed = body['email-dest'];
+      data.form_destination = body['email-dest'].toLowerCase();
+      data.form_destination_not_confirmed = body['email-dest'].toLowerCase();
       data.creator_email = body['email-crt'].toLowerCase();
       data.colours = body.colours.trim();
       data.country_code = body['country-code'].trim().replace(/\+/g, '');
       data.phone = body.phone.trim().replace(/[\-]/g, '');
       data.replyto_field = body['replyto-field'].trim();
 
-      if (data.form_subject.isBlank() || data.form_intro.isBlank() || data.form_name.isBlank() || !regex.colours.test(data.colours)) {
-        this.flash.param_error =  true;
+      if (data.form_subject.isBlank() || data.form_intro.isBlank() || data.form_name.isBlank() || !regex.colours(data.colours)) {
         this.redirect('/signup');
         return;
       }
 
-      if (!test_email(data.creator_email) || !test_email(data.form_destination)) {
-        this.flash('email_error', true);
+      console.log(regex.email(data.creator_email));
+      console.log(regex.email(data.form_destination));
+
+      if (!regex.email(data.creator_email) || !regex.email(data.form_destination)) {
         this.redirect('/signup');
         return;
       }
-      if (!regex.phone.test(data.phone) || !regex.country_code.test(data.country_code)) {
-        this.flash.phone_error = true;
+      if (!regex.phone(data.phone) || !regex.country_code(data.country_code)) {
         this.redirect('/signup');
         return;
       }
@@ -100,101 +97,125 @@ module.exports = function (db, redis_client) {
     },
     get: function* () {
 
+      let json = true; // todo: implement routing for JSON response
       let api_key = this.params.api_key;
+      let form;
 
       if (!api_key) {
         error_utils.params({api_key: api_key}, this);
         return;
       }
 
-      let form_data =  yield formDB.get(api_key);
+      try {
+        form =  yield formDB.get(api_key);  
+      } catch (err) {
+        // todo: handle form not found
+        throw err;
+      }
       
-      if (!form_data) {
+      
+      if (!form) {
         // todo: handle not found
         // error_utils.not_found(api_key, req, res);
         return;
       }
 
-      console.log(security.origin(this.request, form.website_url));
-      return;
 
-      // if (!utils.check_origin(this.request, form_data)) {
-      //   logger.error({
-      //     error: true
-      //   , form_id: api_key
-      //   , description: 'origin error'
-      //   });
-      //   this.flash('origin_error', true);
-      //   this.redirect('/error');
-      //   return;
-      // }
-
-      if (form_data.deleted) {
-        this.status = 403;
-        this.body = {
-          error: true
-        , description: 'not found.'
-        };
-        return;
-      }
-      if (!form_data.confirmed) {
-        // deleted
-        logger.error({
-          error: true
-        , form_id: api_key
-        , description: 'not found'
-        });
-        this.status = 403;
-        this.body = {
-          error: true
-        , description: 'not found'
-        };
+      if (!security.origin(this.request, form.website_url)) {
+        // todo: handle origin error 
         return;
       }
 
-      let spam = yield utils.spam_filter(this);
+
+      if (form.deleted) {
+        // todo: handle form deleted 
+
+        // this.status = 403;
+        // this.body = {
+        //   error: true
+        // , description: 'not found'
+        // };
+        return;
+      }
+      if (!form.confirmed) {
+        // todo: handle not confirmed
+
+        // logger.error({
+        //   error: true
+        // , form_id: api_key
+        // , description: 'not found'
+        // });
+        // this.status = 403;
+        // this.body = {
+        //   error: true
+        // , description: 'not found'
+        // };
+        return;
+      }
+
+      // check spam with akismet
+      let isSpam = yield security.akismet(this.ip, this.request);
       
       // save connection
       let data = {
-        user_ip: this.request.connection.remoteAddress
-      , api_key: api_key
-      , spam: spam
+        userId: api_key,
+        id: uuid.v4(),
+        user_ip: this.request.socket.remoteAddress,
+        spam: isSpam,
+        created_at: new Date().toUTCString()
       };
 
-      yield log_utils.save_log(data);
+      console.log(data);
+
+      yield logDB.save(api_key, data);
       
-      if (spam) {
-        logger.info('Redirect to 500 page');
-        this.redirect('/500');
+      if (isSpam) {
+        logger.error('Spam message');
+        
+        if (json) {
+          this.body = {status: "error"};
+        } else {
+          this.redirect('/500');  
+        }
       }
 
-      let user_form = {}
-        , files = {}
-        ;
+      let user_form = {};
+      //let files = {};
       
       // parse form data
       Object.keys(this.request.body).forEach(function (key) {
-        user_form[inflection.humanize(key)] = req.body[key];
+        user_form[inflection.humanize(key)] = this.request.body[key];
       });
 
-      if (this.request.files !== undefined) {
-        Object.keys(this.request.files).forEach(function(key) {
-          // check MIME type
-          user_form = Object.reject(user_form, key);
-          if (/(doc|docx|pdf|jpg|jpeg|png|gif)/.test(mime.extension(mime.lookup(req.files[key].path)))) {
-            files[key] = this.request.files[key];
-          }
-        });
-      }
+      // if (this.request.files !== undefined) {
+      //   Object.keys(this.request.files).forEach(function(key) {
+      //     // check MIME type
+      //     user_form = Object.reject(user_form, key);
+      //     if (/(doc|docx|pdf|jpg|jpeg|png|gif)/.test(mime.extension(mime.lookup(req.files[key].path)))) {
+      //       files[key] = this.request.files[key];
+      //     }
+      //   });
+      // }
       try {
-        yield comm_utils.send_form(form_data, user_form, files, res);
-        logger.info('Redirect to', form_data.website_success_page);
-        let url = regex.url.test(form_data.website_success_page) ? form_data.website_success_page : form_data.website_url;
-        this.redirect(url);
+        // send email 
+        yield ses.form(form, user_form);
+        logger.info('Redirect to', form.website_success_page);
+        let url = regex.url(form.website_success_page) ? form.website_success_page : form.website_url;
+
+        if (json) {
+          this.body = {
+            status: 'ok'
+          };
+        } else {
+          this.redirect(url);
+        }
       } catch (err) {
-        logger.error('Postmark error', err);
-        logger.info('Redirect to 500 page');
-        this.redirect('/500');
+        logger.error('SES error', err);
+        if (json) {
+          this.body = {status: 'error'};
+        } else {
+          this.redirect('/500');
+        }
       }
     },
     del: function* () {
@@ -206,7 +227,7 @@ module.exports = function (db, redis_client) {
       try {
         form_data = yield formDB.get(api_key);
         if (form_data.token !== token) {
-          error_utils.params({api_key: api_key, token: token}, this, 'token error');
+          error_utils.token(api_key, token, this);
           return;
         }
 
@@ -235,15 +256,15 @@ module.exports = function (db, redis_client) {
         colours: body.colours,
         country_code: body['country-code'].trim().replace(/\+/g, ''),
         phone: body.phone.trim().replace(/[\-]/g, ''),
-        replyto_field: body['replyto-field']
+        replyto_field: body['replyto-field'] || ''
       };
 
-      if (!test_email(data.creator_email) || !test_email(data.form_destination)) {
+      if (!regex.email(data.creator_email) || !regex.email(data.form_destination)) {
         this.redirect('/edit/' + api_key + '?token=' + token);
         return;
       }
 
-      if (!regex.phone.test(data.phone.trim()) || !regex.country_code.test(data.country_code.trim())) {
+      if (!regex.phone(data.phone.trim()) || !regex.country_code(data.country_code)) {
         this.redirect('/edit/' + api_key + '?token=' + token);
         return;
       }
@@ -251,8 +272,9 @@ module.exports = function (db, redis_client) {
       try {
         let form_data = yield formDB.get(api_key);
 
+        // form mismatch
         if (form_data.token !== token) {
-          // do something
+          error_utils.token(api_key, token, this);
         }
 
         let change_email = (email.trim() !== form_data.form_destination);
@@ -281,7 +303,7 @@ module.exports = function (db, redis_client) {
         email = this.query.email,
         token = this.query.token;
 
-    if (!regex.email.test(email)) {
+    if (!regex.email(email)) {
       error_utils.params({api_key: api_key, token: token, email: email}, this);
       return;
     }
@@ -291,7 +313,7 @@ module.exports = function (db, redis_client) {
 
       if (form.token !== token) {
         // fix here
-        this.redirect('/');
+        error_utils.token(api_key, token, this);
       }
 
       if (email === form.form_destination_not_confirmed && form.email_confirmed === false) {
@@ -334,7 +356,15 @@ module.exports = function (db, redis_client) {
 
     try {
       let form = yield formDB.get(api_key);
-      if (form.token !== token || form.phone_confirmed) {
+
+      // token mismatch
+      if (form.token !== token) {
+        error_utils.token(api_key, token, this);
+        return;
+      }
+
+      // phone already confirmed
+      if (form.phone_confirmed) {
         this.redirect('/dashboard/' + form.id + '?token=' + form.token);
         return;
       }

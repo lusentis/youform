@@ -13,7 +13,7 @@ module.exports = function (port) {
       helmet = require('koa-helmet'),
       logger = require('koa-logger'),
       router = require('koa-router'),
-      session = require('koa-generic-session'),
+      //session = require('koa-generic-session'),
       RedisStore = require('koa-redis'),
       limit = require('koa-ratelimit'),
       redis = require('redis'),
@@ -43,12 +43,12 @@ module.exports = function (port) {
   // session
   app.keys = [process.env.SECRET_KEY];
   
-  app.use(session({
+  /*app.use(session({
     store: new RedisStore({
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT
     })
-  }));
+  }));*/
 
   app.use(limit({
     db: redis.createClient(),

@@ -9,9 +9,8 @@ module.exports = function (db) {
       path = require('path');
   // locals dependencies
   let Form = require('../db/models/Form'),
-      error_utils = require('../utils/error_utils.js')(),
-      formDB = require('../db/form')(db),
-      logDB = require('../db/log')(db);
+      error_utils = require('../utils/error_utils')(),
+      formDB = require('../db/form')(db);
 
   let logger = coolog.logger(path.basename(__filename));
 
@@ -33,7 +32,7 @@ module.exports = function (db) {
         form_data = yield formDB.get(api_key);
         
         if (form_data.token !== token) {
-          error_utils.params({api_key: api_key, token: token}, this);
+          error_utils.token(api_key, token, this);
           return;
         }
 
@@ -100,14 +99,6 @@ module.exports = function (db) {
         error_utils.params({api_key: api_key, token: token}, this);
         return;
       }
-
-      let uuid = require('node-uuid');
-      yield logDB.save(uuid.v4(), {
-        userId: api_key,
-        created_at: new Date().toUTCString(),
-        user_ip: '0.0.0.0',
-        spam: false
-      });
       
       // let form_saved = this.flash.form_saved.length > 0;
       // let form_save_error = this.flash.form_save_error.length > 0;
