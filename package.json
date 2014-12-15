@@ -13,12 +13,10 @@
     "test": "cd test/test-server && http-server"
   },
   "dependencies": {
-    "akismet-api": "^1.1.5",
     "aws-sdk": "^2.0.29",
     "co": "^4.0.0",
     "co-request": "^0.2.0",
     "coolog": "^3.0.0",
-    "inflection": "~1.2.6",
     "jade": "^1.7.0",
     "koa": "^0.13.0",
     "koa-body": "^0.4.0",
