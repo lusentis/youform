@@ -1,22 +1,19 @@
 'use strict';
 
 module.exports = function () {
-
-  // // npm dependencies
-  // let coolog = require('coolog');
-
-  // let logger = coolog.logger(path.basename(__filename));
-
     
   let _origin_error =  function* () {
+    this.status = 520;
     this.body = yield this.render('errors/index', {error: 'origin'});
   };
 
   let _not_found =  function* () {
+    this.status = 404;
     this.body = yield this.render('errors/404');
   };
 
   let _server_error =  function* () {
+    this.status = 500;
     this.body = yield this.render('errors/500');
   };
   

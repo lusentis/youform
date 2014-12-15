@@ -3,6 +3,10 @@
 
 module.exports = function (db) {
 
+  // const
+  const JSON_TYPE = 'json';
+  const REDIRECT_TYPE = 'redirect';
+
   // npm dependencies
   let coolog = require('coolog'),
     inflection = require('inflection'),
@@ -95,15 +99,14 @@ module.exports = function (db) {
       this.redirect('/success/' + form_saved.id + '?token=' + form_saved.token);
     },
     get: function* () {
-      const JSON_TYPE = 'json';
-      const REDIRECT_TYPE = 'redirect';
+      
 
       let api_key = this.params.api_key;
       let type = this.params.type;
       let form;
 
       if (type !== JSON_TYPE && type !== REDIRECT_TYPE) {
-        // todo: do something for missing types
+        this.redirect('/404');
         return;
       }
 
@@ -115,47 +118,49 @@ module.exports = function (db) {
       try {
         form =  yield formDB.get(api_key);  
       } catch (err) {
-        // todo: handle form not found
-        throw err;
-      }
-      
-      
-      if (!form) {
-        // todo: handle not found
-        // error_utils.not_found(api_key, req, res);
-        return;
+        logger.error(err);
+        if (type === JSON_TYPE) {
+          this.status = 404;
+          this.body = { status: 'error', api_key: api_key, description: 'form not found'};
+          return;
+        }
+        if (type === REDIRECT_TYPE) {
+          this.redirect('/404');
+          return;
+        }
       }
 
 
       if (!security.origin(this.request, form.website_url)) {
-        // todo: handle origin error 
+        if (type === JSON_TYPE) {
+          this.status = 520;
+          this.body = { status: 'error', api_key: api_key, description: 'origin error'};
+          return;
+        }
+        if (type === REDIRECT_TYPE) {
+          this.redirect('/520');
+          return;
+        }
         return;
       }
 
-
+      // form deleted
       if (form.deleted) {
-        // todo: handle form deleted 
-
-        // this.status = 403;
-        // this.body = {
-        //   error: true
-        // , description: 'not found'
-        // };
+        this.status = 403;
+        this.body = {
+          status: 'error',
+          description: 'not found'
+        };
         return;
       }
-      if (!form.confirmed) {
-        // todo: handle not confirmed
 
-        // logger.error({
-        //   error: true
-        // , form_id: api_key
-        // , description: 'not found'
-        // });
-        // this.status = 403;
-        // this.body = {
-        //   error: true
-        // , description: 'not found'
-        // };
+      // not confirmed
+      if (!form.confirmed) {
+        this.status = 403;
+        this.body = {
+          status: 'error',
+          description: 'not found'
+        };
         return;
       }
 
@@ -178,11 +183,12 @@ module.exports = function (db) {
         logger.error('Spam message');
         
         if (type === JSON_TYPE) {
-          this.body = {status: "error"};
+          this.status = 400;
+          this.body = {status: 'error', description: 'spam'};
           return;
         }
         if (type === REDIRECT_TYPE) {
-          this.redirect('/500');
+          this.redirect('/404');
           return;
         }
       }
@@ -221,6 +227,7 @@ module.exports = function (db) {
       } catch (err) {
         logger.error('SES error', err);
         if (type === JSON_TYPE) {
+          this.status = 500;
           this.body = {status: 'error'};
         } 
         if (type === REDIRECT_TYPE) {
@@ -339,8 +346,6 @@ module.exports = function (db) {
         if (form.confirmed) {
           logger.info('Sending email');
           yield ses.info(form);
-
-          // todo: fix missing id
         }
         this.redirect('/confirm/email/confirmed/' + form.id + '?token=' + token);
       }
@@ -424,7 +429,9 @@ module.exports = function (db) {
         this.redirect('/');
         return;
       }
+      
       // todo: limit sms
+
       yield sms.send(form);
       this.redirect('/dashboard/' + form.id + '?token=' + form.token);
     } catch (err) {
