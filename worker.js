@@ -50,8 +50,12 @@ module.exports = function (port) {
     })
   }));*/
 
+  let redis_url = require('url').parse(process.env.REDIS_URL);
+  let client = redis.createClient(redis_url.port, redis_url.hostname, {no_ready_check: true});
+  client.auth(redis_url.auth.split(":")[1]);
+
   app.use(limit({
-    db: redis.createClient(),
+    db: client,
     duration: 1000 * 60 * 60,
     max: 1000
   }));
