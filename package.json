@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node --harmony app.js",
     "dev": "forever -c \"node --harmony\" --minUptime 1000 --spinSleepTime 1000 -w app.js",
-    "test": "cd test/test-server && http-server"
+    "test": "mocha --harmony"
   },
   "dependencies": {
     "aws-sdk": "^2.0.29",
@@ -45,5 +45,10 @@
   },
   "engines": {
     "node": "0.11.x"
+  },
+  "devDependencies": {
+    "co-mocha": "^1.1.0",
+    "mocha": "^2.0.1",
+    "supertest": "^0.15.0"
   }
 }

@@ -106,6 +106,7 @@ module.exports = function (db) {
       let form;
 
       if (type !== JSON_TYPE && type !== REDIRECT_TYPE) {
+        this.status = 500;
         this.redirect('/404');
         return;
       }
@@ -118,7 +119,6 @@ module.exports = function (db) {
       try {
         form =  yield formDB.get(api_key);  
       } catch (err) {
-        logger.error(err);
         if (type === JSON_TYPE) {
           this.status = 404;
           this.body = { status: 'error', api_key: api_key, description: 'form not found'};

@@ -108,5 +108,5 @@ module.exports = function (port) {
   app.use(gzip());
 
   // start server
-  app.listen(port);
+  return app.listen(port);
 };
