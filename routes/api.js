@@ -23,7 +23,7 @@ module.exports = function (db) {
       ses = require('../libs/ses')(),
       sms = require('../libs/sms')(),
       security = require('../libs/security')();
-  
+
   let logger = coolog.logger(path.basename(__filename));
 
 
@@ -95,11 +95,11 @@ module.exports = function (db) {
           logger.error('Error sending sms', err);
         }
       }
-      
+
       this.redirect('/success/' + form_saved.id + '?token=' + form_saved.token);
     },
     get: function* () {
-      
+
 
       let api_key = this.params.api_key;
       let type = this.params.type;
@@ -117,7 +117,7 @@ module.exports = function (db) {
       }
 
       try {
-        form =  yield formDB.get(api_key);  
+        form =  yield formDB.get(api_key);
       } catch (err) {
         if (type === JSON_TYPE) {
           this.status = 404;
@@ -166,7 +166,7 @@ module.exports = function (db) {
 
       // check spam with akismet
       let isSpam = yield security.akismet(this.ip, this.request);
-      
+
       // save connection
       let data = {
         userId: api_key,
@@ -178,10 +178,10 @@ module.exports = function (db) {
       console.log(data);
 
       yield logDB.save(uuid.v4(), data);
-      
+
       if (isSpam) {
         logger.error('Spam message');
-        
+
         if (type === JSON_TYPE) {
           this.status = 400;
           this.body = {status: 'error', description: 'spam'};
@@ -195,10 +195,12 @@ module.exports = function (db) {
 
       let user_form = {};
       //let files = {};
-      
+
+      var that = this;
+
       // parse form data
       Object.keys(this.request.body).forEach(function (key) {
-        user_form[inflection.humanize(key)] = this.request.body[key];
+        user_form[inflection.humanize(key)] = that.request.body[key];
       });
 
       // if (this.request.files !== undefined) {
@@ -211,7 +213,7 @@ module.exports = function (db) {
       //   });
       // }
       try {
-        // send email 
+        // send email
         yield ses.form(form, user_form);
         logger.info('Redirect to', form.website_success_page);
         let url = regex.url(form.website_success_page) ? form.website_success_page : form.website_url;
@@ -220,7 +222,7 @@ module.exports = function (db) {
           this.body = {
             status: 'ok'
           };
-        } 
+        }
         if (type === REDIRECT_TYPE) {
           this.redirect(url);
         }
@@ -229,7 +231,7 @@ module.exports = function (db) {
         if (type === JSON_TYPE) {
           this.status = 500;
           this.body = {status: 'error'};
-        } 
+        }
         if (type === REDIRECT_TYPE) {
           this.redirect('/500');
         }
@@ -238,7 +240,7 @@ module.exports = function (db) {
     del: function* () {
       let api_key = this.params.api_key,
           token = this.request.body.token;
-      
+
 
       let form_data = null;
       try {
@@ -334,7 +336,7 @@ module.exports = function (db) {
       }
 
       if (email === form.form_destination_not_confirmed && form.email_confirmed === false) {
-        
+
         form.form_destination = form.form_destination_not_confirmed;
         form.form_destination_not_confirmed = null;
         form.email_confirmed = true;
@@ -386,10 +388,10 @@ module.exports = function (db) {
 
       if (form.code !== code) {
         this.redirect('/success/' + form.id + '?token=' + token);
-        return; 
+        return;
       }
 
-      
+
       form.phone_confirmed = true;
       form.confirmed = (form.email_confirmed === true && form.phone_confirmed === true);
       yield formDB.save(form.id, form);
@@ -429,7 +431,7 @@ module.exports = function (db) {
         this.redirect('/');
         return;
       }
-      
+
       // todo: limit sms
 
       yield sms.send(form);
