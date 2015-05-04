@@ -4,7 +4,7 @@ module.exports = function (port) {
 
   // inject sugarJS
   require('sugar');
-  
+
   // npm dependencies
   let bodyParser = require('koa-body')({multipart: true}),
       koa = require('koa'),
@@ -29,20 +29,20 @@ module.exports = function (port) {
   let db = utils.wrap(DynamoDB);
 
   // config coolog
-  require('coolog').addChannel({ 
+  require('coolog').addChannel({
     name: 'root',
-    level: 'debug', 
+    level: 'debug',
     appenders: ['console']
   });
 
-  
+
   let app = koa();
   // logger
   app.use(logger());
 
   // session
   app.keys = [process.env.SECRET_KEY];
-  
+
   /*app.use(session({
     store: new RedisStore({
       host: process.env.REDIS_HOST,
@@ -52,7 +52,7 @@ module.exports = function (port) {
 
   let redis_url = require('url').parse(process.env.REDIS_URL);
   let client = redis.createClient(redis_url.port, redis_url.hostname, {no_ready_check: true});
-  client.auth(redis_url.auth.split(":")[1]);
+  //client.auth(redis_url.auth.split(":")[1]);
 
   app.use(limit({
     db: client,
@@ -70,7 +70,7 @@ module.exports = function (port) {
 
   app.use(router(app));
   //app.use(require('koa-router-newrelic')(app));
- 
+
   // ## Website routes
 
   let website_routes = require('./routes/site')(db);
@@ -103,7 +103,7 @@ module.exports = function (port) {
   app.post(path.join(api_prefix, '/edit/:api_key'), bodyParser, api_routes.form.edit);
   app.post(path.join(api_prefix, '/delete/:api_key'), bodyParser, api_routes.form.del);
   app.get(path.join(api_prefix, '/graph/:api_key'), bodyParser, api_routes.graph);
-  
+
   app.get(path.join('/confirm/email/:api_key'), api_routes.confirm_email);
 
   // add security
